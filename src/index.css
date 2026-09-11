@@ -1,0 +1,299 @@
+@import "tailwindcss";
+
+@layer base {
+  body {
+    @apply font-sans antialiased transition-colors duration-200;
+  }
+}
+
+/* ========================================================
+   🇵🇰 1. PAKISTANI FLAG THEME (LIGHT - GREEN & WHITE)
+   ======================================================== */
+html.theme-pakistan-flag,
+body.theme-pakistan-flag {
+  background-color: #f2faf5 !important;
+  color: #064e3b !important;
+}
+
+html.theme-pakistan-flag .bg-\[\#09090b\] {
+  background-color: #f0fdf4 !important;
+  color: #064e3b !important;
+}
+
+html.theme-pakistan-flag .bg-\[\#121214\],
+html.theme-pakistan-flag .bg-\[\#18181b\],
+html.theme-pakistan-flag .bg-\[\#222226\] {
+  background-color: #ffffff !important;
+  color: #064e3b !important;
+}
+
+html.theme-pakistan-flag header {
+  background-color: #00401a !important;
+  border-color: #005f27 !important;
+  color: #ffffff !important;
+}
+
+html.theme-pakistan-flag header select,
+html.theme-pakistan-flag header option,
+html.theme-pakistan-flag header button,
+html.theme-pakistan-flag header span,
+html.theme-pakistan-flag header div {
+  color: #ffffff !important;
+}
+
+html.theme-pakistan-flag header .bg-\[\#09090b\],
+html.theme-pakistan-flag header .bg-\[\#18181b\] {
+  background-color: rgba(0, 45, 18, 0.6) !important;
+  border-color: rgba(167, 243, 208, 0.3) !important;
+  color: #ffffff !important;
+}
+
+html.theme-pakistan-flag aside {
+  background-color: #ffffff !important;
+  border-color: #d1fae5 !important;
+}
+
+html.theme-pakistan-flag .border-\[\#27272a\],
+html.theme-pakistan-flag .border-\[\#3f3f46\],
+html.theme-pakistan-flag .border-zinc-800,
+html.theme-pakistan-flag .border-zinc-700 {
+  border-color: #d1fae5 !important;
+}
+
+html.theme-pakistan-flag .text-\[\#fafafa\],
+html.theme-pakistan-flag .text-white {
+  color: #064e3b !important;
+}
+
+html.theme-pakistan-flag .text-\[\#a1a1aa\],
+html.theme-pakistan-flag .text-zinc-400,
+html.theme-pakistan-flag .text-zinc-500 {
+  color: #047857 !important;
+}
+
+html.theme-pakistan-flag .text-zinc-300,
+html.theme-pakistan-flag .text-zinc-200 {
+  color: #065f46 !important;
+}
+
+html.theme-pakistan-flag input,
+html.theme-pakistan-flag select,
+html.theme-pakistan-flag textarea {
+  background-color: #ffffff !important;
+  color: #064e3b !important;
+  border-color: #bbf7d0 !important;
+}
+
+html.theme-pakistan-flag input::placeholder,
+html.theme-pakistan-flag textarea::placeholder {
+  color: #6ee7b7 !important;
+}
+
+/* Ensure buttons and badges have high contrast */
+html.theme-pakistan-flag .bg-emerald-600 {
+  background-color: #00401a !important;
+  color: #ffffff !important;
+}
+html.theme-pakistan-flag .bg-emerald-600:hover {
+  background-color: #005020 !important;
+}
+html.theme-pakistan-flag .bg-emerald-500 {
+  background-color: #047857 !important;
+  color: #ffffff !important;
+}
+html.theme-pakistan-flag .text-white {
+  color: #ffffff;
+}
+html.theme-pakistan-flag button.text-white,
+html.theme-pakistan-flag .bg-emerald-600.text-white,
+html.theme-pakistan-flag .bg-blue-600.text-white,
+html.theme-pakistan-flag .bg-purple-600.text-white {
+  color: #ffffff !important;
+}
+
+
+/* ========================================================
+   🇵🇰 2. PAKISTANI FLAG DARK THEME (EMERALD NIGHT)
+   ======================================================== */
+html.theme-pakistan-dark,
+body.theme-pakistan-dark {
+  background-color: #031c10 !important;
+  color: #f0fdf4 !important;
+}
+
+html.theme-pakistan-dark .bg-\[\#09090b\] {
+  background-color: #031c10 !important;
+}
+
+html.theme-pakistan-dark .bg-\[\#121214\],
+html.theme-pakistan-dark .bg-\[\#18181b\] {
+  background-color: #082d1c !important;
+  color: #f0fdf4 !important;
+}
+
+html.theme-pakistan-dark header {
+  background-color: #062315 !important;
+  border-color: #165231 !important;
+}
+
+html.theme-pakistan-dark aside {
+  background-color: #062315 !important;
+  border-color: #165231 !important;
+}
+
+html.theme-pakistan-dark .border-\[\#27272a\] {
+  border-color: #165231 !important;
+}
+
+html.theme-pakistan-dark .text-\[\#fafafa\] {
+  color: #f0fdf4 !important;
+}
+
+html.theme-pakistan-dark .text-\[\#a1a1aa\] {
+  color: #86efac !important;
+}
+
+
+/* ========================================================
+   ☀️ 3. CLASSIC ACADEMIC LIGHT CLEAN THEME
+   ======================================================== */
+html.theme-light-clean,
+body.theme-light-clean {
+  background-color: #f8fafc !important;
+  color: #0f172a !important;
+}
+
+html.theme-light-clean .bg-\[\#09090b\] {
+  background-color: #f8fafc !important;
+}
+
+html.theme-light-clean .bg-\[\#121214\],
+html.theme-light-clean .bg-\[\#18181b\] {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+}
+
+html.theme-light-clean header,
+html.theme-light-clean aside {
+  background-color: #ffffff !important;
+  border-color: #e2e8f0 !important;
+  color: #0f172a !important;
+}
+
+html.theme-light-clean .border-\[\#27272a\] {
+  border-color: #e2e8f0 !important;
+}
+
+html.theme-light-clean .text-\[\#fafafa\] {
+  color: #0f172a !important;
+}
+
+html.theme-light-clean .text-\[\#a1a1aa\] {
+  color: #475569 !important;
+}
+
+html.theme-light-clean input,
+html.theme-light-clean select,
+html.theme-light-clean textarea {
+  background-color: #f1f5f9 !important;
+  color: #0f172a !important;
+  border-color: #cbd5e1 !important;
+}
+
+
+/* ========================================================
+   🌙 4. EXECUTIVE DARK SLATE THEME (DEFAULT DARK)
+   ======================================================== */
+html.theme-dark-slate,
+body.theme-dark-slate {
+  background-color: #09090b !important;
+  color: #fafafa !important;
+}
+
+/* ========================================================
+   🖨️ PRINT STYLES FOR ACCESSION BARCODES & SPINE LABELS (A4 STICKER SHEET)
+   ======================================================== */
+@page {
+  size: A4 portrait;
+  margin: 10mm;
+}
+
+@media print {
+  html, body, #root, #root > div, #root > div > div, main {
+    background-color: #ffffff !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    height: auto !important;
+    max-height: none !important;
+    min-height: 100% !important;
+    position: static !important;
+    display: block !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  header,
+  aside,
+  button,
+  nav,
+  footer,
+  .no-print,
+  #root > div > aside,
+  #root > div > div > header,
+  .offline-sync-bar {
+    display: none !important;
+    visibility: hidden !important;
+  }
+
+  #printable-label-area {
+    display: block !important;
+    visibility: visible !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 auto !important;
+    padding: 0 !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+
+  #printable-label-area .print-grid-container {
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 8mm !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  #printable-label-area .print-label-item {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-align: center !important;
+    border: 1.5px solid #000000 !important;
+    border-radius: 6px !important;
+    padding: 8px !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+    box-sizing: border-box !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+    min-height: 110px !important;
+  }
+
+  #printable-label-area svg {
+    shape-rendering: crispEdges !important;
+    max-width: 100% !important;
+  }
+
+  #printable-label-area rect {
+    fill: #000000 !important;
+  }
+}
+

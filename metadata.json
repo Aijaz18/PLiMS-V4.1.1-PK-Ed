@@ -1,0 +1,11 @@
+{
+  "name": "PLiMS - Pakistan Library Management System",
+  "description": "Enterprise-grade Pakistan Library Management System (PLiMS) with AI MARC21/RDA cataloguing, circulation desk, multi-branch control, OPAC, and secure authentication.",
+  "requestFramePermissions": [
+    "microphone",
+    "camera"
+  ],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
