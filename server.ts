@@ -230,8 +230,8 @@ async function startServer() {
         active: activeRedirect,
         envRedirect: process.env.GOOGLE_REDIRECT_URI || null,
         local: 'http://localhost:3000/auth/google/callback',
-        dev: 'https://ais-dev-clb5pbwchrc3o4zl6nxnru-885005428315.asia-east1.run.app/auth/google/callback',
-        shared: 'https://ais-pre-clb5pbwchrc3o4zl6nxnru-885005428315.asia-east1.run.app/auth/google/callback',
+        dev: 'https://ais-dev-gpew27cmtvqf5mfxh6xd6y-412084889689.asia-southeast1.run.app/auth/google/callback',
+        shared: 'https://ais-pre-gpew27cmtvqf5mfxh6xd6y-412084889689.asia-southeast1.run.app/auth/google/callback',
         detected: dynamicCallback,
       },
     });
@@ -269,8 +269,8 @@ async function startServer() {
         configured: false,
         urls: {
           local: 'http://localhost:3000/auth/google/callback',
-          dev: 'https://ais-dev-clb5pbwchrc3o4zl6nxnru-885005428315.asia-east1.run.app/auth/google/callback',
-          shared: 'https://ais-pre-clb5pbwchrc3o4zl6nxnru-885005428315.asia-east1.run.app/auth/google/callback',
+          dev: 'https://ais-dev-gpew27cmtvqf5mfxh6xd6y-412084889689.asia-southeast1.run.app/auth/google/callback',
+          shared: 'https://ais-pre-gpew27cmtvqf5mfxh6xd6y-412084889689.asia-southeast1.run.app/auth/google/callback',
           detected: dynamicCallback,
         },
       });

@@ -734,7 +734,7 @@ CREATE TABLE IF NOT EXISTS \`digital_assets\` (
             <div className="p-4 rounded-xl bg-[#18181b] border border-[#27272a] space-y-2">
               <div className="text-xs font-bold text-white">2. Environment Configuration (.env)</div>
               <pre className="p-3 rounded-lg bg-[#09090b] text-xs font-mono text-emerald-400">
-                VITE_GEMINI_API_KEY=your_gemini_api_key_here{'\n'}
+                GEMINI_API_KEY=your_gemini_api_key_here{'\n'}
                 DATABASE_URL=mysql://root:password@localhost:3306/plims_db
               </pre>
             </div>
