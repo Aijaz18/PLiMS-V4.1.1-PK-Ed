@@ -128,13 +128,13 @@ export const StockVerificationModule: React.FC<StockVerificationModuleProps> = (
   return (
     <div className="space-y-6">
       {/* Top Banner */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-5 rounded-2xl bg-[#121214] border border-[#27272a]">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-5 rounded-2xl bg-white border border-slate-200/90">
         <div>
           <div className="flex items-center space-x-2">
             <FolderKanban className="h-6 w-6 text-emerald-400" />
-            <h2 className="text-xl font-bold text-[#fafafa]">RFID & Barcode Stock Verification Engine</h2>
+            <h2 className="text-xl font-bold text-slate-900">RFID & Barcode Stock Verification Engine</h2>
           </div>
-          <p className="text-xs text-[#a1a1aa] mt-1">
+          <p className="text-xs text-slate-500 mt-1">
             Physical inventory reconciliation, misplaced book tracking, and missing copy audit desk
           </p>
         </div>
@@ -203,7 +203,7 @@ export const StockVerificationModule: React.FC<StockVerificationModuleProps> = (
                 placeholder="Scan Accession Barcode or RFID Tag (e.g. 978-0132354165 or BAR88001)..."
                 value={scannedBarcode}
                 onChange={(e) => setScannedBarcode(e.target.value)}
-                className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-[#09090b] border-2 border-emerald-500 text-xs text-[#fafafa] focus:outline-none focus:ring-2 focus:ring-emerald-400 font-mono shadow-inner"
+                className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-[#f1f5f9] border-2 border-emerald-500 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-400 font-mono shadow-inner"
               />
             </div>
             <button
@@ -218,71 +218,71 @@ export const StockVerificationModule: React.FC<StockVerificationModuleProps> = (
 
       {/* Audit Target Config & Verification Counter Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="p-4 rounded-2xl border border-[#27272a] bg-[#121214] space-y-1">
-          <div className="text-[10px] font-mono font-bold uppercase text-[#a1a1aa] flex items-center justify-between">
+        <div className="p-4 rounded-2xl border border-slate-200/90 bg-white space-y-1">
+          <div className="text-[10px] font-mono font-bold uppercase text-slate-500 flex items-center justify-between">
             <span>Verified Copies</span>
             <CheckCircle2 className="h-4 w-4 text-emerald-400" />
           </div>
           <div className="text-2xl font-extrabold text-emerald-400 font-mono">{verifiedCount}</div>
-          <div className="text-[10px] text-[#a1a1aa]">Present on active shelf</div>
+          <div className="text-[10px] text-slate-500">Present on active shelf</div>
         </div>
 
-        <div className="p-4 rounded-2xl border border-[#27272a] bg-[#121214] space-y-1">
-          <div className="text-[10px] font-mono font-bold uppercase text-[#a1a1aa] flex items-center justify-between">
+        <div className="p-4 rounded-2xl border border-slate-200/90 bg-white space-y-1">
+          <div className="text-[10px] font-mono font-bold uppercase text-slate-500 flex items-center justify-between">
             <span>Missing Copies</span>
             <XCircle className="h-4 w-4 text-red-400" />
           </div>
           <div className="text-2xl font-extrabold text-red-400 font-mono">{missingCount}</div>
-          <div className="text-[10px] text-[#a1a1aa]">In catalog but unverified</div>
+          <div className="text-[10px] text-slate-500">In catalog but unverified</div>
         </div>
 
-        <div className="p-4 rounded-2xl border border-[#27272a] bg-[#121214] space-y-1">
-          <div className="text-[10px] font-mono font-bold uppercase text-[#a1a1aa] flex items-center justify-between">
+        <div className="p-4 rounded-2xl border border-slate-200/90 bg-white space-y-1">
+          <div className="text-[10px] font-mono font-bold uppercase text-slate-500 flex items-center justify-between">
             <span>Misplaced Copies</span>
             <AlertTriangle className="h-4 w-4 text-amber-400" />
           </div>
           <div className="text-2xl font-extrabold text-amber-400 font-mono">{misplacedCount}</div>
-          <div className="text-[10px] text-[#a1a1aa]">Scanned on wrong stack</div>
+          <div className="text-[10px] text-slate-500">Scanned on wrong stack</div>
         </div>
 
-        <div className="p-4 rounded-2xl border border-[#27272a] bg-[#121214] space-y-1">
-          <div className="text-[10px] font-mono font-bold uppercase text-[#a1a1aa] flex items-center justify-between">
+        <div className="p-4 rounded-2xl border border-slate-200/90 bg-white space-y-1">
+          <div className="text-[10px] font-mono font-bold uppercase text-slate-500 flex items-center justify-between">
             <span>Expected Total</span>
             <Layers className="h-4 w-4 text-blue-400" />
           </div>
-          <div className="text-2xl font-extrabold text-[#fafafa] font-mono">{totalExpectedCount}</div>
-          <div className="text-[10px] text-[#a1a1aa]">Target dept stock count</div>
+          <div className="text-2xl font-extrabold text-slate-900 font-mono">{totalExpectedCount}</div>
+          <div className="text-[10px] text-slate-500">Target dept stock count</div>
         </div>
       </div>
 
       {/* Audit Setup Parameters & Scanned Audit Log */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Left Audit Setup Controls */}
-        <div className="lg:col-span-4 p-5 rounded-2xl border border-[#27272a] bg-[#121214] space-y-4">
-          <h3 className="text-xs font-mono font-bold uppercase text-[#a1a1aa] flex items-center space-x-2">
+        <div className="lg:col-span-4 p-5 rounded-2xl border border-slate-200/90 bg-white space-y-4">
+          <h3 className="text-xs font-mono font-bold uppercase text-slate-500 flex items-center space-x-2">
             <ShieldCheck className="h-4 w-4 text-emerald-400" />
             <span>Audit Session Parameters</span>
           </h3>
 
           <div className="space-y-3 text-xs">
             <div className="space-y-1">
-              <label className="text-[#a1a1aa]">Audit Title / Reference</label>
+              <label className="text-slate-500">Audit Title / Reference</label>
               <input
                 type="text"
                 value={auditTitle}
                 disabled={isAuditActive}
                 onChange={(e) => setAuditTitle(e.target.value)}
-                className="w-full bg-[#09090b] border border-[#27272a] rounded-xl px-3 py-2 text-xs text-[#fafafa] focus:outline-none focus:border-emerald-500 disabled:opacity-60"
+                className="w-full bg-[#f1f5f9] border border-slate-200/90 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-emerald-500 disabled:opacity-60"
               />
             </div>
 
             <div className="space-y-1">
-              <label className="text-[#a1a1aa]">Target Department Stack</label>
+              <label className="text-slate-500">Target Department Stack</label>
               <select
                 value={targetDepartment}
                 disabled={isAuditActive}
                 onChange={(e) => setTargetDepartment(e.target.value)}
-                className="w-full bg-[#09090b] border border-[#27272a] rounded-xl px-3 py-2 text-xs text-[#fafafa] focus:outline-none focus:border-emerald-500 disabled:opacity-60"
+                className="w-full bg-[#f1f5f9] border border-slate-200/90 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-emerald-500 disabled:opacity-60"
               >
                 <option value="Computer Science">Computer Science & IT Stack</option>
                 <option value="Electrical Engineering">Electrical Engineering Stack</option>
@@ -293,12 +293,12 @@ export const StockVerificationModule: React.FC<StockVerificationModuleProps> = (
             </div>
 
             <div className="space-y-1">
-              <label className="text-[#a1a1aa]">Audit Scanning Mode</label>
+              <label className="text-slate-500">Audit Scanning Mode</label>
               <select
                 value={auditMethod}
                 disabled={isAuditActive}
                 onChange={(e) => setAuditMethod(e.target.value as any)}
-                className="w-full bg-[#09090b] border border-[#27272a] rounded-xl px-3 py-2 text-xs text-[#fafafa] focus:outline-none focus:border-emerald-500 disabled:opacity-60"
+                className="w-full bg-[#f1f5f9] border border-slate-200/90 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-emerald-500 disabled:opacity-60"
               >
                 <option value="BARCODE">Laser / Image Barcode Scanner</option>
                 <option value="RFID">Handheld UHF RFID Wand Reader</option>
@@ -309,9 +309,9 @@ export const StockVerificationModule: React.FC<StockVerificationModuleProps> = (
         </div>
 
         {/* Right Audit Scanned Log Table */}
-        <div className="lg:col-span-8 p-5 rounded-2xl border border-[#27272a] bg-[#121214] space-y-4">
+        <div className="lg:col-span-8 p-5 rounded-2xl border border-slate-200/90 bg-white space-y-4">
           <div className="flex items-center justify-between">
-            <h3 className="text-xs font-mono font-bold uppercase text-[#a1a1aa] flex items-center space-x-2">
+            <h3 className="text-xs font-mono font-bold uppercase text-slate-500 flex items-center space-x-2">
               <FileText className="h-4 w-4 text-emerald-400" />
               <span>Real-Time Audit Verification Log ({scannedLog.length})</span>
             </h3>
@@ -336,9 +336,9 @@ export const StockVerificationModule: React.FC<StockVerificationModuleProps> = (
             )}
           </div>
 
-          <div className="overflow-x-auto rounded-xl border border-[#27272a]">
-            <table className="w-full text-left text-xs text-[#a1a1aa]">
-              <thead className="bg-[#09090b] text-[#fafafa] font-mono border-b border-[#27272a]">
+          <div className="overflow-x-auto rounded-xl border border-slate-200/90">
+            <table className="w-full text-left text-xs text-slate-500">
+              <thead className="bg-[#f1f5f9] text-slate-900 font-mono border-b border-slate-200/90">
                 <tr>
                   <th className="p-3">Accession / Code</th>
                   <th className="p-3">Book Title</th>
@@ -347,18 +347,18 @@ export const StockVerificationModule: React.FC<StockVerificationModuleProps> = (
                   <th className="p-3">Status</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#27272a]">
+              <tbody className="divide-y divide-slate-100">
                 {scannedLog.length === 0 ? (
                   <tr>
-                    <td colSpan={5} className="p-8 text-center text-[#a1a1aa]">
+                    <td colSpan={5} className="p-8 text-center text-slate-500">
                       No scanned items yet. Click <span className="text-emerald-400 font-bold">"Start Stock Verification Audit"</span> and scan accession barcodes to log copy verification.
                     </td>
                   </tr>
                 ) : (
                   scannedLog.map((item) => (
-                    <tr key={item.id} className="hover:bg-[#18181b]/50 transition-colors">
-                      <td className="p-3 font-mono font-bold text-[#fafafa]">{item.accessionNo}</td>
-                      <td className="p-3 font-medium text-[#fafafa]">{item.bookTitle}</td>
+                    <tr key={item.id} className="hover:bg-slate-100/50 transition-colors">
+                      <td className="p-3 font-mono font-bold text-slate-900">{item.accessionNo}</td>
+                      <td className="p-3 font-medium text-slate-900">{item.bookTitle}</td>
                       <td className="p-3 font-mono text-[11px]">{item.expectedShelf}</td>
                       <td className="p-3 text-[11px] font-mono">{item.scannedAt}</td>
                       <td className="p-3">

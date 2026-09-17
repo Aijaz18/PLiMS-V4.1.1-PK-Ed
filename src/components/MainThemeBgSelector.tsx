@@ -11,9 +11,11 @@ import {
   RefreshCw,
   Eye,
   Layers,
-  FileCode,
-  Link as LinkIcon
+  Link as LinkIcon,
+  BookOpen
 } from 'lucide-react';
+import { AppTheme } from '../types/alims';
+import { LIBRARIAN_THEMES, LibrarianThemeDefinition, getThemeConfig, applyThemeToDocument } from '../utils/themeConfig';
 
 export type BgType = 'gradient' | 'image' | 'video';
 
@@ -30,7 +32,7 @@ export const STORAGE_KEY_BG = 'pslims_main_bg_config_v2';
 
 export const DEFAULT_BG_CONFIG: MainPageBgConfig = {
   bgType: 'gradient',
-  presetId: 'DEFAULT_DARK',
+  presetId: 'oxford-navy',
   imageUrl: 'https://images.unsplash.com/photo-1521587760476-6c12a4b040da?auto=format&fit=crop&q=80&w=1920',
   videoUrl: 'https://assets.mixkit.co/videos/preview/mixkit-dust-particles-floating-in-the-air-41551-large.mp4',
   overlayOpacity: 0.65,
@@ -111,20 +113,25 @@ export const saveBgConfig = (config: MainPageBgConfig) => {
   }
 };
 
-interface ThemeCustomizerModalProps {
+export interface ThemeCustomizerModalProps {
   isOpen: boolean;
   onClose: () => void;
   config: MainPageBgConfig;
   onChangeConfig: (newConfig: MainPageBgConfig) => void;
+  currentTheme?: AppTheme;
+  onChangeTheme?: (theme: AppTheme) => void;
 }
 
 export const ThemeCustomizerModal: React.FC<ThemeCustomizerModalProps> = ({
   isOpen,
   onClose,
   config,
-  onChangeConfig
+  onChangeConfig,
+  currentTheme = 'oxford-navy',
+  onChangeTheme
 }) => {
-  const [activeTab, setActiveTab] = useState<'PRESETS' | 'CUSTOM_IMAGE' | 'CUSTOM_VIDEO' | 'OVERLAY'>('PRESETS');
+  const [activeTab, setActiveTab] = useState<'THEMES' | 'PHOTOS' | 'VIDEOS' | 'CUSTOM' | 'OVERLAY'>('THEMES');
+  const [selectedCategory, setSelectedCategory] = useState<string>('ALL');
   const [customImageUrlInput, setCustomImageUrlInput] = useState<string>(config.imageUrl || '');
   const [customVideoUrlInput, setCustomVideoUrlInput] = useState<string>(config.videoUrl || '');
   const [fileError, setFileError] = useState<string | null>(null);
@@ -136,12 +143,41 @@ export const ThemeCustomizerModal: React.FC<ThemeCustomizerModalProps> = ({
 
   if (!isOpen) return null;
 
+  const categories = [
+    { id: 'ALL', label: 'All Themes (10)' },
+    { id: 'National Heritage', label: '🇵🇰 National Heritage' },
+    { id: 'Academic & Classical', label: '🏛️ Academic & Classical' },
+    { id: 'Scholarly & Literature', label: '📜 Scholarly & Literature' },
+    { id: 'Modern & Digital', label: '⚡ Modern & Digital' }
+  ];
+
+  const filteredThemes = selectedCategory === 'ALL'
+    ? LIBRARIAN_THEMES
+    : LIBRARIAN_THEMES.filter(t => t.category === selectedCategory);
+
+  const handleSelectTheme = (theme: LibrarianThemeDefinition) => {
+    applyThemeToDocument(theme.id);
+    if (onChangeTheme) {
+      onChangeTheme(theme.id);
+    } else {
+      localStorage.setItem('pslims_theme', theme.id);
+      window.dispatchEvent(new Event('storage'));
+    }
+
+    const updated: MainPageBgConfig = {
+      ...config,
+      bgType: 'gradient',
+      presetId: theme.id
+    };
+    onChangeConfig(updated);
+    saveBgConfig(updated);
+  };
+
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>, fileType: 'IMAGE' | 'VIDEO') => {
     const file = e.target.files?.[0];
     setFileError(null);
     if (!file) return;
 
-    // Validate size (max 50MB for videos/images in localStorage/dataURL)
     if (file.size > 50 * 1024 * 1024) {
       setFileError('File size exceeds 50MB. Please choose a smaller file or paste an external URL.');
       return;
@@ -201,313 +237,341 @@ export const ThemeCustomizerModal: React.FC<ThemeCustomizerModalProps> = ({
   };
 
   const handleResetToDefault = () => {
+    if (onChangeTheme) {
+      onChangeTheme('oxford-navy');
+    }
     onChangeConfig(DEFAULT_BG_CONFIG);
     saveBgConfig(DEFAULT_BG_CONFIG);
     setCustomImageUrlInput(DEFAULT_BG_CONFIG.imageUrl || '');
     setCustomVideoUrlInput(DEFAULT_BG_CONFIG.videoUrl || '');
   };
 
+  const activeThemeDef = getThemeConfig(currentTheme);
+
   return (
-    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 animate-fadeIn">
-      <div className="bg-[#121214] border border-[#27272a] rounded-2xl w-full max-w-2xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
+    <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 animate-fadeIn">
+      <div className="bg-white border border-slate-200 rounded-3xl w-full max-w-4xl max-h-[92vh] flex flex-col shadow-2xl overflow-hidden">
         {/* Modal Header */}
-        <div className="p-5 border-b border-[#27272a] flex items-center justify-between bg-[#18181b]">
+        <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between bg-slate-50/80">
           <div className="flex items-center space-x-3">
-            <div className="p-2.5 rounded-xl bg-blue-600/20 text-blue-400 border border-blue-500/30">
+            <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white flex items-center justify-center shadow-md shadow-blue-500/20">
               <Palette className="h-5 w-5" />
             </div>
             <div>
-              <h2 className="text-base font-bold text-white flex items-center space-x-2">
-                <span>Main Page Background Theme Studio</span>
-                <Sparkles className="h-4 w-4 text-amber-400" />
-              </h2>
-              <p className="text-xs text-[#a1a1aa]">Customize image, video loop, or gradient background for the portal</p>
+              <div className="flex items-center space-x-2">
+                <h2 className="text-base font-bold text-slate-900">
+                  Librarian Visual Theme Choice & Atmosphere Studio
+                </h2>
+                <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300 text-[10px] font-bold font-mono">
+                  10 PALETTES
+                </span>
+              </div>
+              <p className="text-xs text-slate-500">
+                Curated color combinations for academic librarians, research archives, and quiet study halls
+              </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-2 rounded-xl text-[#a1a1aa] hover:text-white hover:bg-[#27272a] transition-all cursor-pointer"
+            className="w-9 h-9 rounded-full bg-white hover:bg-slate-200/70 border border-slate-200 text-slate-500 hover:text-slate-800 flex items-center justify-center transition-all cursor-pointer"
           >
-            <X className="h-5 w-5" />
+            <X className="h-4 w-4" />
           </button>
         </div>
 
         {/* Modal Navigation Tabs */}
-        <div className="flex items-center space-x-1 p-2 bg-[#09090b] border-b border-[#27272a] overflow-x-auto">
+        <div className="flex items-center space-x-1 px-4 py-2 bg-white border-b border-slate-200 overflow-x-auto">
           <button
-            onClick={() => setActiveTab('PRESETS')}
-            className={`px-3.5 py-2 rounded-xl text-xs font-semibold flex items-center space-x-2 transition-all cursor-pointer ${
-              activeTab === 'PRESETS'
-                ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20'
-                : 'text-[#a1a1aa] hover:text-white hover:bg-[#18181b]'
+            onClick={() => setActiveTab('THEMES')}
+            className={`px-3.5 py-2 rounded-xl text-xs font-bold flex items-center space-x-2 transition-all cursor-pointer shrink-0 ${
+              activeTab === 'THEMES'
+                ? 'bg-blue-600 text-white shadow-sm shadow-blue-500/20'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
             }`}
           >
-            <Sparkles className="h-3.5 w-3.5" />
-            <span>Preset Backgrounds</span>
+            <Palette className="h-3.5 w-3.5" />
+            <span>Curated Librarian Themes</span>
           </button>
 
           <button
-            onClick={() => setActiveTab('CUSTOM_IMAGE')}
-            className={`px-3.5 py-2 rounded-xl text-xs font-semibold flex items-center space-x-2 transition-all cursor-pointer ${
-              activeTab === 'CUSTOM_IMAGE'
-                ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20'
-                : 'text-[#a1a1aa] hover:text-white hover:bg-[#18181b]'
+            onClick={() => setActiveTab('PHOTOS')}
+            className={`px-3.5 py-2 rounded-xl text-xs font-bold flex items-center space-x-2 transition-all cursor-pointer shrink-0 ${
+              activeTab === 'PHOTOS'
+                ? 'bg-blue-600 text-white shadow-sm shadow-blue-500/20'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
             }`}
           >
             <ImageIcon className="h-3.5 w-3.5" />
-            <span>Custom Image</span>
+            <span>Library Environments</span>
           </button>
 
           <button
-            onClick={() => setActiveTab('CUSTOM_VIDEO')}
-            className={`px-3.5 py-2 rounded-xl text-xs font-semibold flex items-center space-x-2 transition-all cursor-pointer ${
-              activeTab === 'CUSTOM_VIDEO'
-                ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20'
-                : 'text-[#a1a1aa] hover:text-white hover:bg-[#18181b]'
+            onClick={() => setActiveTab('VIDEOS')}
+            className={`px-3.5 py-2 rounded-xl text-xs font-bold flex items-center space-x-2 transition-all cursor-pointer shrink-0 ${
+              activeTab === 'VIDEOS'
+                ? 'bg-blue-600 text-white shadow-sm shadow-blue-500/20'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
             }`}
           >
             <VideoIcon className="h-3.5 w-3.5" />
-            <span>Custom Video Loop</span>
+            <span>Ambient Study Loops</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('CUSTOM')}
+            className={`px-3.5 py-2 rounded-xl text-xs font-bold flex items-center space-x-2 transition-all cursor-pointer shrink-0 ${
+              activeTab === 'CUSTOM'
+                ? 'bg-blue-600 text-white shadow-sm shadow-blue-500/20'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+            }`}
+          >
+            <Upload className="h-3.5 w-3.5" />
+            <span>Custom Upload & URL</span>
           </button>
 
           <button
             onClick={() => setActiveTab('OVERLAY')}
-            className={`px-3.5 py-2 rounded-xl text-xs font-semibold flex items-center space-x-2 transition-all cursor-pointer ${
+            className={`px-3.5 py-2 rounded-xl text-xs font-bold flex items-center space-x-2 transition-all cursor-pointer shrink-0 ${
               activeTab === 'OVERLAY'
-                ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20'
-                : 'text-[#a1a1aa] hover:text-white hover:bg-[#18181b]'
+                ? 'bg-blue-600 text-white shadow-sm shadow-blue-500/20'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
             }`}
           >
             <Sliders className="h-3.5 w-3.5" />
-            <span>Opacity & Contrast</span>
+            <span>Contrast & Atmosphere</span>
           </button>
         </div>
 
         {/* Modal Body Content */}
-        <div className="p-6 overflow-y-auto flex-1 space-y-6">
-          {activeTab === 'PRESETS' && (
-            <div className="space-y-6">
-              {/* Theme Options */}
-              <div>
-                <h3 className="text-xs font-bold text-zinc-400 uppercase tracking-wider mb-3">Color & Flag Presets</h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {/* Pakistani Flag Light Preset */}
-                  <div
-                    onClick={() => {
-                      const updated: MainPageBgConfig = {
-                        ...config,
-                        bgType: 'gradient',
-                        presetId: 'PAKISTAN_FLAG_LIGHT'
-                      };
-                      onChangeConfig(updated);
-                      saveBgConfig(updated);
-                    }}
-                    className={`p-3.5 rounded-xl border cursor-pointer transition-all flex items-center justify-between ${
-                      config.presetId === 'PAKISTAN_FLAG_LIGHT'
-                        ? 'border-emerald-500 bg-emerald-500/10 text-white ring-2 ring-emerald-500/30'
-                        : 'border-[#27272a] bg-[#18181b] hover:border-emerald-500 text-zinc-300'
+        <div className="p-6 overflow-y-auto flex-1 space-y-6 bg-slate-50/50">
+          {activeTab === 'THEMES' && (
+            <div className="space-y-4">
+              {/* Category Filter Pills */}
+              <div className="flex items-center gap-1.5 overflow-x-auto pb-1">
+                {categories.map((cat) => (
+                  <button
+                    key={cat.id}
+                    onClick={() => setSelectedCategory(cat.id)}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-medium transition-all cursor-pointer whitespace-nowrap ${
+                      selectedCategory === cat.id
+                        ? 'bg-slate-900 text-white shadow-xs'
+                        : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-100'
                     }`}
                   >
-                    <div className="flex items-center space-x-3">
-                      <div className="w-8 h-8 rounded-lg bg-gradient-to-r from-[#00401a] via-[#047857] to-white border border-emerald-400 flex items-center justify-center text-xs">
-                        🇵🇰
-                      </div>
-                      <div>
-                        <div className="text-xs font-bold text-white">🇵🇰 Pakistani Flag (Green & White)</div>
-                        <div className="text-[10px] text-emerald-400">Lite National Emerald & Crisp White</div>
-                      </div>
-                    </div>
-                    {config.presetId === 'PAKISTAN_FLAG_LIGHT' && <Check className="h-4 w-4 text-emerald-400" />}
-                  </div>
-
-                  {/* Pakistani Emerald Night */}
-                  <div
-                    onClick={() => {
-                      const updated: MainPageBgConfig = {
-                        ...config,
-                        bgType: 'gradient',
-                        presetId: 'PAKISTAN_EMERALD_NIGHT'
-                      };
-                      onChangeConfig(updated);
-                      saveBgConfig(updated);
-                    }}
-                    className={`p-3.5 rounded-xl border cursor-pointer transition-all flex items-center justify-between ${
-                      config.presetId === 'PAKISTAN_EMERALD_NIGHT'
-                        ? 'border-emerald-500 bg-emerald-500/10 text-white ring-2 ring-emerald-500/30'
-                        : 'border-[#27272a] bg-[#18181b] hover:border-emerald-500 text-zinc-300'
-                    }`}
-                  >
-                    <div className="flex items-center space-x-3">
-                      <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#00401a] via-[#022c22] to-black border border-emerald-500/40" />
-                      <div>
-                        <div className="text-xs font-bold text-white">🇵🇰 Emerald Night (Dark)</div>
-                        <div className="text-[10px] text-emerald-400">Deep forest academic glow</div>
-                      </div>
-                    </div>
-                    {config.presetId === 'PAKISTAN_EMERALD_NIGHT' && <Check className="h-4 w-4 text-emerald-400" />}
-                  </div>
-
-                  {/* Classic Obsidian */}
-                  <div
-                    onClick={() => {
-                      const updated: MainPageBgConfig = {
-                        ...config,
-                        bgType: 'gradient',
-                        presetId: 'DEFAULT_DARK'
-                      };
-                      onChangeConfig(updated);
-                      saveBgConfig(updated);
-                    }}
-                    className={`p-3.5 rounded-xl border cursor-pointer transition-all flex items-center justify-between ${
-                      config.presetId === 'DEFAULT_DARK'
-                        ? 'border-blue-500 bg-blue-500/10 text-white ring-2 ring-blue-500/30'
-                        : 'border-[#27272a] bg-[#18181b] hover:border-zinc-500 text-zinc-300'
-                    }`}
-                  >
-                    <div className="flex items-center space-x-3">
-                      <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-900 via-indigo-950 to-zinc-950 border border-blue-500/30" />
-                      <div>
-                        <div className="text-xs font-bold text-white">Classic Obsidian Gradient</div>
-                        <div className="text-[10px] text-zinc-400">Deep indigo space gradient</div>
-                      </div>
-                    </div>
-                    {config.presetId === 'DEFAULT_DARK' && <Check className="h-4 w-4 text-blue-400" />}
-                  </div>
-                </div>
+                    {cat.label}
+                  </button>
+                ))}
               </div>
 
-              {/* High Res Image Presets */}
-              <div>
-                <h3 className="text-xs font-bold text-zinc-400 uppercase tracking-wider mb-3">Preset Photo Backgrounds</h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {PRESET_IMAGES.map((img) => {
-                    const isSelected = config.bgType === 'image' && config.imageUrl === img.url;
-                    return (
-                      <div
-                        key={img.id}
-                        onClick={() => {
-                          const updated: MainPageBgConfig = {
-                            ...config,
-                            bgType: 'image',
-                            imageUrl: img.url,
-                            presetId: img.id
-                          };
-                          onChangeConfig(updated);
-                          saveBgConfig(updated);
-                        }}
-                        className={`group relative rounded-xl border overflow-hidden cursor-pointer transition-all h-28 flex flex-col justify-end p-3 ${
-                          isSelected
-                            ? 'border-blue-500 ring-2 ring-blue-500/50 shadow-lg'
-                            : 'border-[#27272a] hover:border-zinc-400'
-                        }`}
-                      >
-                        <img
-                          src={img.url}
-                          alt={img.name}
-                          className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
-                        <div className="relative z-10 flex items-center justify-between">
-                          <div>
-                            <div className="text-xs font-bold text-white leading-tight">{img.name}</div>
-                            <div className="text-[10px] text-zinc-300">{img.category}</div>
+              {/* Theme Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+                {filteredThemes.map((theme) => {
+                  const isSelected = currentTheme === theme.id;
+                  return (
+                    <div
+                      key={theme.id}
+                      onClick={() => handleSelectTheme(theme)}
+                      className={`group p-4 rounded-2xl border transition-all cursor-pointer bg-white relative flex flex-col justify-between space-y-3 shadow-xs hover:shadow-md ${
+                        isSelected
+                          ? 'border-blue-600 ring-2 ring-blue-600/30'
+                          : 'border-slate-200 hover:border-blue-400'
+                      }`}
+                    >
+                      <div>
+                        <div className="flex items-center justify-between gap-2 mb-1.5">
+                          <div className="flex items-center space-x-2">
+                            <span className="font-bold text-xs text-slate-900 group-hover:text-blue-600 transition-colors">
+                              {theme.name}
+                            </span>
                           </div>
-                          {isSelected && <Check className="h-4 w-4 text-blue-400 bg-blue-500/30 p-0.5 rounded-full" />}
+                          {isSelected ? (
+                            <span className="flex items-center space-x-1 text-[10px] font-mono px-2.5 py-0.5 rounded-full bg-blue-600 text-white font-bold shrink-0">
+                              <Check className="h-3 w-3" />
+                              <span>ACTIVE THEME</span>
+                            </span>
+                          ) : (
+                            <span className="text-[9px] font-mono px-2 py-0.5 rounded border border-slate-200 bg-slate-50 text-slate-500 shrink-0">
+                              {theme.badgeText}
+                            </span>
+                          )}
                         </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
 
-              {/* Live Video Loop Presets */}
-              <div>
-                <h3 className="text-xs font-bold text-zinc-400 uppercase tracking-wider mb-3">Preset Motion Video Loops</h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {PRESET_VIDEOS.map((vid) => {
-                    const isSelected = config.bgType === 'video' && config.videoUrl === vid.url;
-                    return (
-                      <div
-                        key={vid.id}
-                        onClick={() => {
-                          const updated: MainPageBgConfig = {
-                            ...config,
-                            bgType: 'video',
-                            videoUrl: vid.url,
-                            presetId: vid.id
-                          };
-                          onChangeConfig(updated);
-                          saveBgConfig(updated);
-                        }}
-                        className={`group relative rounded-xl border overflow-hidden cursor-pointer transition-all h-28 flex flex-col justify-end p-3 ${
-                          isSelected
-                            ? 'border-blue-500 ring-2 ring-blue-500/50 shadow-lg'
-                            : 'border-[#27272a] hover:border-zinc-400'
-                        }`}
-                      >
-                        <video
-                          src={vid.url}
-                          muted
-                          loop
-                          autoPlay
-                          playsInline
-                          className="absolute inset-0 w-full h-full object-cover opacity-60"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent" />
-                        <div className="relative z-10 flex items-center justify-between">
-                          <div>
-                            <div className="text-xs font-bold text-white leading-tight flex items-center space-x-1">
-                              <VideoIcon className="h-3 w-3 text-cyan-400" />
-                              <span>{vid.name}</span>
-                            </div>
-                            <div className="text-[10px] text-zinc-300">{vid.category}</div>
-                          </div>
-                          {isSelected && <Check className="h-4 w-4 text-cyan-400 bg-cyan-500/30 p-0.5 rounded-full" />}
+                        <p className="text-[11px] text-slate-500 leading-relaxed line-clamp-2">
+                          {theme.subtitle}
+                        </p>
+                      </div>
+
+                      {/* Tri-Color Swatch Bar & Preview */}
+                      <div className="space-y-2 pt-1">
+                        <div className="flex items-center justify-between text-[10px] text-slate-400 font-mono">
+                          <span>PALETTE SWATCH:</span>
+                          <span className="text-slate-600 font-medium">{theme.category}</span>
+                        </div>
+                        <div className="h-5 w-full rounded-lg overflow-hidden flex border border-slate-200 shadow-inner">
+                          <div
+                            className="flex-1 transition-transform group-hover:scale-105"
+                            style={{ backgroundColor: theme.swatchColors[0] }}
+                            title={`Sidebar & Masthead: ${theme.swatchColors[0]}`}
+                          />
+                          <div
+                            className="flex-1 transition-transform group-hover:scale-105"
+                            style={{ backgroundColor: theme.swatchColors[1] }}
+                            title={`Accent & Highlighting: ${theme.swatchColors[1]}`}
+                          />
+                          <div
+                            className="flex-1 transition-transform group-hover:scale-105"
+                            style={{ backgroundColor: theme.swatchColors[2] }}
+                            title={`Canvas & Cards: ${theme.swatchColors[2]}`}
+                          />
                         </div>
                       </div>
-                    );
-                  })}
-                </div>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           )}
 
-          {activeTab === 'CUSTOM_IMAGE' && (
-            <div className="space-y-6">
-              {/* External Image URL Input */}
-              <div className="p-4 rounded-xl border border-[#27272a] bg-[#18181b] space-y-3">
-                <label className="text-xs font-bold text-white flex items-center space-x-2">
-                  <LinkIcon className="h-4 w-4 text-blue-400" />
-                  <span>Option A: Paste Custom Image Web URL</span>
+          {activeTab === 'PHOTOS' && (
+            <div className="space-y-4">
+              <div className="text-xs text-slate-600 font-medium">
+                Select high-definition architectural library photographs to place behind the portal interface:
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                {PRESET_IMAGES.map((img) => {
+                  const isSelected = config.bgType === 'image' && config.imageUrl === img.url;
+                  return (
+                    <div
+                      key={img.id}
+                      onClick={() => {
+                        const updated: MainPageBgConfig = {
+                          ...config,
+                          bgType: 'image',
+                          imageUrl: img.url,
+                          presetId: img.id
+                        };
+                        onChangeConfig(updated);
+                        saveBgConfig(updated);
+                      }}
+                      className={`group relative rounded-2xl border overflow-hidden cursor-pointer transition-all h-36 flex flex-col justify-end p-3 shadow-xs ${
+                        isSelected
+                          ? 'border-blue-600 ring-2 ring-blue-600/50 shadow-md'
+                          : 'border-slate-200 hover:border-blue-400'
+                      }`}
+                    >
+                      <img
+                        src={img.url}
+                        alt={img.name}
+                        className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/40 to-transparent" />
+                      <div className="relative z-10 flex items-center justify-between">
+                        <div>
+                          <div className="text-xs font-bold text-white drop-shadow-sm">{img.name}</div>
+                          <div className="text-[10px] text-slate-300 font-medium">{img.category}</div>
+                        </div>
+                        {isSelected && (
+                          <span className="p-1 rounded-full bg-blue-600 text-white shadow-md">
+                            <Check className="h-3 w-3" />
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'VIDEOS' && (
+            <div className="space-y-4">
+              <div className="text-xs text-slate-600 font-medium">
+                Continuous ambient looping backgrounds creating an atmospheric, immersive study desk experience:
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                {PRESET_VIDEOS.map((vid) => {
+                  const isSelected = config.bgType === 'video' && config.videoUrl === vid.url;
+                  return (
+                    <div
+                      key={vid.id}
+                      onClick={() => {
+                        const updated: MainPageBgConfig = {
+                          ...config,
+                          bgType: 'video',
+                          videoUrl: vid.url,
+                          presetId: vid.id
+                        };
+                        onChangeConfig(updated);
+                        saveBgConfig(updated);
+                      }}
+                      className={`group relative rounded-2xl border overflow-hidden cursor-pointer transition-all h-36 flex flex-col justify-end p-3 shadow-xs ${
+                        isSelected
+                          ? 'border-cyan-600 ring-2 ring-cyan-600/50 shadow-md'
+                          : 'border-slate-200 hover:border-cyan-400'
+                      }`}
+                    >
+                      <video
+                        src={vid.url}
+                        muted
+                        loop
+                        autoPlay
+                        playsInline
+                        className="absolute inset-0 w-full h-full object-cover"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/40 to-transparent" />
+                      <div className="relative z-10 flex items-center justify-between">
+                        <div>
+                          <div className="text-xs font-bold text-white drop-shadow-sm">{vid.name}</div>
+                          <div className="text-[10px] text-cyan-300 font-medium">{vid.category}</div>
+                        </div>
+                        {isSelected && (
+                          <span className="p-1 rounded-full bg-cyan-500 text-white shadow-md">
+                            <Check className="h-3 w-3" />
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'CUSTOM' && (
+            <div className="space-y-5">
+              {/* Custom Image URL */}
+              <div className="p-4 rounded-2xl border border-slate-200 bg-white space-y-3 shadow-xs">
+                <label className="text-xs font-bold text-slate-800 flex items-center space-x-2">
+                  <LinkIcon className="h-4 w-4 text-blue-600" />
+                  <span>Option A: Paste External Image URL</span>
                 </label>
                 <div className="flex gap-2">
                   <input
                     type="url"
                     value={customImageUrlInput}
                     onChange={(e) => setCustomImageUrlInput(e.target.value)}
-                    placeholder="https://example.com/my-background.jpg"
-                    className="flex-1 rounded-xl border border-[#27272a] bg-[#09090b] px-3.5 py-2 text-xs text-white placeholder-zinc-500 focus:border-blue-500 focus:outline-none"
+                    placeholder="https://images.unsplash.com/your-library-photo.jpg"
+                    className="flex-1 rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2 text-xs text-slate-900 placeholder-slate-400 focus:border-blue-500 focus:bg-white focus:outline-none"
                   />
                   <button
                     onClick={() => handleApplyCustomUrl('IMAGE')}
-                    className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold cursor-pointer transition-all"
+                    className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold cursor-pointer transition-all shrink-0 shadow-xs"
                   >
-                    Set Background
+                    Apply Image
                   </button>
                 </div>
               </div>
 
-              {/* Local File Upload Input */}
-              <div className="p-4 rounded-xl border border-[#27272a] bg-[#18181b] space-y-3">
-                <label className="text-xs font-bold text-white flex items-center space-x-2">
-                  <Upload className="h-4 w-4 text-emerald-400" />
+              {/* Upload Image from Device */}
+              <div className="p-4 rounded-2xl border border-slate-200 bg-white space-y-3 shadow-xs">
+                <label className="text-xs font-bold text-slate-800 flex items-center space-x-2">
+                  <Upload className="h-4 w-4 text-emerald-600" />
                   <span>Option B: Upload Image from Computer</span>
                 </label>
-                <p className="text-[11px] text-zinc-400">Select any image file (PNG, JPG, WebP) from your device.</p>
-                <label className="block w-full border-2 border-dashed border-[#27272a] hover:border-emerald-500/50 rounded-xl p-6 text-center cursor-pointer transition-all bg-[#09090b]">
-                  <Upload className="h-8 w-8 text-emerald-400 mx-auto mb-2" />
-                  <span className="text-xs font-semibold text-white block">Click to Browse Local Image</span>
-                  <span className="text-[10px] text-zinc-500">Supports JPG, PNG, WEBP, GIF</span>
+                <label className="block w-full border-2 border-dashed border-slate-300 hover:border-emerald-500 rounded-2xl p-6 text-center cursor-pointer transition-all bg-slate-50 hover:bg-emerald-50/30">
+                  <Upload className="h-7 w-7 text-emerald-600 mx-auto mb-2" />
+                  <span className="text-xs font-bold text-slate-800 block">Click to Browse Local Image</span>
+                  <span className="text-[10px] text-slate-500">Supports JPG, PNG, WEBP (Max 50MB)</span>
                   <input
                     type="file"
                     accept="image/*"
@@ -517,105 +581,46 @@ export const ThemeCustomizerModal: React.FC<ThemeCustomizerModalProps> = ({
                 </label>
               </div>
 
-              {/* Current Active Preview */}
-              {config.bgType === 'image' && config.imageUrl && (
-                <div className="space-y-2">
-                  <span className="text-xs font-bold text-zinc-400">Active Background Image Preview:</span>
-                  <div className="h-36 rounded-xl border border-blue-500/40 relative overflow-hidden">
-                    <img src={config.imageUrl} alt="Custom Background" className="w-full h-full object-cover" />
-                    <div
-                      className="absolute inset-0 bg-black pointer-events-none"
-                      style={{ opacity: config.overlayOpacity }}
-                    />
-                    <div className="absolute bottom-2 left-2 px-2.5 py-1 rounded bg-black/70 text-[10px] font-mono text-emerald-300 border border-white/20">
-                      Active Image Theme Applied
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-
-          {activeTab === 'CUSTOM_VIDEO' && (
-            <div className="space-y-6">
-              {/* External Video URL Input */}
-              <div className="p-4 rounded-xl border border-[#27272a] bg-[#18181b] space-y-3">
-                <label className="text-xs font-bold text-white flex items-center space-x-2">
-                  <LinkIcon className="h-4 w-4 text-cyan-400" />
-                  <span>Option A: Paste Custom MP4 / WebM Video URL</span>
+              {/* Custom Video URL */}
+              <div className="p-4 rounded-2xl border border-slate-200 bg-white space-y-3 shadow-xs">
+                <label className="text-xs font-bold text-slate-800 flex items-center space-x-2">
+                  <VideoIcon className="h-4 w-4 text-cyan-600" />
+                  <span>Option C: Paste Ambient MP4 / WebM Video URL</span>
                 </label>
                 <div className="flex gap-2">
                   <input
                     type="url"
                     value={customVideoUrlInput}
                     onChange={(e) => setCustomVideoUrlInput(e.target.value)}
-                    placeholder="https://example.com/ambient-loop.mp4"
-                    className="flex-1 rounded-xl border border-[#27272a] bg-[#09090b] px-3.5 py-2 text-xs text-white placeholder-zinc-500 focus:border-cyan-500 focus:outline-none"
+                    placeholder="https://assets.mixkit.co/videos/preview/your-ambient-loop.mp4"
+                    className="flex-1 rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2 text-xs text-slate-900 placeholder-slate-400 focus:border-cyan-500 focus:bg-white focus:outline-none"
                   />
                   <button
                     onClick={() => handleApplyCustomUrl('VIDEO')}
-                    className="px-4 py-2 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-semibold cursor-pointer transition-all"
+                    className="px-4 py-2 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-bold cursor-pointer transition-all shrink-0 shadow-xs"
                   >
-                    Set Video Loop
+                    Apply Video
                   </button>
                 </div>
               </div>
 
-              {/* Local Video File Upload Input */}
-              <div className="p-4 rounded-xl border border-[#27272a] bg-[#18181b] space-y-3">
-                <label className="text-xs font-bold text-white flex items-center space-x-2">
-                  <Upload className="h-4 w-4 text-cyan-400" />
-                  <span>Option B: Upload Video File from Device</span>
-                </label>
-                <p className="text-[11px] text-zinc-400">Select an MP4, WebM, or MOV video loop to play continuously in the background.</p>
-                <label className="block w-full border-2 border-dashed border-[#27272a] hover:border-cyan-500/50 rounded-xl p-6 text-center cursor-pointer transition-all bg-[#09090b]">
-                  <VideoIcon className="h-8 w-8 text-cyan-400 mx-auto mb-2" />
-                  <span className="text-xs font-semibold text-white block">Click to Browse Local Video Loop</span>
-                  <span className="text-[10px] text-zinc-500">Supports MP4, WEBM (Max 50MB)</span>
-                  <input
-                    type="file"
-                    accept="video/*"
-                    onChange={(e) => handleFileUpload(e, 'VIDEO')}
-                    className="hidden"
-                  />
-                </label>
-              </div>
-
-              {/* Current Active Video Preview */}
-              {config.bgType === 'video' && config.videoUrl && (
-                <div className="space-y-2">
-                  <span className="text-xs font-bold text-zinc-400">Active Video Loop Preview:</span>
-                  <div className="h-36 rounded-xl border border-cyan-500/40 relative overflow-hidden">
-                    <video
-                      src={config.videoUrl}
-                      muted
-                      loop
-                      autoPlay
-                      playsInline
-                      className="w-full h-full object-cover"
-                    />
-                    <div
-                      className="absolute inset-0 bg-black pointer-events-none"
-                      style={{ opacity: config.overlayOpacity }}
-                    />
-                    <div className="absolute bottom-2 left-2 px-2.5 py-1 rounded bg-black/70 text-[10px] font-mono text-cyan-300 border border-white/20">
-                      Active Video Theme Playing
-                    </div>
-                  </div>
+              {fileError && (
+                <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs">
+                  {fileError}
                 </div>
               )}
             </div>
           )}
 
           {activeTab === 'OVERLAY' && (
-            <div className="space-y-6">
-              <div className="p-4 rounded-xl border border-[#27272a] bg-[#18181b] space-y-4">
+            <div className="space-y-4">
+              <div className="p-5 rounded-2xl border border-slate-200 bg-white space-y-4 shadow-xs">
                 <div className="flex items-center justify-between">
-                  <label className="text-xs font-bold text-white flex items-center space-x-2">
-                    <Eye className="h-4 w-4 text-amber-400" />
-                    <span>Dark Overlay Tint Opacity</span>
+                  <label className="text-xs font-bold text-slate-800 flex items-center space-x-2">
+                    <Eye className="h-4 w-4 text-amber-500" />
+                    <span>Overlay Tint Darkness</span>
                   </label>
-                  <span className="text-xs font-mono font-bold text-amber-400">
+                  <span className="text-xs font-mono font-bold text-amber-600">
                     {Math.round(config.overlayOpacity * 100)}%
                   </span>
                 </div>
@@ -630,20 +635,20 @@ export const ThemeCustomizerModal: React.FC<ThemeCustomizerModalProps> = ({
                     onChangeConfig(updated);
                     saveBgConfig(updated);
                   }}
-                  className="w-full h-2 bg-[#09090b] rounded-lg appearance-none cursor-pointer accent-amber-400"
+                  className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-amber-500"
                 />
-                <p className="text-[10px] text-zinc-400">
-                  Higher opacity improves text contrast and legibility over vibrant backgrounds or fast video loops.
+                <p className="text-[11px] text-slate-500">
+                  Controls the opacity layer over photographic and looping backgrounds for optimal text contrast.
                 </p>
               </div>
 
-              <div className="p-4 rounded-xl border border-[#27272a] bg-[#18181b] space-y-4">
+              <div className="p-5 rounded-2xl border border-slate-200 bg-white space-y-4 shadow-xs">
                 <div className="flex items-center justify-between">
-                  <label className="text-xs font-bold text-white flex items-center space-x-2">
-                    <Layers className="h-4 w-4 text-blue-400" />
-                    <span>Background Blur Level</span>
+                  <label className="text-xs font-bold text-slate-800 flex items-center space-x-2">
+                    <Layers className="h-4 w-4 text-blue-600" />
+                    <span>Atmospheric Blur Level</span>
                   </label>
-                  <span className="text-xs font-mono font-bold text-blue-400">
+                  <span className="text-xs font-mono font-bold text-blue-600">
                     {config.blurAmount}px
                   </span>
                 </div>
@@ -658,38 +663,45 @@ export const ThemeCustomizerModal: React.FC<ThemeCustomizerModalProps> = ({
                     onChangeConfig(updated);
                     saveBgConfig(updated);
                   }}
-                  className="w-full h-2 bg-[#09090b] rounded-lg appearance-none cursor-pointer accent-blue-400"
+                  className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
                 />
-                <p className="text-[10px] text-zinc-400">
-                  Adds cinematic depth-of-field blur to background images or videos.
+                <p className="text-[11px] text-slate-500">
+                  Applies cinematic depth-of-field blur behind the library cards and data tables.
                 </p>
               </div>
-            </div>
-          )}
-
-          {fileError && (
-            <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-xs">
-              {fileError}
             </div>
           )}
         </div>
 
         {/* Modal Footer */}
-        <div className="p-4 border-t border-[#27272a] bg-[#18181b] flex items-center justify-between">
-          <button
-            onClick={handleResetToDefault}
-            className="px-3.5 py-2 rounded-xl border border-[#27272a] bg-[#09090b] hover:bg-[#27272a] text-zinc-300 text-xs font-semibold flex items-center space-x-2 transition-all cursor-pointer"
-          >
-            <RefreshCw className="h-3.5 w-3.5" />
-            <span>Reset to Default</span>
-          </button>
+        <div className="px-6 py-3.5 border-t border-slate-200 bg-white flex items-center justify-between">
+          <div className="flex items-center space-x-2">
+            <span className="text-xs text-slate-500">Active Theme:</span>
+            <span className="text-xs font-bold text-slate-800 flex items-center space-x-1.5">
+              <span
+                className="w-2.5 h-2.5 rounded-full inline-block border border-slate-300"
+                style={{ backgroundColor: activeThemeDef.accentHex }}
+              />
+              <span>{activeThemeDef.name}</span>
+            </span>
+          </div>
 
-          <button
-            onClick={onClose}
-            className="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold transition-all cursor-pointer shadow-lg shadow-blue-500/20"
-          >
-            Done & Apply
-          </button>
+          <div className="flex items-center space-x-2">
+            <button
+              onClick={handleResetToDefault}
+              className="px-3 py-1.5 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-600 text-xs font-semibold flex items-center space-x-1.5 transition-all cursor-pointer"
+            >
+              <RefreshCw className="h-3.5 w-3.5" />
+              <span>Reset Default</span>
+            </button>
+
+            <button
+              onClick={onClose}
+              className="px-5 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition-all cursor-pointer shadow-sm"
+            >
+              Done & Apply
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -738,12 +750,5 @@ export const BackgroundLayer: React.FC<BackgroundLayerProps> = ({ config }) => {
     );
   }
 
-  // Default Gradient Blobs
-  return (
-    <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
-      <div className="absolute top-0 left-1/4 w-96 h-96 bg-blue-600/10 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-indigo-600/10 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-[#09090b]/80 -z-10" />
-    </div>
-  );
+  return null;
 };

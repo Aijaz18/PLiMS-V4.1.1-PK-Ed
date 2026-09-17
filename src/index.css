@@ -7,208 +7,308 @@
 }
 
 /* ========================================================
-   🇵🇰 1. PAKISTANI FLAG THEME (LIGHT - GREEN & WHITE)
+   🏛️ LIBRARIAN VISUAL THEME ENGINE & PANEL COLOR HARMONIZATION
+   Matches header, hero banners, cards, action buttons, pills,
+   badges, focus rings and borders across the ENTIRE PANEL
    ======================================================== */
+
+:root {
+  --theme-primary: #2563eb;
+  --theme-primary-hover: #1d4ed8;
+  --theme-primary-light: #eff6ff;
+  --theme-primary-border: #bfdbfe;
+  --theme-accent: #2563eb;
+  --theme-hero-gradient: linear-gradient(135deg, #0c2340 0%, #0a192f 50%, #07172b 100%);
+  --theme-header-bg: #ffffff;
+  --theme-header-border: #e2e8f0;
+  --theme-canvas-bg: #f4f7fb;
+  --theme-card-bg: #ffffff;
+  --theme-card-border: #e2e8f0;
+}
+
+/* 1. Oxford Navy & Royal Blue */
+html.theme-oxford-navy {
+  --theme-primary: #2563eb;
+  --theme-primary-hover: #1d4ed8;
+  --theme-primary-light: #eff6ff;
+  --theme-primary-border: #bfdbfe;
+  --theme-accent: #2563eb;
+  --theme-hero-gradient: linear-gradient(135deg, #0c2340 0%, #0a192f 50%, #07172b 100%);
+  --theme-header-bg: #ffffff;
+  --theme-header-border: #e2e8f0;
+  --theme-canvas-bg: #f4f7fb;
+  --theme-card-bg: #ffffff;
+  --theme-card-border: #e2e8f0;
+}
+
+/* 2. 🇵🇰 Quaid Emerald & Gold (National Academic Green) */
 html.theme-pakistan-flag,
-body.theme-pakistan-flag {
-  background-color: #f2faf5 !important;
-  color: #064e3b !important;
+html.theme-pakistan-dark {
+  --theme-primary: #047857;
+  --theme-primary-hover: #065f46;
+  --theme-primary-light: #ecfdf5;
+  --theme-primary-border: #a7f3d0;
+  --theme-accent: #059669;
+  --theme-hero-gradient: linear-gradient(135deg, #06351e 0%, #042817 50%, #021f11 100%);
+  --theme-header-bg: #fbfdfc;
+  --theme-header-border: #d1fae5;
+  --theme-canvas-bg: #f0fdf4;
+  --theme-card-bg: #ffffff;
+  --theme-card-border: #d1fae5;
 }
 
-html.theme-pakistan-flag .bg-\[\#09090b\] {
-  background-color: #f0fdf4 !important;
-  color: #064e3b !important;
+/* 3. Persian Turquoise & Lapis */
+html.theme-persian-turquoise {
+  --theme-primary: #0891b2;
+  --theme-primary-hover: #0e7490;
+  --theme-primary-light: #ecfeff;
+  --theme-primary-border: #a5f3fc;
+  --theme-accent: #0891b2;
+  --theme-hero-gradient: linear-gradient(135deg, #0c2f54 0%, #082340 50%, #05182d 100%);
+  --theme-header-bg: #fafdfd;
+  --theme-header-border: #ccfbf1;
+  --theme-canvas-bg: #f0fdfa;
+  --theme-card-bg: #ffffff;
+  --theme-card-border: #ccfbf1;
 }
 
-html.theme-pakistan-flag .bg-\[\#121214\],
-html.theme-pakistan-flag .bg-\[\#18181b\],
-html.theme-pakistan-flag .bg-\[\#222226\] {
-  background-color: #ffffff !important;
-  color: #064e3b !important;
+/* 4. Antique Parchment & Mahogany */
+html.theme-antique-parchment {
+  --theme-primary: #b45309;
+  --theme-primary-hover: #92400e;
+  --theme-primary-light: #fffbeb;
+  --theme-primary-border: #fde68a;
+  --theme-accent: #b45309;
+  --theme-hero-gradient: linear-gradient(135deg, #3b1a0e 0%, #2d1309 50%, #1f0c05 100%);
+  --theme-header-bg: #fffdfa;
+  --theme-header-border: #fef3c7;
+  --theme-canvas-bg: #fdfbf7;
+  --theme-card-bg: #ffffff;
+  --theme-card-border: #fef3c7;
 }
 
-html.theme-pakistan-flag header {
-  background-color: #00401a !important;
-  border-color: #005f27 !important;
-  color: #ffffff !important;
+/* 5. Nordic Spruce & Sage Mint */
+html.theme-nordic-spruce {
+  --theme-primary: #0f766e;
+  --theme-primary-hover: #115e59;
+  --theme-primary-light: #f0fdfa;
+  --theme-primary-border: #99f6e4;
+  --theme-accent: #0f766e;
+  --theme-hero-gradient: linear-gradient(135deg, #0f3d3e 0%, #092c2d 50%, #051c1d 100%);
+  --theme-header-bg: #f9fbfb;
+  --theme-header-border: #ccfbf1;
+  --theme-canvas-bg: #f8fafc;
+  --theme-card-bg: #ffffff;
+  --theme-card-border: #ccfbf1;
 }
 
-html.theme-pakistan-flag header select,
-html.theme-pakistan-flag header option,
-html.theme-pakistan-flag header button,
-html.theme-pakistan-flag header span,
-html.theme-pakistan-flag header div {
-  color: #ffffff !important;
+/* 6. Royal Amethyst & Velvet Rose */
+html.theme-royal-amethyst {
+  --theme-primary: #7e22ce;
+  --theme-primary-hover: #6b21a8;
+  --theme-primary-light: #faf5ff;
+  --theme-primary-border: #e9d5ff;
+  --theme-accent: #7e22ce;
+  --theme-hero-gradient: linear-gradient(135deg, #330857 0%, #24043f 50%, #170229 100%);
+  --theme-header-bg: #fdfaff;
+  --theme-header-border: #f3e8ff;
+  --theme-canvas-bg: #faf5ff;
+  --theme-card-bg: #ffffff;
+  --theme-card-border: #f3e8ff;
 }
 
-html.theme-pakistan-flag header .bg-\[\#09090b\],
-html.theme-pakistan-flag header .bg-\[\#18181b\] {
-  background-color: rgba(0, 45, 18, 0.6) !important;
-  border-color: rgba(167, 243, 208, 0.3) !important;
-  color: #ffffff !important;
+/* 7. Harvard Crimson & Warm Ivory */
+html.theme-crimson-harvard {
+  --theme-primary: #be123c;
+  --theme-primary-hover: #9f1239;
+  --theme-primary-light: #fff1f2;
+  --theme-primary-border: #fecdd3;
+  --theme-accent: #be123c;
+  --theme-hero-gradient: linear-gradient(135deg, #5b0d23 0%, #420818 50%, #29030d 100%);
+  --theme-header-bg: #fffbfc;
+  --theme-header-border: #ffe4e6;
+  --theme-canvas-bg: #fffafa;
+  --theme-card-bg: #ffffff;
+  --theme-card-border: #ffe4e6;
 }
 
-html.theme-pakistan-flag aside {
-  background-color: #ffffff !important;
-  border-color: #d1fae5 !important;
+/* 8. Cashmere & Honey Amber */
+html.theme-cashmere-amber {
+  --theme-primary: #d97706;
+  --theme-primary-hover: #b45309;
+  --theme-primary-light: #fffbeb;
+  --theme-primary-border: #fde68a;
+  --theme-accent: #d97706;
+  --theme-hero-gradient: linear-gradient(135deg, #3d2109 0%, #2c1705 50%, #1c0d02 100%);
+  --theme-header-bg: #fffdf7;
+  --theme-header-border: #fef3c7;
+  --theme-canvas-bg: #fffdf5;
+  --theme-card-bg: #ffffff;
+  --theme-card-border: #fef3c7;
 }
 
-html.theme-pakistan-flag .border-\[\#27272a\],
-html.theme-pakistan-flag .border-\[\#3f3f46\],
-html.theme-pakistan-flag .border-zinc-800,
-html.theme-pakistan-flag .border-zinc-700 {
-  border-color: #d1fae5 !important;
+/* 9. Alexandria Cyber Midnight (Deep Dark Mode) */
+html.theme-midnight-alexandria,
+html.theme-dark-slate {
+  --theme-primary: #06b6d4;
+  --theme-primary-hover: #0891b2;
+  --theme-primary-light: #083344;
+  --theme-primary-border: #155e75;
+  --theme-accent: #06b6d4;
+  --theme-hero-gradient: linear-gradient(135deg, #070b14 0%, #0a101d 50%, #04060c 100%);
+  --theme-header-bg: #0c1220;
+  --theme-header-border: #162035;
+  --theme-canvas-bg: #0b0f19;
+  --theme-card-bg: #111827;
+  --theme-card-border: #1f293d;
 }
 
-html.theme-pakistan-flag .text-\[\#fafafa\],
-html.theme-pakistan-flag .text-white {
-  color: #064e3b !important;
+/* 10. Academic Clean Slate */
+html.theme-light-clean {
+  --theme-primary: #2563eb;
+  --theme-primary-hover: #1d4ed8;
+  --theme-primary-light: #f1f5f9;
+  --theme-primary-border: #cbd5e1;
+  --theme-accent: #3b82f6;
+  --theme-hero-gradient: linear-gradient(135deg, #1e293b 0%, #172033 50%, #0f172a 100%);
+  --theme-header-bg: #ffffff;
+  --theme-header-border: #e2e8f0;
+  --theme-canvas-bg: #f8fafc;
+  --theme-card-bg: #ffffff;
+  --theme-card-border: #e2e8f0;
 }
-
-html.theme-pakistan-flag .text-\[\#a1a1aa\],
-html.theme-pakistan-flag .text-zinc-400,
-html.theme-pakistan-flag .text-zinc-500 {
-  color: #047857 !important;
-}
-
-html.theme-pakistan-flag .text-zinc-300,
-html.theme-pakistan-flag .text-zinc-200 {
-  color: #065f46 !important;
-}
-
-html.theme-pakistan-flag input,
-html.theme-pakistan-flag select,
-html.theme-pakistan-flag textarea {
-  background-color: #ffffff !important;
-  color: #064e3b !important;
-  border-color: #bbf7d0 !important;
-}
-
-html.theme-pakistan-flag input::placeholder,
-html.theme-pakistan-flag textarea::placeholder {
-  color: #6ee7b7 !important;
-}
-
-/* Ensure buttons and badges have high contrast */
-html.theme-pakistan-flag .bg-emerald-600 {
-  background-color: #00401a !important;
-  color: #ffffff !important;
-}
-html.theme-pakistan-flag .bg-emerald-600:hover {
-  background-color: #005020 !important;
-}
-html.theme-pakistan-flag .bg-emerald-500 {
-  background-color: #047857 !important;
-  color: #ffffff !important;
-}
-html.theme-pakistan-flag .text-white {
-  color: #ffffff;
-}
-html.theme-pakistan-flag button.text-white,
-html.theme-pakistan-flag .bg-emerald-600.text-white,
-html.theme-pakistan-flag .bg-blue-600.text-white,
-html.theme-pakistan-flag .bg-purple-600.text-white {
-  color: #ffffff !important;
-}
-
-
-/* ========================================================
-   🇵🇰 2. PAKISTANI FLAG DARK THEME (EMERALD NIGHT)
-   ======================================================== */
-html.theme-pakistan-dark,
-body.theme-pakistan-dark {
-  background-color: #031c10 !important;
-  color: #f0fdf4 !important;
-}
-
-html.theme-pakistan-dark .bg-\[\#09090b\] {
-  background-color: #031c10 !important;
-}
-
-html.theme-pakistan-dark .bg-\[\#121214\],
-html.theme-pakistan-dark .bg-\[\#18181b\] {
-  background-color: #082d1c !important;
-  color: #f0fdf4 !important;
-}
-
-html.theme-pakistan-dark header {
-  background-color: #062315 !important;
-  border-color: #165231 !important;
-}
-
-html.theme-pakistan-dark aside {
-  background-color: #062315 !important;
-  border-color: #165231 !important;
-}
-
-html.theme-pakistan-dark .border-\[\#27272a\] {
-  border-color: #165231 !important;
-}
-
-html.theme-pakistan-dark .text-\[\#fafafa\] {
-  color: #f0fdf4 !important;
-}
-
-html.theme-pakistan-dark .text-\[\#a1a1aa\] {
-  color: #86efac !important;
-}
-
 
 /* ========================================================
-   ☀️ 3. CLASSIC ACADEMIC LIGHT CLEAN THEME
+   PANEL HARMONIZATION: APPLY THEME COLORS EVERYWHERE
    ======================================================== */
-html.theme-light-clean,
-body.theme-light-clean {
-  background-color: #f8fafc !important;
-  color: #0f172a !important;
+
+/* Primary Action Buttons match active theme on entire panel */
+button.bg-blue-600:not(.keep-default-color),
+a.bg-blue-600:not(.keep-default-color),
+.theme-btn-primary {
+  background-color: var(--theme-primary) !important;
+  color: #ffffff !important;
 }
 
-html.theme-light-clean .bg-\[\#09090b\] {
-  background-color: #f8fafc !important;
+button.bg-blue-600:hover:not(.keep-default-color),
+a.bg-blue-600:hover:not(.keep-default-color),
+.theme-btn-primary:hover {
+  background-color: var(--theme-primary-hover) !important;
 }
 
-html.theme-light-clean .bg-\[\#121214\],
-html.theme-light-clean .bg-\[\#18181b\] {
-  background-color: #ffffff !important;
-  color: #0f172a !important;
+/* Text and Icon Accents */
+.text-blue-600:not(.keep-default-color),
+.theme-accent-text {
+  color: var(--theme-primary) !important;
 }
 
-html.theme-light-clean header,
-html.theme-light-clean aside {
-  background-color: #ffffff !important;
-  border-color: #e2e8f0 !important;
-  color: #0f172a !important;
+/* Light Pills and Badges */
+.bg-blue-50:not(.keep-default-color),
+.theme-badge-light {
+  background-color: var(--theme-primary-light) !important;
+  color: var(--theme-primary) !important;
+  border-color: var(--theme-primary-border) !important;
 }
 
-html.theme-light-clean .border-\[\#27272a\] {
-  border-color: #e2e8f0 !important;
+/* Border accents */
+.border-blue-600:not(.keep-default-color),
+.border-blue-500:not(.keep-default-color),
+.theme-accent-border {
+  border-color: var(--theme-primary) !important;
 }
 
-html.theme-light-clean .text-\[\#fafafa\] {
-  color: #0f172a !important;
+/* Input / Search focus outlines */
+input:focus,
+select:focus,
+textarea:focus {
+  outline-color: var(--theme-primary);
 }
 
-html.theme-light-clean .text-\[\#a1a1aa\] {
-  color: #475569 !important;
+/* Selection highlight */
+::selection {
+  background-color: var(--theme-primary) !important;
+  color: #ffffff !important;
 }
 
-html.theme-light-clean input,
-html.theme-light-clean select,
-html.theme-light-clean textarea {
-  background-color: #f1f5f9 !important;
-  color: #0f172a !important;
-  border-color: #cbd5e1 !important;
+/* Hero Banners match theme */
+.theme-hero-banner {
+  background: var(--theme-hero-gradient) !important;
 }
-
 
 /* ========================================================
-   🌙 4. EXECUTIVE DARK SLATE THEME (DEFAULT DARK)
+   CYBER MIDNIGHT (DARK MODE) COMPREHENSIVE OVERRIDES
    ======================================================== */
-html.theme-dark-slate,
-body.theme-dark-slate {
-  background-color: #09090b !important;
-  color: #fafafa !important;
+html.theme-midnight-alexandria,
+body.theme-midnight-alexandria {
+  background-color: #0b0f19 !important;
+  color: #f1f5f9 !important;
 }
+
+html.theme-midnight-alexandria header {
+  background-color: #0c1220 !important;
+  border-bottom-color: #162035 !important;
+  color: #f1f5f9 !important;
+}
+
+html.theme-midnight-alexandria header input {
+  background-color: #131d31 !important;
+  border-color: #1e2f4e !important;
+  color: #f1f5f9 !important;
+}
+
+html.theme-midnight-alexandria header .bg-\[\#f1f5f9\] {
+  background-color: #131d31 !important;
+  border-color: #1e2f4e !important;
+  color: #f1f5f9 !important;
+}
+
+html.theme-midnight-alexandria .bg-white {
+  background-color: #111827 !important;
+  border-color: #1f293d !important;
+  color: #f1f5f9 !important;
+}
+
+html.theme-midnight-alexandria .bg-\[\#f1f5f9\] {
+  background-color: #131d31 !important;
+  border-color: #1e2f4e !important;
+  color: #f1f5f9 !important;
+}
+
+html.theme-midnight-alexandria .bg-slate-50,
+html.theme-midnight-alexandria .bg-slate-100 {
+  background-color: #162035 !important;
+  color: #f1f5f9 !important;
+}
+
+html.theme-midnight-alexandria .text-slate-900,
+html.theme-midnight-alexandria .text-slate-800 {
+  color: #f8fafc !important;
+}
+
+html.theme-midnight-alexandria .text-slate-700,
+html.theme-midnight-alexandria .text-slate-600 {
+  color: #cbd5e1 !important;
+}
+
+html.theme-midnight-alexandria .text-slate-500,
+html.theme-midnight-alexandria .text-slate-400 {
+  color: #94a3b8 !important;
+}
+
+html.theme-midnight-alexandria .border-slate-200,
+html.theme-midnight-alexandria .border-slate-200\/90,
+html.theme-midnight-alexandria .border-slate-100 {
+  border-color: #1f293d !important;
+}
+
+html.theme-midnight-alexandria input,
+html.theme-midnight-alexandria select,
+html.theme-midnight-alexandria textarea {
+  background-color: #131d31 !important;
+  border-color: #1e2f4e !important;
+  color: #f8fafc !important;
+}
+
 
 /* ========================================================
    🖨️ PRINT STYLES FOR ACCESSION BARCODES & SPINE LABELS (A4 STICKER SHEET)
@@ -295,5 +395,73 @@ body.theme-dark-slate {
   #printable-label-area rect {
     fill: #000000 !important;
   }
+}
+
+/* ========================================================
+   🇵🇰 FLYING PAKISTANI FLAG WAVE & FLUTTER ANIMATIONS
+   ======================================================== */
+@keyframes flagFlutter {
+  0% {
+    transform: perspective(400px) rotateY(0deg) skewY(0deg) translateZ(0);
+  }
+  20% {
+    transform: perspective(400px) rotateY(4.5deg) skewY(2deg) translateY(-1.5px);
+  }
+  40% {
+    transform: perspective(400px) rotateY(-3.5deg) skewY(-1.8deg) translateY(1.5px);
+  }
+  60% {
+    transform: perspective(400px) rotateY(5deg) skewY(2.2deg) translateY(-1px);
+  }
+  80% {
+    transform: perspective(400px) rotateY(-2.5deg) skewY(-1.2deg) translateY(0.5px);
+  }
+  100% {
+    transform: perspective(400px) rotateY(0deg) skewY(0deg) translateZ(0);
+  }
+}
+
+@keyframes flagClothSheen {
+  0% {
+    background-position: -150px 0;
+  }
+  50% {
+    background-position: 80px 0;
+  }
+  100% {
+    background-position: 250px 0;
+  }
+}
+
+@keyframes flagWindRipples {
+  0% {
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.35));
+  }
+  50% {
+    filter: drop-shadow(2px 4px 7px rgba(0, 0, 0, 0.5));
+  }
+  100% {
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.35));
+  }
+}
+
+.animate-flag-flutter {
+  transform-origin: left center;
+  animation: flagFlutter 2.6s ease-in-out infinite, flagWindRipples 2.6s ease-in-out infinite;
+}
+
+.flag-sheen-overlay {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.28) 25%,
+    rgba(0, 0, 0, 0.22) 50%,
+    rgba(255, 255, 255, 0.3) 75%,
+    rgba(0, 0, 0, 0.15) 100%
+  );
+  background-size: 200% 100%;
+  animation: flagClothSheen 2.6s ease-in-out infinite;
+  mix-blend-mode: overlay;
+  pointer-events: none;
 }
 

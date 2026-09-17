@@ -657,13 +657,13 @@ export const UserMemberModule: React.FC<UserMemberModuleProps> = ({
       )}
 
       {/* Top Banner & Super Admin Status */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-5 rounded-2xl bg-gradient-to-r from-[#121214] via-[#18181b] to-[#121214] border border-[#27272a] shadow-lg">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-5 rounded-2xl bg-gradient-to-r from-[#121214] via-[#18181b] to-[#121214] border border-slate-200/90 shadow-lg">
         <div>
           <div className="flex items-center space-x-2">
             <ShieldCheck className="h-6 w-6 text-emerald-400" />
-            <h2 className="text-xl font-bold text-[#fafafa]">Patron & Staff Powers Matrix</h2>
+            <h2 className="text-xl font-bold text-slate-900">Patron & Staff Powers Matrix</h2>
           </div>
-          <p className="text-xs text-[#a1a1aa] mt-1">
+          <p className="text-xs text-slate-500 mt-1">
             Super Admin power allocation console for Librarians, Assistant Staff & Patron accounts
           </p>
         </div>
@@ -689,7 +689,7 @@ export const UserMemberModule: React.FC<UserMemberModuleProps> = ({
 
           <button
             onClick={handleDownloadMembersCsv}
-            className="px-3.5 py-2 rounded-xl bg-[#121214] hover:bg-[#18181b] border border-[#27272a] text-[#fafafa] font-medium text-xs flex items-center space-x-1.5 transition-all cursor-pointer shadow-sm shrink-0"
+            className="px-3.5 py-2 rounded-xl bg-white hover:bg-slate-100 border border-slate-200/90 text-slate-900 font-medium text-xs flex items-center space-x-1.5 transition-all cursor-pointer shadow-sm shrink-0"
             title="Export full patron & staff directory to CSV"
           >
             <Download className="h-4 w-4 text-emerald-400" />
@@ -726,13 +726,13 @@ export const UserMemberModule: React.FC<UserMemberModuleProps> = ({
       </div>
 
       {/* Navigation Sub-Tabs */}
-      <div className="flex items-center space-x-2 border-b border-[#27272a] pb-3">
+      <div className="flex items-center space-x-2 border-b border-slate-200/90 pb-3">
         <button
           onClick={() => setActiveTab('DIRECTORY')}
           className={`px-4 py-2 rounded-xl text-xs font-semibold flex items-center space-x-2 transition-all cursor-pointer ${
             activeTab === 'DIRECTORY'
               ? 'bg-blue-600 text-white shadow-md'
-              : 'bg-[#121214] border border-[#27272a] text-[#a1a1aa] hover:text-[#fafafa]'
+              : 'bg-white border border-slate-200/90 text-slate-500 hover:text-slate-900'
           }`}
         >
           <Users className="h-4 w-4" />
@@ -744,7 +744,7 @@ export const UserMemberModule: React.FC<UserMemberModuleProps> = ({
           className={`px-4 py-2 rounded-xl text-xs font-semibold flex items-center space-x-2 transition-all cursor-pointer ${
             activeTab === 'POWERS_MATRIX'
               ? 'bg-amber-600 text-white shadow-md'
-              : 'bg-[#121214] border border-[#27272a] text-[#a1a1aa] hover:text-[#fafafa]'
+              : 'bg-white border border-slate-200/90 text-slate-500 hover:text-slate-900'
           }`}
         >
           <Sliders className="h-4 w-4 text-amber-300" />
@@ -756,7 +756,7 @@ export const UserMemberModule: React.FC<UserMemberModuleProps> = ({
           className={`px-4 py-2 rounded-xl text-xs font-semibold flex items-center space-x-2 transition-all cursor-pointer ${
             activeTab === 'AUDIT_LOG'
               ? 'bg-purple-600 text-white shadow-md'
-              : 'bg-[#121214] border border-[#27272a] text-[#a1a1aa] hover:text-[#fafafa]'
+              : 'bg-white border border-slate-200/90 text-slate-500 hover:text-slate-900'
           }`}
         >
           <History className="h-4 w-4" />
@@ -768,22 +768,22 @@ export const UserMemberModule: React.FC<UserMemberModuleProps> = ({
       {activeTab === 'DIRECTORY' && (
         <div className="space-y-4">
           {/* Filters Bar */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-3 bg-[#121214] p-3 rounded-xl border border-[#27272a]">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-3 bg-white p-3 rounded-xl border border-slate-200/90">
             <div className="relative md:col-span-2">
-              <Search className="absolute left-3 top-2.5 h-4 w-4 text-[#a1a1aa]" />
+              <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-500" />
               <input
                 type="text"
                 placeholder="Search by name, email, member code, department..."
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
-                className="w-full bg-[#09090b] border border-[#27272a] rounded-xl pl-9 pr-3 py-2 text-xs text-[#fafafa] focus:outline-none focus:border-blue-500"
+                className="w-full bg-[#f1f5f9] border border-slate-200/90 rounded-xl pl-9 pr-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-blue-500"
               />
             </div>
 
             <select
               value={roleFilter}
               onChange={e => setRoleFilter(e.target.value)}
-              className="bg-[#09090b] border border-[#27272a] rounded-xl px-3 py-2 text-xs text-[#fafafa] focus:outline-none focus:border-blue-500 cursor-pointer"
+              className="bg-[#f1f5f9] border border-slate-200/90 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-blue-500 cursor-pointer"
             >
               <option value="ALL">All Roles</option>
               <option value="SUPER_ADMIN">Super Admin</option>
@@ -798,7 +798,7 @@ export const UserMemberModule: React.FC<UserMemberModuleProps> = ({
             <select
               value={statusFilter}
               onChange={e => setStatusFilter(e.target.value)}
-              className="bg-[#09090b] border border-[#27272a] rounded-xl px-3 py-2 text-xs text-[#fafafa] focus:outline-none focus:border-blue-500 cursor-pointer"
+              className="bg-[#f1f5f9] border border-slate-200/90 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-blue-500 cursor-pointer"
             >
               <option value="ALL">All Statuses</option>
               <option value="ACTIVE">Active</option>
@@ -878,22 +878,22 @@ export const UserMemberModule: React.FC<UserMemberModuleProps> = ({
                           {u.memberCode}
                         </span>
                       </div>
-                      <div className="text-[11px] text-zinc-300 truncate font-sans">{u.email}</div>
+                      <div className="text-[11px] text-slate-700 truncate font-sans">{u.email}</div>
                     </div>
                   </div>
 
                   {/* Detailed Specs Block */}
-                  <div className="text-[11px] text-zinc-200 space-y-1.5 bg-black/40 p-3 rounded-xl border border-white/10 relative z-10 backdrop-blur-sm">
+                  <div className="text-[11px] text-slate-800 space-y-1.5 bg-black/40 p-3 rounded-xl border border-white/10 relative z-10 backdrop-blur-sm">
                     <div className="flex justify-between items-center">
-                      <span className="text-zinc-400 font-medium">Department:</span>
+                      <span className="text-slate-500 font-medium">Department:</span>
                       <span className="text-white font-semibold truncate max-w-[170px]">{u.department || 'General Academic'}</span>
                     </div>
                     <div className="flex justify-between items-center">
-                      <span className="text-zinc-400 font-medium">Assigned Branch:</span>
+                      <span className="text-slate-500 font-medium">Assigned Branch:</span>
                       <span className="text-white font-semibold truncate max-w-[170px]">{u.assignedBranch || 'Central Library'}</span>
                     </div>
                     <div className="flex justify-between items-center">
-                      <span className="text-zinc-400 font-medium">Borrowed Books:</span>
+                      <span className="text-slate-500 font-medium">Borrowed Books:</span>
                       <span className="text-white font-semibold font-mono flex items-center space-x-1">
                         <span>{u.currentBorrowed || u.activeBorrowCount || 0} /</span>
                         {(u.maxBorrowLimit || 5) >= 9999 ? (
@@ -906,7 +906,7 @@ export const UserMemberModule: React.FC<UserMemberModuleProps> = ({
                       </span>
                     </div>
                     <div className="flex justify-between items-center">
-                      <span className="text-zinc-400 font-medium">Fine Pending:</span>
+                      <span className="text-slate-500 font-medium">Fine Pending:</span>
                       <span className={`font-semibold font-mono ${u.finePending > 0 ? 'text-red-400 font-bold' : 'text-emerald-400'}`}>
                         PKR {u.finePending || 0}
                       </span>
@@ -1022,22 +1022,22 @@ export const UserMemberModule: React.FC<UserMemberModuleProps> = ({
             {ALL_STAFF_POWERS.map(power => {
               const IconComp = power.icon;
               return (
-                <div key={power.id} className="p-3 rounded-xl bg-[#121214] border border-[#27272a] space-y-1">
+                <div key={power.id} className="p-3 rounded-xl bg-white border border-slate-200/90 space-y-1">
                   <div className="flex items-center space-x-1.5 text-blue-400 text-xs font-bold">
                     <IconComp className="h-3.5 w-3.5" />
                     <span>{power.label}</span>
                   </div>
-                  <p className="text-[10px] text-[#a1a1aa] leading-tight">{power.desc}</p>
+                  <p className="text-[10px] text-slate-500 leading-tight">{power.desc}</p>
                 </div>
               );
             })}
           </div>
 
           {/* Matrix Table */}
-          <div className="rounded-2xl border border-[#27272a] bg-[#121214] overflow-x-auto">
+          <div className="rounded-2xl border border-slate-200/90 bg-white overflow-x-auto">
             <table className="w-full text-left text-xs border-collapse min-w-[900px]">
               <thead>
-                <tr className="border-b border-[#27272a] bg-[#09090b] text-[#a1a1aa]">
+                <tr className="border-b border-slate-200/90 bg-[#f1f5f9] text-slate-500">
                   <th className="p-3.5 font-semibold">Staff Member</th>
                   <th className="p-3.5 font-semibold">Role</th>
                   <th className="p-3.5 font-semibold">Department</th>
@@ -1045,12 +1045,12 @@ export const UserMemberModule: React.FC<UserMemberModuleProps> = ({
                   <th className="p-3.5 font-semibold text-right">Quick Role Presets</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#27272a]">
+              <tbody className="divide-y divide-slate-100">
                 {staffMembers.map(staff => {
                   const currentPowers = staff.staffPowers || [];
 
                   return (
-                    <tr key={staff.id} className="hover:bg-[#18181b]/50 transition-all">
+                    <tr key={staff.id} className="hover:bg-slate-100/50 transition-all">
                       <td className="p-3.5">
                         <div className="flex items-center space-x-3">
                           <img
@@ -1059,7 +1059,7 @@ export const UserMemberModule: React.FC<UserMemberModuleProps> = ({
                             className="w-9 h-9 rounded-full object-cover border border-amber-500/30"
                           />
                           <div>
-                            <div className="font-bold text-[#fafafa] text-xs flex items-center space-x-1.5">
+                            <div className="font-bold text-slate-900 text-xs flex items-center space-x-1.5">
                               <span>{staff.name}</span>
                               {staff.role === 'SUPER_ADMIN' && (
                                 <span className="px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-400 text-[9px] font-mono">
@@ -1067,7 +1067,7 @@ export const UserMemberModule: React.FC<UserMemberModuleProps> = ({
                                 </span>
                               )}
                             </div>
-                            <div className="text-[10px] text-[#a1a1aa] font-mono">{staff.email} • {staff.memberCode}</div>
+                            <div className="text-[10px] text-slate-500 font-mono">{staff.email} • {staff.memberCode}</div>
                           </div>
                         </div>
                       </td>
@@ -1076,7 +1076,7 @@ export const UserMemberModule: React.FC<UserMemberModuleProps> = ({
                         {staff.role}
                       </td>
 
-                      <td className="p-3.5 text-[#a1a1aa] text-[11px]">
+                      <td className="p-3.5 text-slate-500 text-[11px]">
                         {staff.department || 'Library Staff'}
                       </td>
 
@@ -1093,7 +1093,7 @@ export const UserMemberModule: React.FC<UserMemberModuleProps> = ({
                                 className={`px-2 py-1 rounded-lg text-[10px] font-semibold flex items-center space-x-1 border transition-all cursor-pointer ${
                                   isAssigned
                                     ? 'bg-emerald-500/15 border-emerald-500/40 text-emerald-400 hover:bg-emerald-500/25'
-                                    : 'bg-[#09090b] border-[#27272a] text-[#71717a] hover:border-zinc-700'
+                                    : 'bg-[#f1f5f9] border-slate-200/90 text-slate-400 hover:border-slate-300'
                                 }`}
                               >
                                 {isAssigned ? (
@@ -1148,22 +1148,22 @@ export const UserMemberModule: React.FC<UserMemberModuleProps> = ({
       {/* TAB 3: AUDIT LOG */}
       {activeTab === 'AUDIT_LOG' && (
         <div className="space-y-4">
-          <div className="rounded-2xl border border-[#27272a] bg-[#121214] p-4">
-            <h3 className="text-sm font-bold text-[#fafafa] mb-3 flex items-center space-x-2">
+          <div className="rounded-2xl border border-slate-200/90 bg-white p-4">
+            <h3 className="text-sm font-bold text-slate-900 mb-3 flex items-center space-x-2">
               <History className="h-4 w-4 text-purple-400" />
               <span>Super Admin Power Rights Allocation History</span>
             </h3>
 
             <div className="space-y-2">
               {auditLogs.map(log => (
-                <div key={log.id} className="p-3 rounded-xl bg-[#09090b] border border-[#27272a] text-xs flex items-start justify-between">
+                <div key={log.id} className="p-3 rounded-xl bg-[#f1f5f9] border border-slate-200/90 text-xs flex items-start justify-between">
                   <div>
-                    <div className="font-bold text-[#fafafa] flex items-center space-x-2">
+                    <div className="font-bold text-slate-900 flex items-center space-x-2">
                       <span className="text-amber-400 font-mono">{log.assignedBy}</span>
-                      <span className="text-[#a1a1aa]">→ updated powers for</span>
+                      <span className="text-slate-500">→ updated powers for</span>
                       <span className="text-blue-400">{log.targetStaffName}</span>
                     </div>
-                    <div className="text-[11px] text-[#a1a1aa] mt-1">{log.notes}</div>
+                    <div className="text-[11px] text-slate-500 mt-1">{log.notes}</div>
                     <div className="flex flex-wrap gap-1 mt-2">
                       {log.powersGranted.map(p => (
                         <span key={p} className="px-2 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[10px] font-mono">
@@ -1172,7 +1172,7 @@ export const UserMemberModule: React.FC<UserMemberModuleProps> = ({
                       ))}
                     </div>
                   </div>
-                  <span className="text-[10px] font-mono text-[#a1a1aa] shrink-0">{log.timestamp}</span>
+                  <span className="text-[10px] font-mono text-slate-500 shrink-0">{log.timestamp}</span>
                 </div>
               ))}
             </div>
@@ -1183,15 +1183,15 @@ export const UserMemberModule: React.FC<UserMemberModuleProps> = ({
       {/* Register Member Modal */}
       {isAddModalOpen && (
         <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-[#121214] border border-[#27272a] rounded-2xl p-6 max-w-lg w-full space-y-4 shadow-2xl">
-            <div className="flex items-center justify-between border-b border-[#27272a] pb-3">
-              <h3 className="text-base font-bold text-[#fafafa] flex items-center space-x-2">
+          <div className="bg-white border border-slate-200/90 rounded-2xl p-6 max-w-lg w-full space-y-4 shadow-2xl">
+            <div className="flex items-center justify-between border-b border-slate-200/90 pb-3">
+              <h3 className="text-base font-bold text-slate-900 flex items-center space-x-2">
                 <Users className="h-5 w-5 text-blue-400" />
                 <span>Register New Patron or Staff Profile</span>
               </h3>
               <button
                 onClick={() => setIsAddModalOpen(false)}
-                className="text-[#a1a1aa] hover:text-white cursor-pointer text-sm font-mono"
+                className="text-slate-500 hover:text-white cursor-pointer text-sm font-mono"
               >
                 ✕
               </button>
@@ -1205,36 +1205,36 @@ export const UserMemberModule: React.FC<UserMemberModuleProps> = ({
               />
 
               <div>
-                <label className="block text-[#a1a1aa] mb-1 font-medium">Full Name *</label>
+                <label className="block text-slate-500 mb-1 font-medium">Full Name *</label>
                 <input
                   type="text"
                   required
                   placeholder="e.g. Dr. Jane Foster"
                   value={newUserForm.name || ''}
                   onChange={e => setNewUserForm({ ...newUserForm, name: e.target.value })}
-                  className="w-full bg-[#09090b] border border-[#27272a] rounded-xl px-3 py-2 text-[#fafafa] focus:outline-none focus:border-blue-500"
+                  className="w-full bg-[#f1f5f9] border border-slate-200/90 rounded-xl px-3 py-2 text-slate-900 focus:outline-none focus:border-blue-500"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[#a1a1aa] mb-1 font-medium">Institutional Email *</label>
+                  <label className="block text-slate-500 mb-1 font-medium">Institutional Email *</label>
                   <input
                     type="email"
                     required
                     placeholder="jane.f@university.edu"
                     value={newUserForm.email || ''}
                     onChange={e => setNewUserForm({ ...newUserForm, email: e.target.value })}
-                    className="w-full bg-[#09090b] border border-[#27272a] rounded-xl px-3 py-2 text-[#fafafa] focus:outline-none focus:border-blue-500"
+                    className="w-full bg-[#f1f5f9] border border-slate-200/90 rounded-xl px-3 py-2 text-slate-900 focus:outline-none focus:border-blue-500"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-[#a1a1aa] mb-1 font-medium">Role Preset *</label>
+                  <label className="block text-slate-500 mb-1 font-medium">Role Preset *</label>
                   <select
                     value={newUserForm.role}
                     onChange={e => setNewUserForm({ ...newUserForm, role: e.target.value as UserRole })}
-                    className="w-full bg-[#09090b] border border-[#27272a] rounded-xl px-3 py-2 text-[#fafafa] focus:outline-none focus:border-blue-500 cursor-pointer"
+                    className="w-full bg-[#f1f5f9] border border-slate-200/90 rounded-xl px-3 py-2 text-slate-900 focus:outline-none focus:border-blue-500 cursor-pointer"
                   >
                     <option value="STUDENT">Student</option>
                     <option value="FACULTY">Faculty Member</option>
@@ -1249,25 +1249,25 @@ export const UserMemberModule: React.FC<UserMemberModuleProps> = ({
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[#a1a1aa] mb-1 font-medium">Department</label>
+                  <label className="block text-slate-500 mb-1 font-medium">Department</label>
                   <input
                     type="text"
                     placeholder="e.g. Library Science / Computer Science"
                     value={newUserForm.department || ''}
                     onChange={e => setNewUserForm({ ...newUserForm, department: e.target.value })}
-                    className="w-full bg-[#09090b] border border-[#27272a] rounded-xl px-3 py-2 text-[#fafafa] focus:outline-none focus:border-blue-500"
+                    className="w-full bg-[#f1f5f9] border border-slate-200/90 rounded-xl px-3 py-2 text-slate-900 focus:outline-none focus:border-blue-500"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-[#a1a1aa] mb-1 font-medium">Assigned Library Branch</label>
+                  <label className="block text-slate-500 mb-1 font-medium">Assigned Library Branch</label>
                   <select
                     value={newUserForm.assignedBranch || branches[0] || 'Central Academic Library'}
                     onChange={e => setNewUserForm({ ...newUserForm, assignedBranch: e.target.value })}
-                    className="w-full bg-[#09090b] border border-[#27272a] rounded-xl px-3 py-2 text-[#fafafa] focus:outline-none focus:border-blue-500 cursor-pointer font-medium text-xs"
+                    className="w-full bg-[#f1f5f9] border border-slate-200/90 rounded-xl px-3 py-2 text-slate-900 focus:outline-none focus:border-blue-500 cursor-pointer font-medium text-xs"
                   >
                     {branches.map(b => (
-                      <option key={b} value={b} className="bg-[#121214] text-[#fafafa]">
+                      <option key={b} value={b} className="bg-white text-slate-900">
                         {b}
                       </option>
                     ))}
@@ -1275,11 +1275,11 @@ export const UserMemberModule: React.FC<UserMemberModuleProps> = ({
                 </div>
               </div>
 
-              <div className="bg-[#09090b] p-3 rounded-xl border border-[#27272a] space-y-2">
+              <div className="bg-[#f1f5f9] p-3 rounded-xl border border-slate-200/90 space-y-2">
                 <div className="flex items-center justify-between">
-                  <label className="text-[#a1a1aa] font-medium flex items-center space-x-1.5">
+                  <label className="text-slate-500 font-medium flex items-center space-x-1.5">
                     <span>Borrow Limit Policy</span>
-                    <span className="text-[10px] text-zinc-500">(Concurrent active checkouts)</span>
+                    <span className="text-[10px] text-slate-400">(Concurrent active checkouts)</span>
                   </label>
                   <label className="flex items-center space-x-1.5 cursor-pointer">
                     <input
@@ -1303,7 +1303,7 @@ export const UserMemberModule: React.FC<UserMemberModuleProps> = ({
                     value={(newUserForm.maxBorrowLimit || 5) >= 9999 ? '' : (newUserForm.maxBorrowLimit || 5)}
                     placeholder={(newUserForm.maxBorrowLimit || 5) >= 9999 ? '∞ Unlimited' : '5'}
                     onChange={e => setNewUserForm({ ...newUserForm, maxBorrowLimit: Math.max(1, parseInt(e.target.value) || 1) })}
-                    className="flex-1 bg-[#121214] border border-[#27272a] rounded-xl px-3 py-2 text-[#fafafa] focus:outline-none focus:border-blue-500 disabled:opacity-50 disabled:bg-emerald-950/20 disabled:text-emerald-300 font-mono text-xs"
+                    className="flex-1 bg-white border border-slate-200/90 rounded-xl px-3 py-2 text-slate-900 focus:outline-none focus:border-blue-500 disabled:opacity-50 disabled:bg-emerald-950/20 disabled:text-emerald-300 font-mono text-xs"
                   />
                   <div className="flex items-center gap-1">
                     {[5, 10, 25, 50].map(qty => (
@@ -1314,7 +1314,7 @@ export const UserMemberModule: React.FC<UserMemberModuleProps> = ({
                         className={`px-2 py-1.5 rounded-lg border text-[10px] font-mono font-bold transition-all cursor-pointer ${
                           newUserForm.maxBorrowLimit === qty
                             ? 'bg-blue-600 border-blue-400 text-white'
-                            : 'bg-[#18181b] border-[#27272a] text-zinc-400 hover:text-white'
+                            : 'bg-slate-100 border-slate-200/90 text-slate-500 hover:text-white'
                         }`}
                       >
                         {qty}
@@ -1335,11 +1335,11 @@ export const UserMemberModule: React.FC<UserMemberModuleProps> = ({
                 </div>
               </div>
 
-              <div className="pt-3 border-t border-[#27272a] flex justify-end space-x-2">
+              <div className="pt-3 border-t border-slate-200/90 flex justify-end space-x-2">
                 <button
                   type="button"
                   onClick={() => setIsAddModalOpen(false)}
-                  className="px-4 py-2 rounded-xl bg-[#09090b] border border-[#27272a] text-[#a1a1aa] hover:text-white cursor-pointer"
+                  className="px-4 py-2 rounded-xl bg-[#f1f5f9] border border-slate-200/90 text-slate-500 hover:text-white cursor-pointer"
                 >
                   Cancel
                 </button>
@@ -1357,36 +1357,36 @@ export const UserMemberModule: React.FC<UserMemberModuleProps> = ({
 
       {/* Member ID Card Modal */}
       {isCardModalOpen && selectedCardUser && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="bg-[#121214] border border-[#27272a] rounded-2xl p-6 max-w-xl w-full space-y-5 shadow-2xl relative animate-in fade-in zoom-in duration-200">
+        <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="bg-white border border-slate-200/90 rounded-2xl p-6 max-w-xl w-full space-y-5 shadow-2xl relative animate-in fade-in zoom-in duration-200">
             {/* Modal Header */}
-            <div className="flex items-center justify-between border-b border-[#27272a] pb-3">
+            <div className="flex items-center justify-between border-b border-slate-200/90 pb-3">
               <div className="flex items-center space-x-2.5">
                 <div className="p-2 rounded-xl bg-blue-500/10 border border-blue-500/30 text-blue-400">
                   <CreditCard className="h-5 w-5" />
                 </div>
                 <div>
-                  <h3 className="text-base font-bold text-[#fafafa]">Official Library Member ID Card</h3>
-                  <p className="text-xs text-[#a1a1aa]">{selectedCardUser.name} • {selectedCardUser.memberCode}</p>
+                  <h3 className="text-base font-bold text-slate-900">Official Library Member ID Card</h3>
+                  <p className="text-xs text-slate-500">{selectedCardUser.name} • {selectedCardUser.memberCode}</p>
                 </div>
               </div>
 
               <button
                 onClick={() => setIsCardModalOpen(false)}
-                className="text-[#a1a1aa] hover:text-white text-lg font-bold px-2 py-1 cursor-pointer"
+                className="text-slate-500 hover:text-white text-lg font-bold px-2 py-1 cursor-pointer"
               >
                 ✕
               </button>
             </div>
 
             {/* Theme & Side Controls */}
-            <div className="flex items-center justify-between bg-[#09090b] p-2 rounded-xl border border-[#27272a] text-xs">
+            <div className="flex items-center justify-between bg-[#f1f5f9] p-2 rounded-xl border border-slate-200/90 text-xs">
               <div className="flex items-center space-x-1.5">
-                <span className="text-[#a1a1aa] text-[11px] font-medium mr-1">Theme:</span>
+                <span className="text-slate-500 text-[11px] font-medium mr-1">Theme:</span>
                 <button
                   onClick={() => setCardTheme('EMERALD')}
                   className={`px-2.5 py-1 rounded-lg text-[10px] font-bold cursor-pointer ${
-                    cardTheme === 'EMERALD' ? 'bg-emerald-600 text-white' : 'text-[#a1a1aa] hover:text-white'
+                    cardTheme === 'EMERALD' ? 'bg-emerald-600 text-white' : 'text-slate-500 hover:text-white'
                   }`}
                 >
                   Emerald
@@ -1394,7 +1394,7 @@ export const UserMemberModule: React.FC<UserMemberModuleProps> = ({
                 <button
                   onClick={() => setCardTheme('NAVY')}
                   className={`px-2.5 py-1 rounded-lg text-[10px] font-bold cursor-pointer ${
-                    cardTheme === 'NAVY' ? 'bg-blue-600 text-white' : 'text-[#a1a1aa] hover:text-white'
+                    cardTheme === 'NAVY' ? 'bg-blue-600 text-white' : 'text-slate-500 hover:text-white'
                   }`}
                 >
                   Navy
@@ -1402,7 +1402,7 @@ export const UserMemberModule: React.FC<UserMemberModuleProps> = ({
                 <button
                   onClick={() => setCardTheme('GOLD')}
                   className={`px-2.5 py-1 rounded-lg text-[10px] font-bold cursor-pointer ${
-                    cardTheme === 'GOLD' ? 'bg-amber-600 text-white' : 'text-[#a1a1aa] hover:text-white'
+                    cardTheme === 'GOLD' ? 'bg-amber-600 text-white' : 'text-slate-500 hover:text-white'
                   }`}
                 >
                   Academic Gold
@@ -1413,7 +1413,7 @@ export const UserMemberModule: React.FC<UserMemberModuleProps> = ({
                 <button
                   onClick={() => setCardSide('FRONT')}
                   className={`px-2.5 py-1 rounded-lg text-[10px] font-bold cursor-pointer ${
-                    cardSide === 'FRONT' ? 'bg-zinc-700 text-white' : 'text-[#a1a1aa] hover:text-white'
+                    cardSide === 'FRONT' ? 'bg-zinc-700 text-white' : 'text-slate-500 hover:text-white'
                   }`}
                 >
                   Front Side
@@ -1421,7 +1421,7 @@ export const UserMemberModule: React.FC<UserMemberModuleProps> = ({
                 <button
                   onClick={() => setCardSide('BACK')}
                   className={`px-2.5 py-1 rounded-lg text-[10px] font-bold cursor-pointer ${
-                    cardSide === 'BACK' ? 'bg-zinc-700 text-white' : 'text-[#a1a1aa] hover:text-white'
+                    cardSide === 'BACK' ? 'bg-zinc-700 text-white' : 'text-slate-500 hover:text-white'
                   }`}
                 >
                   Back Side
@@ -1505,13 +1505,13 @@ export const UserMemberModule: React.FC<UserMemberModuleProps> = ({
                             <div className="inline-block px-2 py-0.5 rounded bg-white/20 text-white text-[10px] font-mono font-bold uppercase tracking-wider">
                               {selectedCardUser.role} • {modalRoleCfg.category}
                             </div>
-                            <div className="text-[11px] text-zinc-200 font-mono">
+                            <div className="text-[11px] text-slate-800 font-mono">
                               Member ID: <span className="text-cyan-300 font-bold">{selectedCardUser.memberCode}</span>
                             </div>
-                            <div className="text-[10px] text-zinc-300 truncate">
+                            <div className="text-[10px] text-slate-700 truncate">
                               Dept: <span className="text-white font-medium">{selectedCardUser.department || 'General Academic'}</span>
                             </div>
-                            <div className="text-[10px] text-zinc-300 truncate">
+                            <div className="text-[10px] text-slate-700 truncate">
                               Branch: <span className="text-white font-medium">{selectedCardUser.assignedBranch || 'Central Library'}</span>
                             </div>
                           </div>
@@ -1524,12 +1524,12 @@ export const UserMemberModule: React.FC<UserMemberModuleProps> = ({
                             <div className="font-mono text-[10px] tracking-[0.25em] text-cyan-300 font-bold">
                               |||| ||| ||||| ||||
                             </div>
-                            <div className="font-mono text-[8px] text-zinc-400 mt-0.5">
+                            <div className="font-mono text-[8px] text-slate-500 mt-0.5">
                               {selectedCardUser.memberCode}
                             </div>
                           </div>
 
-                          <div className="text-right text-[9px] text-zinc-200 font-mono">
+                          <div className="text-right text-[9px] text-slate-800 font-mono">
                             <div>Borrow Limit: <span className="text-white font-bold">{(selectedCardUser.maxBorrowLimit || 5) >= 9999 ? '∞ Unlimited' : `${selectedCardUser.maxBorrowLimit || 5} Books`}</span></div>
                             <div>Status: <span className="text-emerald-300 font-bold">{selectedCardUser.status}</span></div>
                           </div>
@@ -1547,21 +1547,21 @@ export const UserMemberModule: React.FC<UserMemberModuleProps> = ({
                             <QrCode className="h-5 w-5 text-white" />
                           </div>
 
-                          <ul className="text-[10px] text-zinc-200 space-y-1 list-disc pl-4">
+                          <ul className="text-[10px] text-slate-800 space-y-1 list-disc pl-4">
                             <li>Official member ID issued by Pakistan Library System (PLiMS).</li>
                             <li>Card is non-transferable; present at circulation desk upon request.</li>
                             <li>Report lost or stolen cards immediately to library administration.</li>
                             <li>Overdue items incur fines as per PLiMS circulation policy.</li>
                           </ul>
 
-                          <div className="bg-black/50 p-2 rounded-lg border border-white/15 text-[9px] font-mono text-zinc-300 flex justify-between items-center">
+                          <div className="bg-slate-900/30 p-2 rounded-lg border border-white/15 text-[9px] font-mono text-slate-700 flex justify-between items-center">
                             <div>
                               <div>Authorized Signature: __________________</div>
-                              <div className="text-zinc-400 mt-0.5">Issued: {new Date().toISOString().slice(0, 10)} | Valid: 2 Years</div>
+                              <div className="text-slate-500 mt-0.5">Issued: {new Date().toISOString().slice(0, 10)} | Valid: 2 Years</div>
                             </div>
                             <div className="text-right border-l border-white/15 pl-2">
                               <div className="text-cyan-300 font-bold">RFID CHIP</div>
-                              <div className="text-[8px] text-zinc-400">PLiMS-PASS-v4</div>
+                              <div className="text-[8px] text-slate-500">PLiMS-PASS-v4</div>
                             </div>
                           </div>
                         </div>
@@ -1573,7 +1573,7 @@ export const UserMemberModule: React.FC<UserMemberModuleProps> = ({
             </div>
 
             {/* Action Buttons */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-2 border-t border-[#27272a]">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-2 border-t border-slate-200/90">
               <button
                 onClick={() => handleDownloadSingleMemberCardHtml(selectedCardUser)}
                 className="px-3.5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-bold flex items-center justify-center space-x-1.5 shadow-lg shadow-emerald-600/30 cursor-pointer transition-all"
@@ -1584,7 +1584,7 @@ export const UserMemberModule: React.FC<UserMemberModuleProps> = ({
 
               <button
                 onClick={() => window.print()}
-                className="px-3.5 py-2.5 rounded-xl bg-[#09090b] hover:bg-[#18181b] border border-[#27272a] text-[#fafafa] text-xs font-semibold flex items-center justify-center space-x-1.5 cursor-pointer transition-all"
+                className="px-3.5 py-2.5 rounded-xl bg-[#f1f5f9] hover:bg-slate-100 border border-slate-200/90 text-slate-900 text-xs font-semibold flex items-center justify-center space-x-1.5 cursor-pointer transition-all"
               >
                 <Printer className="h-4 w-4 text-purple-400" />
                 <span>Print Card</span>
@@ -1597,7 +1597,7 @@ export const UserMemberModule: React.FC<UserMemberModuleProps> = ({
                   setDownloadToast(`✨ Copied member details for ${selectedCardUser.name}!`);
                   setTimeout(() => setDownloadToast(null), 3000);
                 }}
-                className="px-3.5 py-2.5 rounded-xl bg-[#09090b] hover:bg-[#18181b] border border-[#27272a] text-[#fafafa] text-xs font-semibold flex items-center justify-center space-x-1.5 cursor-pointer transition-all"
+                className="px-3.5 py-2.5 rounded-xl bg-[#f1f5f9] hover:bg-slate-100 border border-slate-200/90 text-slate-900 text-xs font-semibold flex items-center justify-center space-x-1.5 cursor-pointer transition-all"
               >
                 <Copy className="h-4 w-4 text-blue-400" />
                 <span>Copy Details</span>
@@ -1610,15 +1610,15 @@ export const UserMemberModule: React.FC<UserMemberModuleProps> = ({
       {/* Edit Member Profile & Borrow Limits Modal */}
       {editingUser && (
         <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-[#121214] border border-[#27272a] rounded-2xl p-6 max-w-lg w-full space-y-4 shadow-2xl">
-            <div className="flex items-center justify-between border-b border-[#27272a] pb-3">
-              <h3 className="text-base font-bold text-[#fafafa] flex items-center space-x-2">
+          <div className="bg-white border border-slate-200/90 rounded-2xl p-6 max-w-lg w-full space-y-4 shadow-2xl">
+            <div className="flex items-center justify-between border-b border-slate-200/90 pb-3">
+              <h3 className="text-base font-bold text-slate-900 flex items-center space-x-2">
                 <Edit className="h-5 w-5 text-amber-400" />
                 <span>Edit Member Record & Privileges</span>
               </h3>
               <button
                 onClick={() => setEditingUser(null)}
-                className="text-[#a1a1aa] hover:text-white cursor-pointer text-sm font-mono"
+                className="text-slate-500 hover:text-white cursor-pointer text-sm font-mono"
               >
                 ✕
               </button>
@@ -1633,40 +1633,40 @@ export const UserMemberModule: React.FC<UserMemberModuleProps> = ({
                 />
                 <div>
                   <div className="text-white font-bold text-sm">{editingUser.name}</div>
-                  <div className="text-zinc-400 font-mono text-[11px]">{editingUser.memberCode} • ID: {editingUser.id}</div>
+                  <div className="text-slate-500 font-mono text-[11px]">{editingUser.memberCode} • ID: {editingUser.id}</div>
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[#a1a1aa] mb-1 font-medium">Full Name</label>
+                  <label className="block text-slate-500 mb-1 font-medium">Full Name</label>
                   <input
                     type="text"
                     required
                     value={editUserForm.name || ''}
                     onChange={e => setEditUserForm({ ...editUserForm, name: e.target.value })}
-                    className="w-full bg-[#09090b] border border-[#27272a] rounded-xl px-3 py-2 text-[#fafafa] focus:outline-none focus:border-amber-500"
+                    className="w-full bg-[#f1f5f9] border border-slate-200/90 rounded-xl px-3 py-2 text-slate-900 focus:outline-none focus:border-amber-500"
                   />
                 </div>
                 <div>
-                  <label className="block text-[#a1a1aa] mb-1 font-medium">Email</label>
+                  <label className="block text-slate-500 mb-1 font-medium">Email</label>
                   <input
                     type="email"
                     required
                     value={editUserForm.email || ''}
                     onChange={e => setEditUserForm({ ...editUserForm, email: e.target.value })}
-                    className="w-full bg-[#09090b] border border-[#27272a] rounded-xl px-3 py-2 text-[#fafafa] focus:outline-none focus:border-amber-500"
+                    className="w-full bg-[#f1f5f9] border border-slate-200/90 rounded-xl px-3 py-2 text-slate-900 focus:outline-none focus:border-amber-500"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[#a1a1aa] mb-1 font-medium">Role Category</label>
+                  <label className="block text-slate-500 mb-1 font-medium">Role Category</label>
                   <select
                     value={editUserForm.role}
                     onChange={e => setEditUserForm({ ...editUserForm, role: e.target.value as UserRole })}
-                    className="w-full bg-[#09090b] border border-[#27272a] rounded-xl px-3 py-2 text-[#fafafa] focus:outline-none focus:border-amber-500 cursor-pointer"
+                    className="w-full bg-[#f1f5f9] border border-slate-200/90 rounded-xl px-3 py-2 text-slate-900 focus:outline-none focus:border-amber-500 cursor-pointer"
                   >
                     <option value="STUDENT">Student</option>
                     <option value="FACULTY">Faculty Member</option>
@@ -1679,11 +1679,11 @@ export const UserMemberModule: React.FC<UserMemberModuleProps> = ({
                 </div>
 
                 <div>
-                  <label className="block text-[#a1a1aa] mb-1 font-medium">Account Status</label>
+                  <label className="block text-slate-500 mb-1 font-medium">Account Status</label>
                   <select
                     value={editUserForm.status}
                     onChange={e => setEditUserForm({ ...editUserForm, status: e.target.value as any })}
-                    className="w-full bg-[#09090b] border border-[#27272a] rounded-xl px-3 py-2 text-[#fafafa] focus:outline-none focus:border-amber-500 cursor-pointer"
+                    className="w-full bg-[#f1f5f9] border border-slate-200/90 rounded-xl px-3 py-2 text-slate-900 focus:outline-none focus:border-amber-500 cursor-pointer"
                   >
                     <option value="ACTIVE">ACTIVE (Good Standing)</option>
                     <option value="SUSPENDED">SUSPENDED (Overdue/Fine Block)</option>
@@ -1694,20 +1694,20 @@ export const UserMemberModule: React.FC<UserMemberModuleProps> = ({
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[#a1a1aa] mb-1 font-medium">Department</label>
+                  <label className="block text-slate-500 mb-1 font-medium">Department</label>
                   <input
                     type="text"
                     value={editUserForm.department || ''}
                     onChange={e => setEditUserForm({ ...editUserForm, department: e.target.value })}
-                    className="w-full bg-[#09090b] border border-[#27272a] rounded-xl px-3 py-2 text-[#fafafa] focus:outline-none focus:border-amber-500"
+                    className="w-full bg-[#f1f5f9] border border-slate-200/90 rounded-xl px-3 py-2 text-slate-900 focus:outline-none focus:border-amber-500"
                   />
                 </div>
                 <div>
-                  <label className="block text-[#a1a1aa] mb-1 font-medium">Assigned Branch</label>
+                  <label className="block text-slate-500 mb-1 font-medium">Assigned Branch</label>
                   <select
                     value={editUserForm.assignedBranch || branches[0]}
                     onChange={e => setEditUserForm({ ...editUserForm, assignedBranch: e.target.value })}
-                    className="w-full bg-[#09090b] border border-[#27272a] rounded-xl px-3 py-2 text-[#fafafa] focus:outline-none focus:border-amber-500 cursor-pointer"
+                    className="w-full bg-[#f1f5f9] border border-slate-200/90 rounded-xl px-3 py-2 text-slate-900 focus:outline-none focus:border-amber-500 cursor-pointer"
                   >
                     {branches.map(b => (
                       <option key={b} value={b}>{b}</option>
@@ -1717,11 +1717,11 @@ export const UserMemberModule: React.FC<UserMemberModuleProps> = ({
               </div>
 
               {/* Borrow Limit Policy & Unlimited Settings */}
-              <div className="bg-[#09090b] p-3.5 rounded-xl border border-amber-500/30 space-y-2.5">
+              <div className="bg-[#f1f5f9] p-3.5 rounded-xl border border-amber-500/30 space-y-2.5">
                 <div className="flex items-center justify-between">
                   <label className="text-amber-300 font-semibold flex items-center space-x-1.5">
                     <span>Borrow Limit Policy</span>
-                    <span className="text-[10px] text-zinc-400 font-normal">(Concurrent active checkouts)</span>
+                    <span className="text-[10px] text-slate-500 font-normal">(Concurrent active checkouts)</span>
                   </label>
                   <label className="flex items-center space-x-1.5 cursor-pointer">
                     <input
@@ -1745,7 +1745,7 @@ export const UserMemberModule: React.FC<UserMemberModuleProps> = ({
                     value={(editUserForm.maxBorrowLimit || 5) >= 9999 ? '' : (editUserForm.maxBorrowLimit || 5)}
                     placeholder={(editUserForm.maxBorrowLimit || 5) >= 9999 ? '∞ Unlimited' : '5'}
                     onChange={e => setEditUserForm({ ...editUserForm, maxBorrowLimit: Math.max(1, parseInt(e.target.value) || 1) })}
-                    className="flex-1 bg-[#121214] border border-[#27272a] rounded-xl px-3 py-2 text-[#fafafa] focus:outline-none focus:border-amber-500 disabled:opacity-50 disabled:bg-emerald-950/20 disabled:text-emerald-300 font-mono text-xs"
+                    className="flex-1 bg-white border border-slate-200/90 rounded-xl px-3 py-2 text-slate-900 focus:outline-none focus:border-amber-500 disabled:opacity-50 disabled:bg-emerald-950/20 disabled:text-emerald-300 font-mono text-xs"
                   />
                   <div className="flex items-center gap-1">
                     {[5, 10, 25, 50].map(qty => (
@@ -1756,7 +1756,7 @@ export const UserMemberModule: React.FC<UserMemberModuleProps> = ({
                         className={`px-2 py-1.5 rounded-lg border text-[10px] font-mono font-bold transition-all cursor-pointer ${
                           editUserForm.maxBorrowLimit === qty
                             ? 'bg-amber-600 border-amber-400 text-white'
-                            : 'bg-[#18181b] border-[#27272a] text-zinc-400 hover:text-white'
+                            : 'bg-slate-100 border-slate-200/90 text-slate-500 hover:text-white'
                         }`}
                       >
                         {qty}
@@ -1777,11 +1777,11 @@ export const UserMemberModule: React.FC<UserMemberModuleProps> = ({
                 </div>
               </div>
 
-              <div className="pt-3 border-t border-[#27272a] flex justify-end space-x-2">
+              <div className="pt-3 border-t border-slate-200/90 flex justify-end space-x-2">
                 <button
                   type="button"
                   onClick={() => setEditingUser(null)}
-                  className="px-4 py-2 rounded-xl bg-[#09090b] border border-[#27272a] text-[#a1a1aa] hover:text-white cursor-pointer"
+                  className="px-4 py-2 rounded-xl bg-[#f1f5f9] border border-slate-200/90 text-slate-500 hover:text-white cursor-pointer"
                 >
                   Cancel
                 </button>
@@ -1800,20 +1800,20 @@ export const UserMemberModule: React.FC<UserMemberModuleProps> = ({
       {/* Batch Add Members Modal (Unlimited Capacity Patron Ingestion) */}
       {isBatchModalOpen && (
         <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-[#121214] border border-[#27272a] rounded-2xl p-6 max-w-lg w-full space-y-4 shadow-2xl">
-            <div className="flex items-center justify-between border-b border-[#27272a] pb-3">
+          <div className="bg-white border border-slate-200/90 rounded-2xl p-6 max-w-lg w-full space-y-4 shadow-2xl">
+            <div className="flex items-center justify-between border-b border-slate-200/90 pb-3">
               <div className="flex items-center space-x-2.5">
                 <div className="p-2 rounded-xl bg-purple-500/10 border border-purple-500/30 text-purple-400">
                   <Users className="h-5 w-5" />
                 </div>
                 <div>
-                  <h3 className="text-base font-bold text-[#fafafa]">Batch Member Registration</h3>
+                  <h3 className="text-base font-bold text-slate-900">Batch Member Registration</h3>
                   <p className="text-xs text-purple-300">Unlimited capacity patron intake & high-volume accessioning</p>
                 </div>
               </div>
               <button
                 onClick={() => setIsBatchModalOpen(false)}
-                className="text-[#a1a1aa] hover:text-white cursor-pointer text-sm font-mono"
+                className="text-slate-500 hover:text-white cursor-pointer text-sm font-mono"
               >
                 ✕
               </button>
@@ -1822,22 +1822,22 @@ export const UserMemberModule: React.FC<UserMemberModuleProps> = ({
             <form onSubmit={handleBatchAddMembers} className="space-y-3.5 text-xs max-h-[80vh] overflow-y-auto pr-1">
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[#a1a1aa] mb-1 font-medium">Department Preset</label>
+                  <label className="block text-slate-500 mb-1 font-medium">Department Preset</label>
                   <input
                     type="text"
                     required
                     value={batchDept}
                     onChange={e => setBatchDept(e.target.value)}
                     placeholder="e.g. Computer Science / Business"
-                    className="w-full bg-[#09090b] border border-[#27272a] rounded-xl px-3 py-2 text-[#fafafa] focus:outline-none focus:border-purple-500"
+                    className="w-full bg-[#f1f5f9] border border-slate-200/90 rounded-xl px-3 py-2 text-slate-900 focus:outline-none focus:border-purple-500"
                   />
                 </div>
                 <div>
-                  <label className="block text-[#a1a1aa] mb-1 font-medium">Role Preset</label>
+                  <label className="block text-slate-500 mb-1 font-medium">Role Preset</label>
                   <select
                     value={batchRole}
                     onChange={e => setBatchRole(e.target.value as UserRole)}
-                    className="w-full bg-[#09090b] border border-[#27272a] rounded-xl px-3 py-2 text-[#fafafa] focus:outline-none focus:border-purple-500 cursor-pointer"
+                    className="w-full bg-[#f1f5f9] border border-slate-200/90 rounded-xl px-3 py-2 text-slate-900 focus:outline-none focus:border-purple-500 cursor-pointer"
                   >
                     <option value="STUDENT">Student</option>
                     <option value="FACULTY">Faculty Member</option>
@@ -1849,11 +1849,11 @@ export const UserMemberModule: React.FC<UserMemberModuleProps> = ({
               </div>
 
               <div>
-                <label className="block text-[#a1a1aa] mb-1 font-medium">Assigned Library Branch</label>
+                <label className="block text-slate-500 mb-1 font-medium">Assigned Library Branch</label>
                 <select
                   value={batchBranch}
                   onChange={e => setBatchBranch(e.target.value)}
-                  className="w-full bg-[#09090b] border border-[#27272a] rounded-xl px-3 py-2 text-[#fafafa] focus:outline-none focus:border-purple-500 cursor-pointer"
+                  className="w-full bg-[#f1f5f9] border border-slate-200/90 rounded-xl px-3 py-2 text-slate-900 focus:outline-none focus:border-purple-500 cursor-pointer"
                 >
                   {branches.map(b => (
                     <option key={b} value={b}>{b}</option>
@@ -1863,28 +1863,28 @@ export const UserMemberModule: React.FC<UserMemberModuleProps> = ({
 
               <div>
                 <div className="flex items-center justify-between mb-1">
-                  <label className="text-[#a1a1aa] font-medium">Paste Member Names (Optional, 1 per line)</label>
-                  <span className="text-[10px] text-zinc-400">Or use sequential generator below</span>
+                  <label className="text-slate-500 font-medium">Paste Member Names (Optional, 1 per line)</label>
+                  <span className="text-[10px] text-slate-500">Or use sequential generator below</span>
                 </div>
                 <textarea
                   rows={4}
                   value={batchNamesText}
                   onChange={e => setBatchNamesText(e.target.value)}
                   placeholder="Ali Ahmed&#10;Fatima Noor&#10;Muhammad Bilal&#10;Zainab Khan"
-                  className="w-full bg-[#09090b] border border-[#27272a] rounded-xl px-3 py-2 text-[#fafafa] focus:outline-none focus:border-purple-500 font-mono text-xs"
+                  className="w-full bg-[#f1f5f9] border border-slate-200/90 rounded-xl px-3 py-2 text-slate-900 focus:outline-none focus:border-purple-500 font-mono text-xs"
                 />
               </div>
 
               {!batchNamesText.trim() && (
                 <div>
-                  <label className="block text-[#a1a1aa] mb-1 font-medium">Count of Members to Auto-Generate</label>
+                  <label className="block text-slate-500 mb-1 font-medium">Count of Members to Auto-Generate</label>
                   <div className="flex items-center space-x-2">
                     <input
                       type="number"
                       min="1"
                       value={batchQuantity}
                       onChange={e => setBatchQuantity(Math.max(1, parseInt(e.target.value) || 1))}
-                      className="w-24 bg-[#09090b] border border-[#27272a] rounded-xl px-3 py-2 text-[#fafafa] focus:outline-none focus:border-purple-500 font-mono"
+                      className="w-24 bg-[#f1f5f9] border border-slate-200/90 rounded-xl px-3 py-2 text-slate-900 focus:outline-none focus:border-purple-500 font-mono"
                     />
                     <div className="flex items-center gap-1.5 flex-wrap">
                       {[5, 10, 25, 50, 100].map(cnt => (
@@ -1895,7 +1895,7 @@ export const UserMemberModule: React.FC<UserMemberModuleProps> = ({
                           className={`px-2.5 py-1.5 rounded-lg border text-xs font-mono font-bold transition-all cursor-pointer ${
                             batchQuantity === cnt
                               ? 'bg-purple-600 border-purple-400 text-white'
-                              : 'bg-[#18181b] border-[#27272a] text-zinc-400 hover:text-white'
+                              : 'bg-slate-100 border-slate-200/90 text-slate-500 hover:text-white'
                           }`}
                         >
                           +{cnt}
@@ -1913,7 +1913,7 @@ export const UserMemberModule: React.FC<UserMemberModuleProps> = ({
                     <Sparkles className="h-4 w-4 text-purple-400" />
                     <span>Unlimited Borrowing Privilege</span>
                   </div>
-                  <p className="text-[10px] text-zinc-400">Grant unlimited book checkouts (∞ uncapped) to all generated members</p>
+                  <p className="text-[10px] text-slate-500">Grant unlimited book checkouts (∞ uncapped) to all generated members</p>
                 </div>
                 <input
                   type="checkbox"
@@ -1923,11 +1923,11 @@ export const UserMemberModule: React.FC<UserMemberModuleProps> = ({
                 />
               </div>
 
-              <div className="pt-3 border-t border-[#27272a] flex justify-end space-x-2">
+              <div className="pt-3 border-t border-slate-200/90 flex justify-end space-x-2">
                 <button
                   type="button"
                   onClick={() => setIsBatchModalOpen(false)}
-                  className="px-4 py-2 rounded-xl bg-[#09090b] border border-[#27272a] text-[#a1a1aa] hover:text-white cursor-pointer"
+                  className="px-4 py-2 rounded-xl bg-[#f1f5f9] border border-slate-200/90 text-slate-500 hover:text-white cursor-pointer"
                 >
                   Cancel
                 </button>

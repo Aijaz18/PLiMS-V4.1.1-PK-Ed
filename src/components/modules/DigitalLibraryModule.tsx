@@ -168,13 +168,13 @@ export const DigitalLibraryModule: React.FC<DigitalLibraryModuleProps> = ({ asse
       )}
 
       {/* Repository Header & Action Bar */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#27272a] pb-5">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200/90 pb-5">
         <div>
-          <h2 className="text-xl font-bold text-[#fafafa] flex items-center space-x-2.5">
+          <h2 className="text-xl font-bold text-slate-900 flex items-center space-x-2.5">
             <GraduationCap className="h-6 w-6 text-indigo-400" />
             <span>Institutional Digital & Thesis Repository</span>
           </h2>
-          <p className="text-xs text-[#a1a1aa] mt-1">
+          <p className="text-xs text-slate-500 mt-1">
             Archiving university dissertations, scholarly research papers, peer-reviewed journals, and digital media with OCR full-text search capabilities
           </p>
         </div>
@@ -190,52 +190,52 @@ export const DigitalLibraryModule: React.FC<DigitalLibraryModuleProps> = ({ asse
 
       {/* Institutional Repository Stats Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <div className="p-3.5 rounded-xl border border-[#27272a] bg-[#121214] space-y-1">
-          <div className="flex items-center justify-between text-[#a1a1aa] text-[11px]">
+        <div className="p-3.5 rounded-xl border border-slate-200/90 bg-white space-y-1">
+          <div className="flex items-center justify-between text-slate-500 text-[11px]">
             <span>Total Digital Assets</span>
             <BookOpen className="h-3.5 w-3.5 text-indigo-400" />
           </div>
-          <div className="text-xl font-bold text-[#fafafa]">{assets.length}</div>
+          <div className="text-xl font-bold text-slate-900">{assets.length}</div>
           <div className="text-[10px] text-indigo-400 font-mono">Full-Text OCR Indexed</div>
         </div>
 
-        <div className="p-3.5 rounded-xl border border-[#27272a] bg-[#121214] space-y-1">
-          <div className="flex items-center justify-between text-[#a1a1aa] text-[11px]">
+        <div className="p-3.5 rounded-xl border border-slate-200/90 bg-white space-y-1">
+          <div className="flex items-center justify-between text-slate-500 text-[11px]">
             <span>Theses & Dissertations</span>
             <GraduationCap className="h-3.5 w-3.5 text-purple-400" />
           </div>
-          <div className="text-xl font-bold text-[#fafafa]">{totalTheses}</div>
+          <div className="text-xl font-bold text-slate-900">{totalTheses}</div>
           <div className="text-[10px] text-purple-400 font-mono">Ph.D. & M.S. Repository</div>
         </div>
 
-        <div className="p-3.5 rounded-xl border border-[#27272a] bg-[#121214] space-y-1">
-          <div className="flex items-center justify-between text-[#a1a1aa] text-[11px]">
+        <div className="p-3.5 rounded-xl border border-slate-200/90 bg-white space-y-1">
+          <div className="flex items-center justify-between text-slate-500 text-[11px]">
             <span>Open Access Papers</span>
             <Globe className="h-3.5 w-3.5 text-emerald-400" />
           </div>
-          <div className="text-xl font-bold text-[#fafafa]">{openAccessCount}</div>
+          <div className="text-xl font-bold text-slate-900">{openAccessCount}</div>
           <div className="text-[10px] text-emerald-400 font-mono">Public Downloadable</div>
         </div>
 
-        <div className="p-3.5 rounded-xl border border-[#27272a] bg-[#121214] space-y-1">
-          <div className="flex items-center justify-between text-[#a1a1aa] text-[11px]">
+        <div className="p-3.5 rounded-xl border border-slate-200/90 bg-white space-y-1">
+          <div className="flex items-center justify-between text-slate-500 text-[11px]">
             <span>Total Downloads</span>
             <Download className="h-3.5 w-3.5 text-blue-400" />
           </div>
-          <div className="text-xl font-bold text-[#fafafa]">{totalDownloads}</div>
+          <div className="text-xl font-bold text-slate-900">{totalDownloads}</div>
           <div className="text-[10px] text-blue-400 font-mono">Global Scholar Access</div>
         </div>
       </div>
 
       {/* Filter Tabs & Search Controls */}
-      <div className="p-4 rounded-2xl border border-[#27272a] bg-[#121214] space-y-3">
+      <div className="p-4 rounded-2xl border border-slate-200/90 bg-white space-y-3">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
           {/* Category Tabs */}
-          <div className="flex flex-wrap items-center gap-1.5 bg-[#09090b] p-1 rounded-xl border border-[#27272a]">
+          <div className="flex flex-wrap items-center gap-1.5 bg-[#f1f5f9] p-1 rounded-xl border border-slate-200/90">
             <button
               onClick={() => setSelectedCategoryTab('ALL')}
               className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
-                selectedCategoryTab === 'ALL' ? 'bg-indigo-600 text-white shadow' : 'text-[#a1a1aa] hover:text-white'
+                selectedCategoryTab === 'ALL' ? 'bg-indigo-600 text-white shadow' : 'text-slate-500 hover:text-white'
               }`}
             >
               All Assets ({assets.length})
@@ -243,7 +243,7 @@ export const DigitalLibraryModule: React.FC<DigitalLibraryModuleProps> = ({ asse
             <button
               onClick={() => setSelectedCategoryTab('THESES')}
               className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
-                selectedCategoryTab === 'THESES' ? 'bg-indigo-600 text-white shadow' : 'text-[#a1a1aa] hover:text-white'
+                selectedCategoryTab === 'THESES' ? 'bg-indigo-600 text-white shadow' : 'text-slate-500 hover:text-white'
               }`}
             >
               🎓 Theses & Dissertations
@@ -251,7 +251,7 @@ export const DigitalLibraryModule: React.FC<DigitalLibraryModuleProps> = ({ asse
             <button
               onClick={() => setSelectedCategoryTab('RESEARCH')}
               className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
-                selectedCategoryTab === 'RESEARCH' ? 'bg-indigo-600 text-white shadow' : 'text-[#a1a1aa] hover:text-white'
+                selectedCategoryTab === 'RESEARCH' ? 'bg-indigo-600 text-white shadow' : 'text-slate-500 hover:text-white'
               }`}
             >
               🔬 Research Journals & Papers
@@ -259,7 +259,7 @@ export const DigitalLibraryModule: React.FC<DigitalLibraryModuleProps> = ({ asse
             <button
               onClick={() => setSelectedCategoryTab('EBOOKS')}
               className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
-                selectedCategoryTab === 'EBOOKS' ? 'bg-indigo-600 text-white shadow' : 'text-[#a1a1aa] hover:text-white'
+                selectedCategoryTab === 'EBOOKS' ? 'bg-indigo-600 text-white shadow' : 'text-slate-500 hover:text-white'
               }`}
             >
               📚 E-Books & Reference
@@ -269,16 +269,16 @@ export const DigitalLibraryModule: React.FC<DigitalLibraryModuleProps> = ({ asse
           {/* Search & Access Filter */}
           <div className="flex items-center space-x-2.5">
             <div className="relative flex-1 sm:w-64">
-              <Search className="absolute left-3 top-2.5 h-3.5 w-3.5 text-[#a1a1aa]" />
+              <Search className="absolute left-3 top-2.5 h-3.5 w-3.5 text-slate-500" />
               <input
                 type="text"
                 placeholder="Search by title, scholar, DOI, department..."
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
-                className="w-full bg-[#09090b] border border-[#27272a] rounded-xl pl-9 pr-3 py-2 text-xs text-[#fafafa] placeholder-[#71717a] focus:outline-none focus:border-indigo-500"
+                className="w-full bg-[#f1f5f9] border border-slate-200/90 rounded-xl pl-9 pr-3 py-2 text-xs text-slate-900 placeholder-[#71717a] focus:outline-none focus:border-indigo-500"
               />
               {searchQuery && (
-                <button onClick={() => setSearchQuery('')} className="absolute right-2.5 top-2.5 text-[#a1a1aa] hover:text-white">
+                <button onClick={() => setSearchQuery('')} className="absolute right-2.5 top-2.5 text-slate-500 hover:text-white">
                   <X className="h-3.5 w-3.5" />
                 </button>
               )}
@@ -287,7 +287,7 @@ export const DigitalLibraryModule: React.FC<DigitalLibraryModuleProps> = ({ asse
             <select
               value={accessFilter}
               onChange={e => setAccessFilter(e.target.value)}
-              className="bg-[#09090b] border border-[#27272a] rounded-xl px-3 py-2 text-xs text-[#fafafa] focus:outline-none focus:border-indigo-500"
+              className="bg-[#f1f5f9] border border-slate-200/90 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-indigo-500"
             >
               <option value="ALL">All Access Types</option>
               <option value="OPEN">Open Access</option>
@@ -300,10 +300,10 @@ export const DigitalLibraryModule: React.FC<DigitalLibraryModuleProps> = ({ asse
 
       {/* Asset Repository Cards */}
       {filteredAssets.length === 0 ? (
-        <div className="p-12 text-center rounded-2xl border border-[#27272a] bg-[#121214] space-y-3">
+        <div className="p-12 text-center rounded-2xl border border-slate-200/90 bg-white space-y-3">
           <BookOpen className="h-10 w-10 text-[#52525b] mx-auto" />
-          <h3 className="text-sm font-bold text-[#fafafa]">No Repository Resources Found</h3>
-          <p className="text-xs text-[#a1a1aa]">Try adjusting your search keywords or deposit a new thesis using the button above.</p>
+          <h3 className="text-sm font-bold text-slate-900">No Repository Resources Found</h3>
+          <p className="text-xs text-slate-500">Try adjusting your search keywords or deposit a new thesis using the button above.</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -314,7 +314,7 @@ export const DigitalLibraryModule: React.FC<DigitalLibraryModuleProps> = ({ asse
             return (
               <div
                 key={a.id}
-                className="p-5 rounded-2xl border border-[#27272a] bg-[#121214] hover:border-indigo-500/40 transition-all space-y-3.5 flex flex-col justify-between shadow-sm hover:shadow-indigo-500/10"
+                className="p-5 rounded-2xl border border-slate-200/90 bg-white hover:border-indigo-500/40 transition-all space-y-3.5 flex flex-col justify-between shadow-sm hover:shadow-indigo-500/10"
               >
                 <div className="space-y-2">
                   {/* Category & Access Badges Header */}
@@ -328,7 +328,7 @@ export const DigitalLibraryModule: React.FC<DigitalLibraryModuleProps> = ({ asse
                         {a.fileType} • {a.fileSize}
                       </span>
 
-                      <span className="text-[10px] text-[#a1a1aa] bg-[#09090b] px-2 py-0.5 rounded border border-[#27272a]">
+                      <span className="text-[10px] text-slate-500 bg-[#f1f5f9] px-2 py-0.5 rounded border border-slate-200/90">
                         {a.category}
                       </span>
                     </div>
@@ -353,18 +353,18 @@ export const DigitalLibraryModule: React.FC<DigitalLibraryModuleProps> = ({ asse
                   </div>
 
                   {/* Resource Title */}
-                  <h3 className="font-bold text-[#fafafa] text-sm leading-snug hover:text-indigo-400 transition-colors">
+                  <h3 className="font-bold text-slate-900 text-sm leading-snug hover:text-indigo-400 transition-colors">
                     {a.title}
                   </h3>
 
                   {/* Scholar Author & Department info */}
-                  <div className="text-xs text-[#a1a1aa] space-y-0.5">
+                  <div className="text-xs text-slate-500 space-y-0.5">
                     <div className="flex items-center space-x-1 text-emerald-400 font-medium">
                       <span>By {a.author}</span>
-                      {a.year && <span className="text-[#71717a]">({a.year})</span>}
+                      {a.year && <span className="text-slate-400">({a.year})</span>}
                     </div>
                     {a.department && (
-                      <div className="text-[11px] text-[#71717a] flex items-center space-x-1">
+                      <div className="text-[11px] text-slate-400 flex items-center space-x-1">
                         <Building className="h-3 w-3 text-indigo-400" />
                         <span>{a.department}</span>
                       </div>
@@ -379,7 +379,7 @@ export const DigitalLibraryModule: React.FC<DigitalLibraryModuleProps> = ({ asse
                   {/* Abstract Section */}
                   {a.abstract && (
                     <div className="pt-1">
-                      <p className={`text-[11px] text-[#a1a1aa] leading-relaxed ${isExpanded ? '' : 'line-clamp-2'}`}>
+                      <p className={`text-[11px] text-slate-500 leading-relaxed ${isExpanded ? '' : 'line-clamp-2'}`}>
                         {a.abstract}
                       </p>
                       <button
@@ -395,7 +395,7 @@ export const DigitalLibraryModule: React.FC<DigitalLibraryModuleProps> = ({ asse
                   {a.keywords && a.keywords.length > 0 && (
                     <div className="flex flex-wrap gap-1 pt-1">
                       {a.keywords.map((kw, idx) => (
-                        <span key={idx} className="text-[9px] bg-[#09090b] text-[#a1a1aa] px-1.5 py-0.5 rounded border border-[#27272a] font-mono">
+                        <span key={idx} className="text-[9px] bg-[#f1f5f9] text-slate-500 px-1.5 py-0.5 rounded border border-slate-200/90 font-mono">
                           #{kw}
                         </span>
                       ))}
@@ -404,8 +404,8 @@ export const DigitalLibraryModule: React.FC<DigitalLibraryModuleProps> = ({ asse
                 </div>
 
                 {/* Footer Action Buttons */}
-                <div className="border-t border-[#27272a] pt-3 flex items-center justify-between gap-2">
-                  <div className="text-[10px] text-[#71717a] font-mono flex items-center space-x-1">
+                <div className="border-t border-slate-200/90 pt-3 flex items-center justify-between gap-2">
+                  <div className="text-[10px] text-slate-400 font-mono flex items-center space-x-1">
                     <Download className="h-3 w-3 text-blue-400" />
                     <span>{a.downloadsCount || 120} downloads</span>
                   </div>
@@ -413,7 +413,7 @@ export const DigitalLibraryModule: React.FC<DigitalLibraryModuleProps> = ({ asse
                   <div className="flex items-center space-x-2">
                     <button
                       onClick={() => setCitationAsset(a)}
-                      className="px-2.5 py-1.5 rounded-lg bg-[#09090b] hover:bg-[#18181b] border border-[#27272a] text-[#fafafa] text-xs font-semibold flex items-center space-x-1 cursor-pointer transition-all"
+                      className="px-2.5 py-1.5 rounded-lg bg-[#f1f5f9] hover:bg-slate-100 border border-slate-200/90 text-slate-900 text-xs font-semibold flex items-center space-x-1 cursor-pointer transition-all"
                       title="Generate Citation (APA / IEEE / MLA)"
                     >
                       <Share2 className="h-3.5 w-3.5 text-purple-400" />
@@ -422,7 +422,7 @@ export const DigitalLibraryModule: React.FC<DigitalLibraryModuleProps> = ({ asse
 
                     <button
                       onClick={() => setPreviewAsset(a)}
-                      className="px-2.5 py-1.5 rounded-lg bg-[#09090b] hover:bg-[#18181b] border border-[#27272a] text-[#fafafa] text-xs font-semibold flex items-center space-x-1 cursor-pointer transition-all"
+                      className="px-2.5 py-1.5 rounded-lg bg-[#f1f5f9] hover:bg-slate-100 border border-slate-200/90 text-slate-900 text-xs font-semibold flex items-center space-x-1 cursor-pointer transition-all"
                       title="Read Online Document Reader"
                     >
                       <Eye className="h-3.5 w-3.5 text-emerald-400" />
@@ -448,22 +448,22 @@ export const DigitalLibraryModule: React.FC<DigitalLibraryModuleProps> = ({ asse
       {/* DEPOSIT NEW RESOURCE MODAL */}
       {/* ========================================================= */}
       {isAddModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
-          <div className="bg-[#121214] border border-[#27272a] w-full max-w-2xl rounded-2xl shadow-2xl p-6 space-y-5 my-8">
-            <div className="flex items-center justify-between border-b border-[#27272a] pb-3">
+        <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+          <div className="bg-white border border-slate-200/90 w-full max-w-2xl rounded-2xl shadow-2xl p-6 space-y-5 my-8">
+            <div className="flex items-center justify-between border-b border-slate-200/90 pb-3">
               <div className="flex items-center space-x-2.5">
                 <div className="p-2 rounded-xl bg-indigo-500/10 border border-indigo-500/30 text-indigo-400">
                   <UploadCloud className="h-5 w-5" />
                 </div>
                 <div>
-                  <h3 className="font-bold text-base text-[#fafafa]">Deposit Thesis / Digital Resource</h3>
-                  <p className="text-xs text-[#a1a1aa]">Archive scholarly publications directly into PLiMS Institutional Repository</p>
+                  <h3 className="font-bold text-base text-slate-900">Deposit Thesis / Digital Resource</h3>
+                  <p className="text-xs text-slate-500">Archive scholarly publications directly into PLiMS Institutional Repository</p>
                 </div>
               </div>
 
               <button
                 onClick={() => setIsAddModalOpen(false)}
-                className="p-1.5 rounded-lg bg-[#09090b] text-[#a1a1aa] hover:text-white border border-[#27272a]"
+                className="p-1.5 rounded-lg bg-[#f1f5f9] text-slate-500 hover:text-white border border-slate-200/90"
               >
                 <X className="h-4 w-4" />
               </button>
@@ -472,46 +472,46 @@ export const DigitalLibraryModule: React.FC<DigitalLibraryModuleProps> = ({ asse
             <form onSubmit={handleDepositResource} className="space-y-4 text-xs">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1 sm:col-span-2">
-                  <label className="text-[#a1a1aa] font-medium">Resource Title *</label>
+                  <label className="text-slate-500 font-medium">Resource Title *</label>
                   <input
                     type="text"
                     required
                     placeholder="e.g. Next-Generation Neural Search Architectures for Academic Repositories"
                     value={newResourceForm.title}
                     onChange={e => setNewResourceForm({ ...newResourceForm, title: e.target.value })}
-                    className="w-full bg-[#09090b] border border-[#27272a] rounded-xl px-3 py-2 text-xs text-[#fafafa] focus:outline-none focus:border-indigo-500"
+                    className="w-full bg-[#f1f5f9] border border-slate-200/90 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-indigo-500"
                   />
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-[#a1a1aa] font-medium">Author / Scholar Name *</label>
+                  <label className="text-slate-500 font-medium">Author / Scholar Name *</label>
                   <input
                     type="text"
                     required
                     placeholder="e.g. Dr. Aijaz Akhter / Scholar Name"
                     value={newResourceForm.author}
                     onChange={e => setNewResourceForm({ ...newResourceForm, author: e.target.value })}
-                    className="w-full bg-[#09090b] border border-[#27272a] rounded-xl px-3 py-2 text-xs text-[#fafafa] focus:outline-none focus:border-indigo-500"
+                    className="w-full bg-[#f1f5f9] border border-slate-200/90 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-indigo-500"
                   />
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-[#a1a1aa] font-medium">Academic Department</label>
+                  <label className="text-slate-500 font-medium">Academic Department</label>
                   <input
                     type="text"
                     placeholder="e.g. Computer Science & LIS"
                     value={newResourceForm.department}
                     onChange={e => setNewResourceForm({ ...newResourceForm, department: e.target.value })}
-                    className="w-full bg-[#09090b] border border-[#27272a] rounded-xl px-3 py-2 text-xs text-[#fafafa] focus:outline-none focus:border-indigo-500"
+                    className="w-full bg-[#f1f5f9] border border-slate-200/90 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-indigo-500"
                   />
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-[#a1a1aa] font-medium">Repository Category</label>
+                  <label className="text-slate-500 font-medium">Repository Category</label>
                   <select
                     value={newResourceForm.category}
                     onChange={e => setNewResourceForm({ ...newResourceForm, category: e.target.value })}
-                    className="w-full bg-[#09090b] border border-[#27272a] rounded-xl px-3 py-2 text-xs text-[#fafafa] focus:outline-none focus:border-indigo-500"
+                    className="w-full bg-[#f1f5f9] border border-slate-200/90 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-indigo-500"
                   >
                     <option value="Doctoral Dissertation">Doctoral Dissertation (Ph.D.)</option>
                     <option value="Master's Thesis">Master's Thesis (M.S. / M.Phil)</option>
@@ -523,11 +523,11 @@ export const DigitalLibraryModule: React.FC<DigitalLibraryModuleProps> = ({ asse
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-[#a1a1aa] font-medium">File Document Format</label>
+                  <label className="text-slate-500 font-medium">File Document Format</label>
                   <select
                     value={newResourceForm.fileType}
                     onChange={e => setNewResourceForm({ ...newResourceForm, fileType: e.target.value, category: e.target.value === 'THESIS' ? 'Doctoral Dissertation' : newResourceForm.category })}
-                    className="w-full bg-[#09090b] border border-[#27272a] rounded-xl px-3 py-2 text-xs text-[#fafafa] focus:outline-none focus:border-indigo-500"
+                    className="w-full bg-[#f1f5f9] border border-slate-200/90 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-indigo-500"
                   >
                     <option value="THESIS">THESIS (Ph.D. / M.S. PDF)</option>
                     <option value="PDF">PDF Document</option>
@@ -539,11 +539,11 @@ export const DigitalLibraryModule: React.FC<DigitalLibraryModuleProps> = ({ asse
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-[#a1a1aa] font-medium">Access Permission Level</label>
+                  <label className="text-slate-500 font-medium">Access Permission Level</label>
                   <select
                     value={newResourceForm.accessLevel}
                     onChange={e => setNewResourceForm({ ...newResourceForm, accessLevel: e.target.value as any })}
-                    className="w-full bg-[#09090b] border border-[#27272a] rounded-xl px-3 py-2 text-xs text-[#fafafa] focus:outline-none focus:border-indigo-500"
+                    className="w-full bg-[#f1f5f9] border border-slate-200/90 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-indigo-500"
                   >
                     <option value="OPEN">🌐 Open Access (Public Global Download)</option>
                     <option value="STUDENT_ONLY">🎓 Students & University Members</option>
@@ -552,41 +552,41 @@ export const DigitalLibraryModule: React.FC<DigitalLibraryModuleProps> = ({ asse
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-[#a1a1aa] font-medium">DOI / Handle URL (Optional)</label>
+                  <label className="text-slate-500 font-medium">DOI / Handle URL (Optional)</label>
                   <input
                     type="text"
                     placeholder="e.g. 10.5281/zenodo.9876543"
                     value={newResourceForm.doi}
                     onChange={e => setNewResourceForm({ ...newResourceForm, doi: e.target.value })}
-                    className="w-full bg-[#09090b] border border-[#27272a] rounded-xl px-3 py-2 text-xs text-[#fafafa] focus:outline-none focus:border-indigo-500"
+                    className="w-full bg-[#f1f5f9] border border-slate-200/90 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-indigo-500"
                   />
                 </div>
 
                 <div className="space-y-1 sm:col-span-2">
-                  <label className="text-[#a1a1aa] font-medium">Abstract / Executive Summary</label>
+                  <label className="text-slate-500 font-medium">Abstract / Executive Summary</label>
                   <textarea
                     rows={3}
                     placeholder="Provide a scholarly abstract of the research thesis or paper..."
                     value={newResourceForm.abstract}
                     onChange={e => setNewResourceForm({ ...newResourceForm, abstract: e.target.value })}
-                    className="w-full bg-[#09090b] border border-[#27272a] rounded-xl px-3 py-2 text-xs text-[#fafafa] focus:outline-none focus:border-indigo-500"
+                    className="w-full bg-[#f1f5f9] border border-slate-200/90 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-indigo-500"
                   />
                 </div>
 
                 <div className="space-y-1 sm:col-span-2">
-                  <label className="text-[#a1a1aa] font-medium">Keywords (comma-separated)</label>
+                  <label className="text-slate-500 font-medium">Keywords (comma-separated)</label>
                   <input
                     type="text"
                     placeholder="e.g. Machine Learning, Information Retrieval, MARC21, DDC"
                     value={newResourceForm.keywords}
                     onChange={e => setNewResourceForm({ ...newResourceForm, keywords: e.target.value })}
-                    className="w-full bg-[#09090b] border border-[#27272a] rounded-xl px-3 py-2 text-xs text-[#fafafa] focus:outline-none focus:border-indigo-500"
+                    className="w-full bg-[#f1f5f9] border border-slate-200/90 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-indigo-500"
                   />
                 </div>
               </div>
 
               {/* Drag & Drop File Upload Area */}
-              <div className="border-2 border-dashed border-[#27272a] hover:border-indigo-500/50 rounded-xl p-4 text-center bg-[#09090b] transition-all">
+              <div className="border-2 border-dashed border-slate-200/90 hover:border-indigo-500/50 rounded-xl p-4 text-center bg-[#f1f5f9] transition-all">
                 <input
                   type="file"
                   id="thesis-file-upload"
@@ -604,7 +604,7 @@ export const DigitalLibraryModule: React.FC<DigitalLibraryModuleProps> = ({ asse
                 />
                 <label htmlFor="thesis-file-upload" className="cursor-pointer space-y-1.5 block">
                   <UploadCloud className="h-7 w-7 text-indigo-400 mx-auto" />
-                  <div className="text-xs font-semibold text-[#fafafa]">
+                  <div className="text-xs font-semibold text-slate-900">
                     {uploadedFileName ? (
                       <span className="text-emerald-400 flex items-center justify-center space-x-1">
                         <Check className="h-4 w-4" />
@@ -614,15 +614,15 @@ export const DigitalLibraryModule: React.FC<DigitalLibraryModuleProps> = ({ asse
                       <span>Click to select or drag PDF/EPUB document here</span>
                     )}
                   </div>
-                  <div className="text-[10px] text-[#71717a]">Supports PDF, EPUB, DOCX up to 100MB • Automatic OCR indexing</div>
+                  <div className="text-[10px] text-slate-400">Supports PDF, EPUB, DOCX up to 100MB • Automatic OCR indexing</div>
                 </label>
               </div>
 
-              <div className="pt-2 flex items-center justify-end space-x-3 border-t border-[#27272a]">
+              <div className="pt-2 flex items-center justify-end space-x-3 border-t border-slate-200/90">
                 <button
                   type="button"
                   onClick={() => setIsAddModalOpen(false)}
-                  className="px-4 py-2 rounded-xl bg-[#09090b] border border-[#27272a] text-xs text-[#a1a1aa] hover:text-white"
+                  className="px-4 py-2 rounded-xl bg-[#f1f5f9] border border-slate-200/90 text-xs text-slate-500 hover:text-white"
                 >
                   Cancel
                 </button>
@@ -644,15 +644,15 @@ export const DigitalLibraryModule: React.FC<DigitalLibraryModuleProps> = ({ asse
       {/* DOCUMENT PREVIEWER READER MODAL */}
       {/* ========================================================= */}
       {previewAsset && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-[#121214] border border-[#27272a] w-full max-w-4xl h-[85vh] rounded-2xl shadow-2xl flex flex-col overflow-hidden">
+        <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white border border-slate-200/90 w-full max-w-4xl h-[85vh] rounded-2xl shadow-2xl flex flex-col overflow-hidden">
             {/* Modal Header */}
-            <div className="px-6 py-3.5 border-b border-[#27272a] flex items-center justify-between bg-[#09090b]">
+            <div className="px-6 py-3.5 border-b border-slate-200/90 flex items-center justify-between bg-[#f1f5f9]">
               <div className="flex items-center space-x-3 overflow-hidden">
                 <FileText className="h-5 w-5 text-indigo-400 shrink-0" />
                 <div className="truncate">
-                  <h3 className="font-bold text-sm text-[#fafafa] truncate">{previewAsset.title}</h3>
-                  <div className="text-[11px] text-[#a1a1aa]">By {previewAsset.author} • {previewAsset.fileType}</div>
+                  <h3 className="font-bold text-sm text-slate-900 truncate">{previewAsset.title}</h3>
+                  <div className="text-[11px] text-slate-500">By {previewAsset.author} • {previewAsset.fileType}</div>
                 </div>
               </div>
 
@@ -667,7 +667,7 @@ export const DigitalLibraryModule: React.FC<DigitalLibraryModuleProps> = ({ asse
 
                 <button
                   onClick={() => setPreviewAsset(null)}
-                  className="p-1.5 rounded-lg bg-[#18181b] text-[#a1a1aa] hover:text-white"
+                  className="p-1.5 rounded-lg bg-slate-100 text-slate-500 hover:text-white"
                 >
                   <X className="h-4 w-4" />
                 </button>
@@ -675,7 +675,7 @@ export const DigitalLibraryModule: React.FC<DigitalLibraryModuleProps> = ({ asse
             </div>
 
             {/* Document Reader Simulated Viewport */}
-            <div className="flex-1 bg-[#18181b] p-6 overflow-y-auto space-y-6">
+            <div className="flex-1 bg-slate-100 p-6 overflow-y-auto space-y-6">
               <div className="max-w-2xl mx-auto bg-white text-slate-900 p-8 rounded-lg shadow-xl space-y-6 min-h-[600px]">
                 <div className="border-b border-slate-200 pb-4 text-center space-y-2">
                   <div className="text-[10px] font-mono tracking-widest text-indigo-600 uppercase font-bold">
@@ -711,22 +711,22 @@ export const DigitalLibraryModule: React.FC<DigitalLibraryModuleProps> = ({ asse
       {/* CITATION MODAL */}
       {/* ========================================================= */}
       {citationAsset && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-[#121214] border border-[#27272a] w-full max-w-lg rounded-2xl shadow-2xl p-6 space-y-4">
-            <div className="flex items-center justify-between border-b border-[#27272a] pb-3">
+        <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white border border-slate-200/90 w-full max-w-lg rounded-2xl shadow-2xl p-6 space-y-4">
+            <div className="flex items-center justify-between border-b border-slate-200/90 pb-3">
               <div className="flex items-center space-x-2">
                 <Share2 className="h-5 w-5 text-purple-400" />
-                <h3 className="font-bold text-sm text-[#fafafa]">Academic Citation Formats</h3>
+                <h3 className="font-bold text-sm text-slate-900">Academic Citation Formats</h3>
               </div>
-              <button onClick={() => setCitationAsset(null)} className="text-[#a1a1aa] hover:text-white">
+              <button onClick={() => setCitationAsset(null)} className="text-slate-500 hover:text-white">
                 <X className="h-4 w-4" />
               </button>
             </div>
 
             <div className="space-y-3 text-xs">
               {/* APA 7th */}
-              <div className="p-3 rounded-xl bg-[#09090b] border border-[#27272a] space-y-1">
-                <div className="flex items-center justify-between text-[#a1a1aa] font-semibold text-[11px]">
+              <div className="p-3 rounded-xl bg-[#f1f5f9] border border-slate-200/90 space-y-1">
+                <div className="flex items-center justify-between text-slate-500 font-semibold text-[11px]">
                   <span>APA 7th Edition</span>
                   <button
                     onClick={() =>
@@ -741,14 +741,14 @@ export const DigitalLibraryModule: React.FC<DigitalLibraryModuleProps> = ({ asse
                     <span>{copiedCitationFormat === 'APA' ? 'Copied!' : 'Copy'}</span>
                   </button>
                 </div>
-                <p className="font-mono text-[11px] text-[#fafafa] leading-relaxed">
+                <p className="font-mono text-[11px] text-slate-900 leading-relaxed">
                   {citationAsset.author}. ({citationAsset.year || 2024}). <em>{citationAsset.title}</em>. PLiMS Institutional Repository.
                 </p>
               </div>
 
               {/* IEEE */}
-              <div className="p-3 rounded-xl bg-[#09090b] border border-[#27272a] space-y-1">
-                <div className="flex items-center justify-between text-[#a1a1aa] font-semibold text-[11px]">
+              <div className="p-3 rounded-xl bg-[#f1f5f9] border border-slate-200/90 space-y-1">
+                <div className="flex items-center justify-between text-slate-500 font-semibold text-[11px]">
                   <span>IEEE Standard</span>
                   <button
                     onClick={() =>
@@ -763,7 +763,7 @@ export const DigitalLibraryModule: React.FC<DigitalLibraryModuleProps> = ({ asse
                     <span>{copiedCitationFormat === 'IEEE' ? 'Copied!' : 'Copy'}</span>
                   </button>
                 </div>
-                <p className="font-mono text-[11px] text-[#fafafa] leading-relaxed">
+                <p className="font-mono text-[11px] text-slate-900 leading-relaxed">
                   {citationAsset.author}, "{citationAsset.title}," PLiMS Institutional Repository, {citationAsset.year || 2024}.
                 </p>
               </div>

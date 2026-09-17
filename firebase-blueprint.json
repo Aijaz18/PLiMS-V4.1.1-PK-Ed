@@ -1,0 +1,52 @@
+{
+  "entities": {
+    "users": {
+      "title": "User Profiles",
+      "description": "Library members, faculty, students, and librarians",
+      "fields": {
+        "id": { "type": "string", "description": "Unique user or Firebase UID" },
+        "name": { "type": "string", "description": "Full name" },
+        "email": { "type": "string", "description": "User email address" },
+        "role": { "type": "string", "description": "Role in the library system" },
+        "memberCode": { "type": "string", "description": "Institutional membership code" },
+        "status": { "type": "string", "description": "Active or suspended status" },
+        "authProvider": { "type": "string", "description": "Authentication provider (GOOGLE or LOCAL)" },
+        "googleSub": { "type": "string", "description": "Google Subject identifier" },
+        "createdAt": { "type": "string", "description": "Timestamp ISO" }
+      }
+    },
+    "books": {
+      "title": "Library Catalog Records",
+      "description": "Bibliographic MARC21 records",
+      "fields": {
+        "id": { "type": "string", "description": "Unique book identifier" },
+        "title": { "type": "string", "description": "Book title" },
+        "isbn": { "type": "string", "description": "ISBN code" },
+        "authors": { "type": "array", "description": "List of authors" },
+        "edition": { "type": "string", "description": "Book edition" },
+        "copiesTotal": { "type": "number", "description": "Total physical copies" }
+      }
+    },
+    "copies": {
+      "title": "Book Copies",
+      "description": "Physical copy items with accession barcodes",
+      "fields": {
+        "id": { "type": "string", "description": "Unique copy identifier" },
+        "accessionNumber": { "type": "string", "description": "Accession number" },
+        "bookId": { "type": "string", "description": "Parent book ID" },
+        "status": { "type": "string", "description": "Circulation status" }
+      }
+    },
+    "transactions": {
+      "title": "Circulation Transactions",
+      "description": "Circulation issue, return, and renewal transactions",
+      "fields": {
+        "id": { "type": "string", "description": "Unique transaction ID" },
+        "bookId": { "type": "string", "description": "Book ID" },
+        "userId": { "type": "string", "description": "Member ID" },
+        "type": { "type": "string", "description": "ISSUE, RETURN, or RENEW" },
+        "status": { "type": "string", "description": "Transaction status" }
+      }
+    }
+  }
+}

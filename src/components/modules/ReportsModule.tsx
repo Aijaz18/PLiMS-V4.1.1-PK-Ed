@@ -156,13 +156,13 @@ export const ReportsModule: React.FC<ReportsModuleProps> = ({
       )}
 
       {/* Header & Main Download Export Action Bar */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#27272a] pb-5">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200/90 pb-5">
         <div>
-          <h2 className="text-xl font-bold text-[#fafafa] flex items-center space-x-2.5">
+          <h2 className="text-xl font-bold text-slate-900 flex items-center space-x-2.5">
             <BarChart3 className="h-6 w-6 text-blue-400" />
             <span>Analytics & MIS Reports</span>
           </h2>
-          <p className="text-xs text-[#a1a1aa] mt-1">
+          <p className="text-xs text-slate-500 mt-1">
             Real-time circulation velocity, accession inventory counts, patron demographic reports, and fine audit trail
           </p>
         </div>
@@ -171,7 +171,7 @@ export const ReportsModule: React.FC<ReportsModuleProps> = ({
         <div className="flex flex-wrap items-center gap-2.5 shrink-0">
           <button
             onClick={handlePrintPdfReport}
-            className="px-3.5 py-2 rounded-xl bg-[#121214] hover:bg-[#18181b] border border-[#27272a] text-[#fafafa] text-xs font-semibold flex items-center space-x-1.5 cursor-pointer transition-all shadow-sm"
+            className="px-3.5 py-2 rounded-xl bg-white hover:bg-slate-100 border border-slate-200/90 text-slate-900 text-xs font-semibold flex items-center space-x-1.5 cursor-pointer transition-all shadow-sm"
             title="Print or Save as PDF Summary"
           >
             <Printer className="h-4 w-4 text-purple-400" />
@@ -190,70 +190,70 @@ export const ReportsModule: React.FC<ReportsModuleProps> = ({
 
       {/* High-Level MIS Key Metrics Grid */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-        <div className="p-3.5 rounded-xl border border-[#27272a] bg-[#121214] space-y-1">
-          <div className="flex items-center justify-between text-[#a1a1aa] text-[11px]">
+        <div className="p-3.5 rounded-xl border border-slate-200/90 bg-white space-y-1">
+          <div className="flex items-center justify-between text-slate-500 text-[11px]">
             <span>Total Titles</span>
             <BookOpen className="h-3.5 w-3.5 text-blue-400" />
           </div>
-          <div className="text-xl font-bold text-[#fafafa]">{totalBooksCount}</div>
+          <div className="text-xl font-bold text-slate-900">{totalBooksCount}</div>
           <div className="text-[10px] text-emerald-400 font-mono">MARC21 Cataloged</div>
         </div>
 
-        <div className="p-3.5 rounded-xl border border-[#27272a] bg-[#121214] space-y-1">
-          <div className="flex items-center justify-between text-[#a1a1aa] text-[11px]">
+        <div className="p-3.5 rounded-xl border border-slate-200/90 bg-white space-y-1">
+          <div className="flex items-center justify-between text-slate-500 text-[11px]">
             <span>Accession Copies</span>
             <BookMarked className="h-3.5 w-3.5 text-indigo-400" />
           </div>
-          <div className="text-xl font-bold text-[#fafafa]">{totalCopiesCount}</div>
+          <div className="text-xl font-bold text-slate-900">{totalCopiesCount}</div>
           <div className="text-[10px] text-indigo-400 font-mono">Barcode & RFID</div>
         </div>
 
-        <div className="p-3.5 rounded-xl border border-[#27272a] bg-[#121214] space-y-1">
-          <div className="flex items-center justify-between text-[#a1a1aa] text-[11px]">
+        <div className="p-3.5 rounded-xl border border-slate-200/90 bg-white space-y-1">
+          <div className="flex items-center justify-between text-slate-500 text-[11px]">
             <span>Active Loans</span>
             <Clock className="h-3.5 w-3.5 text-emerald-400" />
           </div>
-          <div className="text-xl font-bold text-[#fafafa]">{activeLoansCount}</div>
+          <div className="text-xl font-bold text-slate-900">{activeLoansCount}</div>
           <div className="text-[10px] text-emerald-400 font-mono">In Patron Possession</div>
         </div>
 
-        <div className="p-3.5 rounded-xl border border-[#27272a] bg-[#121214] space-y-1">
-          <div className="flex items-center justify-between text-[#a1a1aa] text-[11px]">
+        <div className="p-3.5 rounded-xl border border-slate-200/90 bg-white space-y-1">
+          <div className="flex items-center justify-between text-slate-500 text-[11px]">
             <span>Overdue Notices</span>
             <TrendingUp className="h-3.5 w-3.5 text-amber-400" />
           </div>
-          <div className="text-xl font-bold text-[#fafafa]">{overdueCount}</div>
+          <div className="text-xl font-bold text-slate-900">{overdueCount}</div>
           <div className="text-[10px] text-red-400 font-mono">Fine Penalty Active</div>
         </div>
 
-        <div className="p-3.5 rounded-xl border border-[#27272a] bg-[#121214] space-y-1">
-          <div className="flex items-center justify-between text-[#a1a1aa] text-[11px]">
+        <div className="p-3.5 rounded-xl border border-slate-200/90 bg-white space-y-1">
+          <div className="flex items-center justify-between text-slate-500 text-[11px]">
             <span>Registered Patrons</span>
             <Users className="h-3.5 w-3.5 text-purple-400" />
           </div>
-          <div className="text-xl font-bold text-[#fafafa]">{users.length}</div>
+          <div className="text-xl font-bold text-slate-900">{users.length}</div>
           <div className="text-[10px] text-purple-400 font-mono">Students & Faculty</div>
         </div>
 
-        <div className="p-3.5 rounded-xl border border-[#27272a] bg-[#121214] space-y-1">
-          <div className="flex items-center justify-between text-[#a1a1aa] text-[11px]">
+        <div className="p-3.5 rounded-xl border border-slate-200/90 bg-white space-y-1">
+          <div className="flex items-center justify-between text-slate-500 text-[11px]">
             <span>Total Fines (PKR)</span>
             <DollarSign className="h-3.5 w-3.5 text-amber-400" />
           </div>
-          <div className="text-xl font-bold text-[#fafafa]">PKR {totalFinesAmount}</div>
+          <div className="text-xl font-bold text-slate-900">PKR {totalFinesAmount}</div>
           <div className="text-[10px] text-amber-400 font-mono">Audit Synced</div>
         </div>
       </div>
 
       {/* Module Specific Download Bar & Category Navigation */}
-      <div className="p-4 rounded-2xl border border-[#27272a] bg-[#121214] space-y-3">
+      <div className="p-4 rounded-2xl border border-slate-200/90 bg-white space-y-3">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
           {/* Tab Navigation */}
-          <div className="flex flex-wrap items-center gap-1.5 bg-[#09090b] p-1 rounded-xl border border-[#27272a]">
+          <div className="flex flex-wrap items-center gap-1.5 bg-[#f1f5f9] p-1 rounded-xl border border-slate-200/90">
             <button
               onClick={() => setActiveReportTab('CIRCULATION')}
               className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
-                activeReportTab === 'CIRCULATION' ? 'bg-blue-600 text-white shadow' : 'text-[#a1a1aa] hover:text-white'
+                activeReportTab === 'CIRCULATION' ? 'bg-blue-600 text-white shadow' : 'text-slate-500 hover:text-white'
               }`}
             >
               🔄 Circulation Velocity
@@ -261,7 +261,7 @@ export const ReportsModule: React.FC<ReportsModuleProps> = ({
             <button
               onClick={() => setActiveReportTab('CATALOG')}
               className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
-                activeReportTab === 'CATALOG' ? 'bg-blue-600 text-white shadow' : 'text-[#a1a1aa] hover:text-white'
+                activeReportTab === 'CATALOG' ? 'bg-blue-600 text-white shadow' : 'text-slate-500 hover:text-white'
               }`}
             >
               📚 Catalog & Inventory
@@ -269,7 +269,7 @@ export const ReportsModule: React.FC<ReportsModuleProps> = ({
             <button
               onClick={() => setActiveReportTab('PATRONS')}
               className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
-                activeReportTab === 'PATRONS' ? 'bg-blue-600 text-white shadow' : 'text-[#a1a1aa] hover:text-white'
+                activeReportTab === 'PATRONS' ? 'bg-blue-600 text-white shadow' : 'text-slate-500 hover:text-white'
               }`}
             >
               🎓 Patron Demographics
@@ -277,7 +277,7 @@ export const ReportsModule: React.FC<ReportsModuleProps> = ({
             <button
               onClick={() => setActiveReportTab('FINES')}
               className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
-                activeReportTab === 'FINES' ? 'bg-blue-600 text-white shadow' : 'text-[#a1a1aa] hover:text-white'
+                activeReportTab === 'FINES' ? 'bg-blue-600 text-white shadow' : 'text-slate-500 hover:text-white'
               }`}
             >
               💰 Financial & Fine Audit
@@ -321,11 +321,11 @@ export const ReportsModule: React.FC<ReportsModuleProps> = ({
 
       {/* Detailed Report View Body */}
       {activeReportTab === 'CIRCULATION' && (
-        <div className="p-5 rounded-2xl border border-[#27272a] bg-[#121214] space-y-4">
-          <div className="flex items-center justify-between border-b border-[#27272a] pb-3">
+        <div className="p-5 rounded-2xl border border-slate-200/90 bg-white space-y-4">
+          <div className="flex items-center justify-between border-b border-slate-200/90 pb-3">
             <div>
-              <h3 className="font-bold text-sm text-[#fafafa]">Circulation Log & Transaction History</h3>
-              <p className="text-xs text-[#a1a1aa]">Detailed breakdown of all issue, return, and overdue transactions</p>
+              <h3 className="font-bold text-sm text-slate-900">Circulation Log & Transaction History</h3>
+              <p className="text-xs text-slate-500">Detailed breakdown of all issue, return, and overdue transactions</p>
             </div>
             <button
               onClick={handleDownloadCirculationReport}
@@ -339,7 +339,7 @@ export const ReportsModule: React.FC<ReportsModuleProps> = ({
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse text-xs">
               <thead>
-                <tr className="border-b border-[#27272a] text-[#a1a1aa] font-semibold bg-[#09090b]">
+                <tr className="border-b border-slate-200/90 text-slate-500 font-semibold bg-[#f1f5f9]">
                   <th className="py-2.5 px-3">Transaction ID</th>
                   <th className="py-2.5 px-3">Barcode</th>
                   <th className="py-2.5 px-3">Book Title</th>
@@ -350,20 +350,20 @@ export const ReportsModule: React.FC<ReportsModuleProps> = ({
                   <th className="py-2.5 px-3">Fine (PKR)</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#27272a]">
+              <tbody className="divide-y divide-slate-100">
                 {transactions.length === 0 ? (
                   <tr>
-                    <td colSpan={8} className="py-6 text-center text-[#a1a1aa]">
+                    <td colSpan={8} className="py-6 text-center text-slate-500">
                       No circulation transactions available.
                     </td>
                   </tr>
                 ) : (
                   transactions.map(t => (
-                    <tr key={t.id} className="hover:bg-[#18181b] transition-colors">
+                    <tr key={t.id} className="hover:bg-slate-100 transition-colors">
                       <td className="py-2.5 px-3 font-mono text-blue-400">{t.id}</td>
                       <td className="py-2.5 px-3 font-mono">{t.copyBarcode || 'N/A'}</td>
-                      <td className="py-2.5 px-3 font-medium text-[#fafafa]">{t.bookTitle || 'Bibliographic Record'}</td>
-                      <td className="py-2.5 px-3 text-[#a1a1aa]">{t.memberName || t.memberId || 'N/A'}</td>
+                      <td className="py-2.5 px-3 font-medium text-slate-900">{t.bookTitle || 'Bibliographic Record'}</td>
+                      <td className="py-2.5 px-3 text-slate-500">{t.memberName || t.memberId || 'N/A'}</td>
                       <td className="py-2.5 px-3">{t.issueDate}</td>
                       <td className="py-2.5 px-3">{t.dueDate}</td>
                       <td className="py-2.5 px-3">
@@ -388,11 +388,11 @@ export const ReportsModule: React.FC<ReportsModuleProps> = ({
       )}
 
       {activeReportTab === 'CATALOG' && (
-        <div className="p-5 rounded-2xl border border-[#27272a] bg-[#121214] space-y-4">
-          <div className="flex items-center justify-between border-b border-[#27272a] pb-3">
+        <div className="p-5 rounded-2xl border border-slate-200/90 bg-white space-y-4">
+          <div className="flex items-center justify-between border-b border-slate-200/90 pb-3">
             <div>
-              <h3 className="font-bold text-sm text-[#fafafa]">Bibliographic Catalog & Holdings Inventory</h3>
-              <p className="text-xs text-[#a1a1aa]">Summary of total book titles, department distribution, and total copies</p>
+              <h3 className="font-bold text-sm text-slate-900">Bibliographic Catalog & Holdings Inventory</h3>
+              <p className="text-xs text-slate-500">Summary of total book titles, department distribution, and total copies</p>
             </div>
             <button
               onClick={handleDownloadCatalogReport}
@@ -406,7 +406,7 @@ export const ReportsModule: React.FC<ReportsModuleProps> = ({
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse text-xs">
               <thead>
-                <tr className="border-b border-[#27272a] text-[#a1a1aa] font-semibold bg-[#09090b]">
+                <tr className="border-b border-slate-200/90 text-slate-500 font-semibold bg-[#f1f5f9]">
                   <th className="py-2.5 px-3">ISBN</th>
                   <th className="py-2.5 px-3">Title</th>
                   <th className="py-2.5 px-3">Author(s)</th>
@@ -416,16 +416,16 @@ export const ReportsModule: React.FC<ReportsModuleProps> = ({
                   <th className="py-2.5 px-3">Total Copies</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#27272a]">
+              <tbody className="divide-y divide-slate-100">
                 {books.map(b => (
-                  <tr key={b.id} className="hover:bg-[#18181b] transition-colors">
+                  <tr key={b.id} className="hover:bg-slate-100 transition-colors">
                     <td className="py-2.5 px-3 font-mono text-xs">{b.isbn}</td>
-                    <td className="py-2.5 px-3 font-bold text-[#fafafa]">{b.title}</td>
-                    <td className="py-2.5 px-3 text-[#a1a1aa]">{Array.isArray(b.authors) ? b.authors.join(', ') : b.authors}</td>
+                    <td className="py-2.5 px-3 font-bold text-slate-900">{b.title}</td>
+                    <td className="py-2.5 px-3 text-slate-500">{Array.isArray(b.authors) ? b.authors.join(', ') : b.authors}</td>
                     <td className="py-2.5 px-3 text-indigo-400">{b.department}</td>
-                    <td className="py-2.5 px-3 font-mono text-[#a1a1aa]">{b.callNumber}</td>
-                    <td className="py-2.5 px-3 text-[#71717a]">{b.publisherName || 'Addison-Wesley'}</td>
-                    <td className="py-2.5 px-3 font-bold text-[#fafafa]">{b.totalCopies}</td>
+                    <td className="py-2.5 px-3 font-mono text-slate-500">{b.callNumber}</td>
+                    <td className="py-2.5 px-3 text-slate-400">{b.publisherName || 'Addison-Wesley'}</td>
+                    <td className="py-2.5 px-3 font-bold text-slate-900">{b.totalCopies}</td>
                   </tr>
                 ))}
               </tbody>
@@ -435,11 +435,11 @@ export const ReportsModule: React.FC<ReportsModuleProps> = ({
       )}
 
       {(activeReportTab === 'PATRONS' || activeReportTab === 'FINES') && (
-        <div className="p-5 rounded-2xl border border-[#27272a] bg-[#121214] space-y-4">
-          <div className="flex items-center justify-between border-b border-[#27272a] pb-3">
+        <div className="p-5 rounded-2xl border border-slate-200/90 bg-white space-y-4">
+          <div className="flex items-center justify-between border-b border-slate-200/90 pb-3">
             <div>
-              <h3 className="font-bold text-sm text-[#fafafa]">Patron Profiles & Fine Audit Trail</h3>
-              <p className="text-xs text-[#a1a1aa]">Registered library patrons, membership statuses, and overdue fine ledgers</p>
+              <h3 className="font-bold text-sm text-slate-900">Patron Profiles & Fine Audit Trail</h3>
+              <p className="text-xs text-slate-500">Registered library patrons, membership statuses, and overdue fine ledgers</p>
             </div>
             <button
               onClick={handleDownloadPatronFinesReport}
@@ -453,7 +453,7 @@ export const ReportsModule: React.FC<ReportsModuleProps> = ({
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse text-xs">
               <thead>
-                <tr className="border-b border-[#27272a] text-[#a1a1aa] font-semibold bg-[#09090b]">
+                <tr className="border-b border-slate-200/90 text-slate-500 font-semibold bg-[#f1f5f9]">
                   <th className="py-2.5 px-3">Member ID</th>
                   <th className="py-2.5 px-3">Full Name</th>
                   <th className="py-2.5 px-3">Department</th>
@@ -462,14 +462,14 @@ export const ReportsModule: React.FC<ReportsModuleProps> = ({
                   <th className="py-2.5 px-3">Outstanding Fine</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#27272a]">
+              <tbody className="divide-y divide-slate-100">
                 {users.map(u => (
-                  <tr key={u.id} className="hover:bg-[#18181b] transition-colors">
+                  <tr key={u.id} className="hover:bg-slate-100 transition-colors">
                     <td className="py-2.5 px-3 font-mono text-purple-400">{u.id}</td>
-                    <td className="py-2.5 px-3 font-bold text-[#fafafa]">{u.name}</td>
-                    <td className="py-2.5 px-3 text-[#a1a1aa]">{u.department || 'General'}</td>
+                    <td className="py-2.5 px-3 font-bold text-slate-900">{u.name}</td>
+                    <td className="py-2.5 px-3 text-slate-500">{u.department || 'General'}</td>
                     <td className="py-2.5 px-3">
-                      <span className="px-2 py-0.5 rounded bg-[#09090b] border border-[#27272a] font-mono text-[10px]">
+                      <span className="px-2 py-0.5 rounded bg-[#f1f5f9] border border-slate-200/90 font-mono text-[10px]">
                         {u.role}
                       </span>
                     </td>

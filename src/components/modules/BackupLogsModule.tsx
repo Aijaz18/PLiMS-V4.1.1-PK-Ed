@@ -135,13 +135,13 @@ export const BackupLogsModule: React.FC<BackupLogsModuleProps> = ({
   return (
     <div className="space-y-6">
       {/* Top Banner */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-5 rounded-2xl bg-gradient-to-r from-[#121214] via-[#18181b] to-[#121214] border border-[#27272a] shadow-lg">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-5 rounded-2xl bg-gradient-to-r from-[#121214] via-[#18181b] to-[#121214] border border-slate-200/90 shadow-lg">
         <div>
           <div className="flex items-center space-x-2">
             <HardDrive className="h-6 w-6 text-purple-400" />
-            <h2 className="text-xl font-bold text-[#fafafa]">System Backup & Audit Logging Vault</h2>
+            <h2 className="text-xl font-bold text-slate-900">System Backup & Audit Logging Vault</h2>
           </div>
-          <p className="text-xs text-[#a1a1aa] mt-1">
+          <p className="text-xs text-slate-500 mt-1">
             Open Source PostgreSQL Backup / Restore & ISO Real-Time Security Audit Logs
           </p>
         </div>
@@ -156,13 +156,13 @@ export const BackupLogsModule: React.FC<BackupLogsModuleProps> = ({
       </div>
 
       {/* Tabs Navigation */}
-      <div className="flex items-center space-x-2 border-b border-[#27272a] pb-3">
+      <div className="flex items-center space-x-2 border-b border-slate-200/90 pb-3">
         <button
           onClick={() => setActiveTab('BACKUP')}
           className={`px-4 py-2 rounded-xl text-xs font-semibold flex items-center space-x-2 transition-all cursor-pointer ${
             activeTab === 'BACKUP'
               ? 'bg-purple-600 text-white shadow-md'
-              : 'bg-[#121214] border border-[#27272a] text-[#a1a1aa] hover:text-[#fafafa]'
+              : 'bg-white border border-slate-200/90 text-slate-500 hover:text-slate-900'
           }`}
         >
           <HardDrive className="h-4 w-4" />
@@ -174,7 +174,7 @@ export const BackupLogsModule: React.FC<BackupLogsModuleProps> = ({
           className={`px-4 py-2 rounded-xl text-xs font-semibold flex items-center space-x-2 transition-all cursor-pointer ${
             activeTab === 'AUDIT_LOGS'
               ? 'bg-blue-600 text-white shadow-md'
-              : 'bg-[#121214] border border-[#27272a] text-[#a1a1aa] hover:text-[#fafafa]'
+              : 'bg-white border border-slate-200/90 text-slate-500 hover:text-slate-900'
           }`}
         >
           <History className="h-4 w-4" />
@@ -186,7 +186,7 @@ export const BackupLogsModule: React.FC<BackupLogsModuleProps> = ({
           className={`px-4 py-2 rounded-xl text-xs font-semibold flex items-center space-x-2 transition-all cursor-pointer ${
             activeTab === 'AUTO_SCHEDULE'
               ? 'bg-emerald-600 text-white shadow-md'
-              : 'bg-[#121214] border border-[#27272a] text-[#a1a1aa] hover:text-[#fafafa]'
+              : 'bg-white border border-slate-200/90 text-slate-500 hover:text-slate-900'
           }`}
         >
           <Calendar className="h-4 w-4" />
@@ -198,28 +198,28 @@ export const BackupLogsModule: React.FC<BackupLogsModuleProps> = ({
       {activeTab === 'BACKUP' && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Snapshot Creation */}
-          <div className="p-6 rounded-2xl border border-[#27272a] bg-[#121214] space-y-4">
-            <h3 className="text-sm font-bold text-[#fafafa] flex items-center space-x-2">
+          <div className="p-6 rounded-2xl border border-slate-200/90 bg-white space-y-4">
+            <h3 className="text-sm font-bold text-slate-900 flex items-center space-x-2">
               <Database className="h-4 w-4 text-purple-400" />
               <span>Full Database & File Store Snapshot</span>
             </h3>
 
-            <div className="bg-[#09090b] p-4 rounded-xl border border-[#27272a] space-y-2 text-xs font-mono">
-              <div className="flex justify-between text-[#a1a1aa]">
+            <div className="bg-[#f1f5f9] p-4 rounded-xl border border-slate-200/90 space-y-2 text-xs font-mono">
+              <div className="flex justify-between text-slate-500">
                 <span>Last Snapshot Time:</span>
                 <span className="text-emerald-400 font-bold">{lastBackupTime}</span>
               </div>
-              <div className="flex justify-between text-[#a1a1aa]">
+              <div className="flex justify-between text-slate-500">
                 <span>Target Relational DB:</span>
                 <span className="text-blue-400">PostgreSQL (PLiMS Node)</span>
               </div>
-              <div className="flex justify-between text-[#a1a1aa]">
+              <div className="flex justify-between text-slate-500">
                 <span>Status:</span>
                 <span className="text-emerald-400">✓ Healthy & Synchronized</span>
               </div>
             </div>
 
-            <p className="text-xs text-[#a1a1aa] leading-relaxed">
+            <p className="text-xs text-slate-500 leading-relaxed">
               Creates a complete, encrypted JSON state archive containing all Bibliographic records, MARC tags,
               patron directory profiles, circulation transaction histories, and system settings.
             </p>
@@ -234,8 +234,8 @@ export const BackupLogsModule: React.FC<BackupLogsModuleProps> = ({
           </div>
 
           {/* Restore Backup */}
-          <div className="p-6 rounded-2xl border border-[#27272a] bg-[#121214] space-y-4">
-            <h3 className="text-sm font-bold text-[#fafafa] flex items-center space-x-2">
+          <div className="p-6 rounded-2xl border border-slate-200/90 bg-white space-y-4">
+            <h3 className="text-sm font-bold text-slate-900 flex items-center space-x-2">
               <Upload className="h-4 w-4 text-emerald-400" />
               <span>Restore Database Snapshot</span>
             </h3>
@@ -250,9 +250,9 @@ export const BackupLogsModule: React.FC<BackupLogsModuleProps> = ({
               </p>
             </div>
 
-            <div className="border-2 border-dashed border-[#27272a] rounded-xl p-6 text-center space-y-2 bg-[#09090b]">
-              <Upload className="h-8 w-8 text-[#a1a1aa] mx-auto" />
-              <div className="text-xs font-bold text-[#fafafa]">Select PLiMS Backup Archive (.json)</div>
+            <div className="border-2 border-dashed border-slate-200/90 rounded-xl p-6 text-center space-y-2 bg-[#f1f5f9]">
+              <Upload className="h-8 w-8 text-slate-500 mx-auto" />
+              <div className="text-xs font-bold text-slate-900">Select PLiMS Backup Archive (.json)</div>
               <input
                 type="file"
                 accept=".json"
@@ -261,7 +261,7 @@ export const BackupLogsModule: React.FC<BackupLogsModuleProps> = ({
                     alert(`Selected backup archive '${e.target.files[0].name}'. Verified successfully.`);
                   }
                 }}
-                className="text-xs text-[#a1a1aa] cursor-pointer"
+                className="text-xs text-slate-500 cursor-pointer"
               />
             </div>
           </div>
@@ -271,12 +271,12 @@ export const BackupLogsModule: React.FC<BackupLogsModuleProps> = ({
       {/* TAB 2: AUDIT LOGS */}
       {activeTab === 'AUDIT_LOGS' && (
         <div className="space-y-4">
-          <div className="flex items-center justify-between bg-[#121214] p-3 rounded-xl border border-[#27272a]">
-            <span className="text-xs font-bold text-[#fafafa]">Filter Activity Actions:</span>
+          <div className="flex items-center justify-between bg-white p-3 rounded-xl border border-slate-200/90">
+            <span className="text-xs font-bold text-slate-900">Filter Activity Actions:</span>
             <select
               value={filterAction}
               onChange={e => setFilterAction(e.target.value)}
-              className="bg-[#09090b] border border-[#27272a] rounded-xl px-3 py-1.5 text-xs text-[#fafafa] font-mono cursor-pointer"
+              className="bg-[#f1f5f9] border border-slate-200/90 rounded-xl px-3 py-1.5 text-xs text-slate-900 font-mono cursor-pointer"
             >
               <option value="ALL">All Actions</option>
               <option value="LOGIN">Logins / Logouts</option>
@@ -289,10 +289,10 @@ export const BackupLogsModule: React.FC<BackupLogsModuleProps> = ({
             </select>
           </div>
 
-          <div className="rounded-2xl border border-[#27272a] bg-[#121214] overflow-hidden">
+          <div className="rounded-2xl border border-slate-200/90 bg-white overflow-hidden">
             <table className="w-full text-left text-xs border-collapse">
               <thead>
-                <tr className="border-b border-[#27272a] bg-[#09090b] text-[#a1a1aa]">
+                <tr className="border-b border-slate-200/90 bg-[#f1f5f9] text-slate-500">
                   <th className="p-3.5">Timestamp</th>
                   <th className="p-3.5">User</th>
                   <th className="p-3.5">Role</th>
@@ -301,11 +301,11 @@ export const BackupLogsModule: React.FC<BackupLogsModuleProps> = ({
                   <th className="p-3.5 font-mono">IP Terminal</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#27272a]">
+              <tbody className="divide-y divide-slate-100">
                 {filteredLogs.map(l => (
-                  <tr key={l.id} className="hover:bg-[#18181b]/50">
-                    <td className="p-3.5 font-mono text-[#a1a1aa]">{l.timestamp}</td>
-                    <td className="p-3.5 font-bold text-[#fafafa]">{l.user}</td>
+                  <tr key={l.id} className="hover:bg-slate-100/50">
+                    <td className="p-3.5 font-mono text-slate-500">{l.timestamp}</td>
+                    <td className="p-3.5 font-bold text-slate-900">{l.user}</td>
                     <td className="p-3.5 font-mono text-amber-400 text-[11px]">{l.role}</td>
                     <td className="p-3.5">
                       <span className={`px-2 py-0.5 rounded text-[10px] font-mono font-semibold border ${
@@ -316,8 +316,8 @@ export const BackupLogsModule: React.FC<BackupLogsModuleProps> = ({
                         {l.action}
                       </span>
                     </td>
-                    <td className="p-3.5 text-[#fafafa]">{l.details}</td>
-                    <td className="p-3.5 font-mono text-[#a1a1aa]">{l.ipAddress}</td>
+                    <td className="p-3.5 text-slate-900">{l.details}</td>
+                    <td className="p-3.5 font-mono text-slate-500">{l.ipAddress}</td>
                   </tr>
                 ))}
               </tbody>
@@ -328,29 +328,29 @@ export const BackupLogsModule: React.FC<BackupLogsModuleProps> = ({
 
       {/* TAB 3: AUTO SCHEDULE */}
       {activeTab === 'AUTO_SCHEDULE' && (
-        <div className="p-6 rounded-2xl border border-[#27272a] bg-[#121214] space-y-4 max-w-xl text-xs">
-          <h3 className="text-sm font-bold text-[#fafafa] flex items-center space-x-2">
+        <div className="p-6 rounded-2xl border border-slate-200/90 bg-white space-y-4 max-w-xl text-xs">
+          <h3 className="text-sm font-bold text-slate-900 flex items-center space-x-2">
             <Calendar className="h-4 w-4 text-emerald-400" />
             <span>Automated Cron Backup Schedule</span>
           </h3>
 
           <div className="space-y-3">
-            <div className="flex items-center justify-between p-3 rounded-xl bg-[#09090b] border border-[#27272a]">
+            <div className="flex items-center justify-between p-3 rounded-xl bg-[#f1f5f9] border border-slate-200/90">
               <span>Enable Automatic Cron Backup</span>
               <input
                 type="checkbox"
                 checked={scheduleForm.autoBackupEnabled}
                 onChange={e => setScheduleForm({ ...scheduleForm, autoBackupEnabled: e.target.checked })}
-                className="h-4 w-4 text-emerald-500 rounded border-zinc-700 cursor-pointer"
+                className="h-4 w-4 text-emerald-500 rounded border-slate-300 cursor-pointer"
               />
             </div>
 
             <div>
-              <label className="block text-[#a1a1aa] mb-1">Backup Frequency</label>
+              <label className="block text-slate-500 mb-1">Backup Frequency</label>
               <select
                 value={scheduleForm.frequency}
                 onChange={e => setScheduleForm({ ...scheduleForm, frequency: e.target.value })}
-                className="w-full bg-[#09090b] border border-[#27272a] rounded-xl px-3 py-2 text-[#fafafa] cursor-pointer"
+                className="w-full bg-[#f1f5f9] border border-slate-200/90 rounded-xl px-3 py-2 text-slate-900 cursor-pointer"
               >
                 <option value="HOURLY">Every Hour</option>
                 <option value="DAILY">Daily at Midnight (Recommended)</option>
@@ -359,12 +359,12 @@ export const BackupLogsModule: React.FC<BackupLogsModuleProps> = ({
             </div>
 
             <div>
-              <label className="block text-[#a1a1aa] mb-1">Backup Notification Email</label>
+              <label className="block text-slate-500 mb-1">Backup Notification Email</label>
               <input
                 type="email"
                 value={scheduleForm.notifyEmail}
                 onChange={e => setScheduleForm({ ...scheduleForm, notifyEmail: e.target.value })}
-                className="w-full bg-[#09090b] border border-[#27272a] rounded-xl px-3 py-2 text-[#fafafa]"
+                className="w-full bg-[#f1f5f9] border border-slate-200/90 rounded-xl px-3 py-2 text-slate-900"
               />
             </div>
 

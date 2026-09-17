@@ -574,7 +574,7 @@ export const MemberQrScanner: React.FC<MemberQrScannerProps> = ({
 
   return (
     <div
-      className={`rounded-2xl border border-emerald-500/30 bg-[#121214] text-xs shadow-2xl transition-all ${
+      className={`rounded-2xl border border-emerald-500/30 bg-white text-xs shadow-2xl transition-all ${
         isFullscreen ? 'fixed inset-4 z-50 overflow-y-auto bg-[#0d0d0f] p-6' : 'p-5 space-y-5'
       }`}
     >
@@ -582,7 +582,7 @@ export const MemberQrScanner: React.FC<MemberQrScannerProps> = ({
       <canvas ref={canvasRef} className="hidden" />
 
       {/* Header Banner */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#27272a] pb-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200/90 pb-4">
         <div className="flex items-center space-x-3">
           <div className="p-2.5 rounded-xl bg-emerald-600/20 text-emerald-400 border border-emerald-500/30 shrink-0">
             <QrCode className="h-6 w-6 animate-pulse" />
@@ -596,7 +596,7 @@ export const MemberQrScanner: React.FC<MemberQrScannerProps> = ({
                 v3.0 Live Scan
               </span>
             </div>
-            <p className="text-[11px] text-[#a1a1aa] mt-0.5">
+            <p className="text-[11px] text-slate-500 mt-0.5">
               Scan member cards or digital mobile passes via camera/scanner gun to load borrower loans and process instant 1-click book check-ins.
             </p>
           </div>
@@ -611,7 +611,7 @@ export const MemberQrScanner: React.FC<MemberQrScannerProps> = ({
             className={`p-2 rounded-xl border transition-colors cursor-pointer ${
               soundEnabled
                 ? 'bg-emerald-600/20 text-emerald-400 border-emerald-500/30'
-                : 'bg-[#09090b] text-[#71717a] border-[#27272a]'
+                : 'bg-[#f1f5f9] text-[#71717a] border-slate-200/90'
             }`}
           >
             {soundEnabled ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}
@@ -621,7 +621,7 @@ export const MemberQrScanner: React.FC<MemberQrScannerProps> = ({
             type="button"
             onClick={() => setIsFullscreen(!isFullscreen)}
             title={isFullscreen ? 'Exit Fullscreen' : 'Expand Scanner'}
-            className="p-2 rounded-xl bg-[#09090b] border border-[#27272a] text-[#a1a1aa] hover:text-white transition-colors cursor-pointer"
+            className="p-2 rounded-xl bg-[#f1f5f9] border border-slate-200/90 text-slate-500 hover:text-white transition-colors cursor-pointer"
           >
             {isFullscreen ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
           </button>
@@ -630,7 +630,7 @@ export const MemberQrScanner: React.FC<MemberQrScannerProps> = ({
             <button
               type="button"
               onClick={onClose}
-              className="p-2 rounded-xl bg-[#09090b] border border-[#27272a] text-[#a1a1aa] hover:text-white transition-colors cursor-pointer"
+              className="p-2 rounded-xl bg-[#f1f5f9] border border-slate-200/90 text-slate-500 hover:text-white transition-colors cursor-pointer"
             >
               <X className="h-4 w-4" />
             </button>
@@ -645,14 +645,14 @@ export const MemberQrScanner: React.FC<MemberQrScannerProps> = ({
         <div className="lg:col-span-5 space-y-3">
           
           {/* Scanner Mode Tabs */}
-          <div className="grid grid-cols-4 gap-1 p-1 rounded-xl bg-[#09090b] border border-[#27272a]">
+          <div className="grid grid-cols-4 gap-1 p-1 rounded-xl bg-[#f1f5f9] border border-slate-200/90">
             <button
               type="button"
               onClick={() => setScanMode('CAMERA')}
               className={`py-1.5 px-2 rounded-lg font-bold text-[10px] flex items-center justify-center space-x-1 transition-all cursor-pointer ${
                 scanMode === 'CAMERA'
                   ? 'bg-emerald-600 text-white shadow-md'
-                  : 'text-[#a1a1aa] hover:text-white'
+                  : 'text-slate-500 hover:text-white'
               }`}
             >
               <Camera className="h-3 w-3" />
@@ -665,7 +665,7 @@ export const MemberQrScanner: React.FC<MemberQrScannerProps> = ({
               className={`py-1.5 px-2 rounded-lg font-bold text-[10px] flex items-center justify-center space-x-1 transition-all cursor-pointer ${
                 scanMode === 'UPLOAD'
                   ? 'bg-emerald-600 text-white shadow-md'
-                  : 'text-[#a1a1aa] hover:text-white'
+                  : 'text-slate-500 hover:text-white'
               }`}
             >
               <Upload className="h-3 w-3" />
@@ -678,7 +678,7 @@ export const MemberQrScanner: React.FC<MemberQrScannerProps> = ({
               className={`py-1.5 px-2 rounded-lg font-bold text-[10px] flex items-center justify-center space-x-1 transition-all cursor-pointer ${
                 scanMode === 'MANUAL'
                   ? 'bg-emerald-600 text-white shadow-md'
-                  : 'text-[#a1a1aa] hover:text-white'
+                  : 'text-slate-500 hover:text-white'
               }`}
             >
               <Zap className="h-3 w-3" />
@@ -691,7 +691,7 @@ export const MemberQrScanner: React.FC<MemberQrScannerProps> = ({
               className={`py-1.5 px-2 rounded-lg font-bold text-[10px] flex items-center justify-center space-x-1 transition-all cursor-pointer ${
                 scanMode === 'SAMPLES'
                   ? 'bg-emerald-600 text-white shadow-md'
-                  : 'text-[#a1a1aa] hover:text-white'
+                  : 'text-slate-500 hover:text-white'
               }`}
             >
               <Sparkles className="h-3 w-3 text-amber-400" />
@@ -701,7 +701,7 @@ export const MemberQrScanner: React.FC<MemberQrScannerProps> = ({
 
           {/* Mode 1: Live Video Camera Feed */}
           {scanMode === 'CAMERA' && (
-            <div className="relative rounded-2xl overflow-hidden border border-[#27272a] bg-black aspect-video flex items-center justify-center group shadow-inner">
+            <div className="relative rounded-2xl overflow-hidden border border-slate-200/90 bg-black aspect-video flex items-center justify-center group shadow-inner">
               {/* Video Element */}
               <video
                 ref={videoRef}
@@ -755,7 +755,7 @@ export const MemberQrScanner: React.FC<MemberQrScannerProps> = ({
                     <button
                       type="button"
                       onClick={() => setScanMode('UPLOAD')}
-                      className="px-3 py-1.5 rounded-xl bg-[#18181b] hover:bg-[#27272a] text-zinc-200 text-xs cursor-pointer border border-[#27272a] flex items-center space-x-1.5"
+                      className="px-3 py-1.5 rounded-xl bg-[#18181b] hover:bg-[#27272a] text-zinc-200 text-xs cursor-pointer border border-slate-200/90 flex items-center space-x-1.5"
                     >
                       <Upload className="h-3.5 w-3.5" />
                       <span>Upload QR Image</span>
@@ -763,7 +763,7 @@ export const MemberQrScanner: React.FC<MemberQrScannerProps> = ({
                     <button
                       type="button"
                       onClick={() => setScanMode('SAMPLES')}
-                      className="px-3 py-1.5 rounded-xl bg-[#18181b] hover:bg-[#27272a] text-zinc-200 text-xs cursor-pointer border border-[#27272a] flex items-center space-x-1.5"
+                      className="px-3 py-1.5 rounded-xl bg-[#18181b] hover:bg-[#27272a] text-zinc-200 text-xs cursor-pointer border border-slate-200/90 flex items-center space-x-1.5"
                     >
                       <Users className="h-3.5 w-3.5" />
                       <span>Pick Sample Member</span>
@@ -782,7 +782,7 @@ export const MemberQrScanner: React.FC<MemberQrScannerProps> = ({
               )}
 
               {/* Camera Control Bar: Device Switch & Torch */}
-              <div className="absolute bottom-2 left-2 right-2 flex items-center justify-between pointer-events-auto bg-black/60 backdrop-blur-sm p-1.5 rounded-xl border border-white/10 text-[10px]">
+              <div className="absolute bottom-2 left-2 right-2 flex items-center justify-between pointer-events-auto bg-slate-900/40 backdrop-blur-sm p-1.5 rounded-xl border border-white/10 text-[10px]">
                 {cameraDevices.length > 1 ? (
                   <select
                     value={selectedDeviceId}
@@ -790,7 +790,7 @@ export const MemberQrScanner: React.FC<MemberQrScannerProps> = ({
                       setSelectedDeviceId(e.target.value);
                       startCamera(e.target.value);
                     }}
-                    className="bg-zinc-900 border border-zinc-700 text-white rounded-lg px-2 py-1 text-[10px] focus:outline-none max-w-[140px] truncate"
+                    className="bg-white border border-zinc-700 text-white rounded-lg px-2 py-1 text-[10px] focus:outline-none max-w-[140px] truncate"
                   >
                     {cameraDevices.map((d, i) => (
                       <option key={d.deviceId || i} value={d.deviceId}>
@@ -799,7 +799,7 @@ export const MemberQrScanner: React.FC<MemberQrScannerProps> = ({
                     ))}
                   </select>
                 ) : (
-                  <span className="text-zinc-400 font-mono text-[10px] px-1 flex items-center space-x-1">
+                  <span className="text-slate-500 font-mono text-[10px] px-1 flex items-center space-x-1">
                     <Camera className="h-3 w-3 text-emerald-400" />
                     <span>Live Scanner Ready</span>
                   </span>
@@ -836,13 +836,13 @@ export const MemberQrScanner: React.FC<MemberQrScannerProps> = ({
 
           {/* Mode 2: Photo / Image File Upload */}
           {scanMode === 'UPLOAD' && (
-            <div className="p-6 rounded-2xl border-2 border-dashed border-[#27272a] bg-[#09090b] hover:border-emerald-500/50 transition-colors text-center space-y-3">
+            <div className="p-6 rounded-2xl border-2 border-dashed border-slate-200/90 bg-[#f1f5f9] hover:border-emerald-500/50 transition-colors text-center space-y-3">
               <div className="mx-auto w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
                 <Upload className="h-6 w-6" />
               </div>
               <div>
                 <div className="font-bold text-white text-xs">Upload Member QR Code Image</div>
-                <p className="text-[11px] text-[#a1a1aa] mt-0.5">
+                <p className="text-[11px] text-slate-500 mt-0.5">
                   Select or drag & drop a snapshot, screenshot, or digital card image
                 </p>
               </div>
@@ -861,12 +861,12 @@ export const MemberQrScanner: React.FC<MemberQrScannerProps> = ({
 
           {/* Mode 3: Manual Code / USB Wedge Scanner */}
           {scanMode === 'MANUAL' && (
-            <div className="p-4 rounded-2xl border border-[#27272a] bg-[#09090b] space-y-3">
+            <div className="p-4 rounded-2xl border border-slate-200/90 bg-[#f1f5f9] space-y-3">
               <div className="flex items-center space-x-2 text-emerald-400 font-bold text-xs">
                 <Zap className="h-4 w-4" />
                 <span>Handheld Barcode / QR Scanner Input</span>
               </div>
-              <p className="text-[11px] text-[#a1a1aa]">
+              <p className="text-[11px] text-slate-500">
                 Connect any standard USB/Bluetooth 2D barcode scanner or manually type member code.
               </p>
               <form
@@ -885,7 +885,7 @@ export const MemberQrScanner: React.FC<MemberQrScannerProps> = ({
                   placeholder="Scan QR or type STU-2024-001..."
                   value={manualCodeInput}
                   onChange={(e) => setManualCodeInput(e.target.value)}
-                  className="flex-1 rounded-xl border border-[#27272a] bg-[#121214] px-3.5 py-2 text-xs text-white focus:outline-none focus:border-emerald-500 font-mono"
+                  className="flex-1 rounded-xl border border-slate-200/90 bg-white px-3.5 py-2 text-xs text-white focus:outline-none focus:border-emerald-500 font-mono"
                 />
                 <button
                   type="submit"
@@ -899,7 +899,7 @@ export const MemberQrScanner: React.FC<MemberQrScannerProps> = ({
 
           {/* Mode 4: Quick Member QR Chips for Testing & Simulation */}
           {scanMode === 'SAMPLES' && (
-            <div className="p-4 rounded-2xl border border-amber-500/30 bg-[#09090b] space-y-3">
+            <div className="p-4 rounded-2xl border border-amber-500/30 bg-[#f1f5f9] space-y-3">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-bold text-amber-300 flex items-center space-x-1.5">
                   <Sparkles className="h-3.5 w-3.5" />
@@ -916,7 +916,7 @@ export const MemberQrScanner: React.FC<MemberQrScannerProps> = ({
                       key={u.id}
                       type="button"
                       onClick={() => processQrPayload(u.memberCode)}
-                      className="p-2 rounded-xl border border-[#27272a] hover:border-emerald-500/60 bg-[#121214] text-left flex items-center space-x-2.5 transition-all cursor-pointer group"
+                      className="p-2 rounded-xl border border-slate-200/90 hover:border-emerald-500/60 bg-white text-left flex items-center space-x-2.5 transition-all cursor-pointer group"
                     >
                       <img
                         src={u.avatarUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150'}
@@ -927,7 +927,7 @@ export const MemberQrScanner: React.FC<MemberQrScannerProps> = ({
                         <div className="font-bold text-white truncate group-hover:text-emerald-400 transition-colors text-[11px]">
                           {u.name}
                         </div>
-                        <div className="text-[9px] text-[#a1a1aa] font-mono truncate">
+                        <div className="text-[9px] text-slate-500 font-mono truncate">
                           {u.memberCode} • <span className="text-emerald-400 font-bold">{activeLoanCount} loan(s)</span>
                         </div>
                       </div>
@@ -958,10 +958,10 @@ export const MemberQrScanner: React.FC<MemberQrScannerProps> = ({
         <div className="lg:col-span-7 space-y-4">
           
           {selectedMember ? (
-            <div className="p-5 rounded-2xl border border-emerald-500/30 bg-[#09090b] space-y-4 shadow-xl">
+            <div className="p-5 rounded-2xl border border-emerald-500/30 bg-[#f1f5f9] space-y-4 shadow-xl">
               
               {/* Member Card Header */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#27272a] pb-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200/90 pb-4">
                 <div className="flex items-center space-x-3.5">
                   <img
                     src={selectedMember.avatarUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150'}
@@ -975,7 +975,7 @@ export const MemberQrScanner: React.FC<MemberQrScannerProps> = ({
                         {selectedMember.role}
                       </span>
                     </div>
-                    <div className="text-[11px] text-[#a1a1aa] font-mono mt-0.5 flex items-center space-x-2">
+                    <div className="text-[11px] text-slate-500 font-mono mt-0.5 flex items-center space-x-2">
                       <span>ID: <strong className="text-white">{selectedMember.memberCode}</strong></span>
                       <span>•</span>
                       <span>{selectedMember.department || 'Library Member'}</span>
@@ -987,7 +987,7 @@ export const MemberQrScanner: React.FC<MemberQrScannerProps> = ({
                   <button
                     type="button"
                     onClick={() => setPreviewQrMember(selectedMember)}
-                    className="px-3 py-1.5 rounded-xl bg-[#121214] border border-[#27272a] hover:border-emerald-500/40 text-[#a1a1aa] hover:text-white text-xs font-semibold flex items-center space-x-1.5 cursor-pointer transition-colors"
+                    className="px-3 py-1.5 rounded-xl bg-white border border-slate-200/90 hover:border-emerald-500/40 text-slate-500 hover:text-white text-xs font-semibold flex items-center space-x-1.5 cursor-pointer transition-colors"
                   >
                     <QrCode className="h-3.5 w-3.5 text-emerald-400" />
                     <span>View QR Pass</span>
@@ -1000,7 +1000,7 @@ export const MemberQrScanner: React.FC<MemberQrScannerProps> = ({
                       setScannedCode('');
                       setScanSuccessMessage(null);
                     }}
-                    className="px-3 py-1.5 rounded-xl bg-[#121214] border border-[#27272a] hover:bg-zinc-800 text-[#a1a1aa] hover:text-white text-xs font-semibold cursor-pointer transition-colors"
+                    className="px-3 py-1.5 rounded-xl bg-white border border-slate-200/90 hover:bg-zinc-800 text-slate-500 hover:text-white text-xs font-semibold cursor-pointer transition-colors"
                   >
                     Clear Session
                   </button>
@@ -1009,15 +1009,15 @@ export const MemberQrScanner: React.FC<MemberQrScannerProps> = ({
 
               {/* Member Loan Summary Stats */}
               <div className="grid grid-cols-3 gap-3">
-                <div className="p-3 rounded-xl bg-[#121214] border border-[#27272a] space-y-0.5">
-                  <span className="text-[10px] uppercase font-mono text-[#a1a1aa]">Active Checked Out</span>
+                <div className="p-3 rounded-xl bg-white border border-slate-200/90 space-y-0.5">
+                  <span className="text-[10px] uppercase font-mono text-slate-500">Active Checked Out</span>
                   <div className="text-lg font-bold text-white font-mono flex items-center space-x-1.5">
                     <BookOpen className="h-4 w-4 text-blue-400" />
                     <span>{memberActiveLoans.length}</span>
                   </div>
                 </div>
 
-                <div className="p-3 rounded-xl bg-[#121214] border border-[#27272a] space-y-0.5">
+                <div className="p-3 rounded-xl bg-white border border-slate-200/90 space-y-0.5">
                   <span className="text-[10px] uppercase font-mono text-red-400">Overdue Items</span>
                   <div className="text-lg font-bold text-red-400 font-mono flex items-center space-x-1.5">
                     <Clock className="h-4 w-4 text-red-400" />
@@ -1025,7 +1025,7 @@ export const MemberQrScanner: React.FC<MemberQrScannerProps> = ({
                   </div>
                 </div>
 
-                <div className="p-3 rounded-xl bg-[#121214] border border-[#27272a] space-y-0.5">
+                <div className="p-3 rounded-xl bg-white border border-slate-200/90 space-y-0.5">
                   <span className="text-[10px] uppercase font-mono text-emerald-400">Account Status</span>
                   <div className="text-sm font-bold text-emerald-400 flex items-center space-x-1">
                     <ShieldCheck className="h-4 w-4" />
@@ -1059,7 +1059,7 @@ export const MemberQrScanner: React.FC<MemberQrScannerProps> = ({
                 </div>
 
                 {memberActiveLoans.length === 0 ? (
-                  <div className="p-6 rounded-xl border border-[#27272a] bg-[#121214] text-center text-[#a1a1aa] space-y-1">
+                  <div className="p-6 rounded-xl border border-slate-200/90 bg-white text-center text-slate-500 space-y-1">
                     <CheckCircle2 className="h-7 w-7 text-emerald-400 mx-auto" />
                     <p className="font-bold text-white text-xs">All Clear! No Active Books Checked Out</p>
                     <p className="text-[11px]">This member currently has 0 active loans on their library card.</p>
@@ -1074,7 +1074,7 @@ export const MemberQrScanner: React.FC<MemberQrScannerProps> = ({
                           className={`p-3 rounded-xl border flex items-center justify-between transition-all ${
                             isOver
                               ? 'border-red-500/40 bg-red-500/10'
-                              : 'border-[#27272a] bg-[#121214]'
+                              : 'border-slate-200/90 bg-white'
                           }`}
                         >
                           <div className="space-y-0.5 min-w-0 pr-2">
@@ -1086,7 +1086,7 @@ export const MemberQrScanner: React.FC<MemberQrScannerProps> = ({
                                 </span>
                               )}
                             </div>
-                            <div className="text-[10px] text-[#a1a1aa] font-mono flex items-center space-x-2">
+                            <div className="text-[10px] text-slate-500 font-mono flex items-center space-x-2">
                               <span>Acc: <strong className="text-zinc-300">{loan.accessionNumber || loan.copyBarcode || 'ACC-88001'}</strong></span>
                               <span>•</span>
                               <span>Due: <strong className={isOver ? 'text-red-400' : 'text-zinc-300'}>{loan.dueDate}</strong></span>
@@ -1125,7 +1125,7 @@ export const MemberQrScanner: React.FC<MemberQrScannerProps> = ({
               </div>
 
               {/* Fast Book Accession Barcode Bar (Scan Book to Check-in / Issue) */}
-              <div className="pt-2 border-t border-[#27272a] space-y-2">
+              <div className="pt-2 border-t border-slate-200/90 space-y-2">
                 <div className="flex items-center justify-between text-[11px]">
                   <span className="font-bold text-zinc-300 flex items-center space-x-1">
                     <Zap className="h-3.5 w-3.5 text-emerald-400" />
@@ -1139,7 +1139,7 @@ export const MemberQrScanner: React.FC<MemberQrScannerProps> = ({
                     value={bookAccessionInput}
                     onChange={(e) => setBookAccessionInput(e.target.value)}
                     placeholder="Scan or enter book barcode (e.g. ACC-88001)..."
-                    className="flex-1 rounded-xl border border-[#27272a] bg-[#121214] px-3.5 py-2 text-xs text-white focus:outline-none focus:border-emerald-500 font-mono"
+                    className="flex-1 rounded-xl border border-slate-200/90 bg-white px-3.5 py-2 text-xs text-white focus:outline-none focus:border-emerald-500 font-mono"
                   />
                   <button
                     type="submit"
@@ -1153,13 +1153,13 @@ export const MemberQrScanner: React.FC<MemberQrScannerProps> = ({
             </div>
           ) : (
             /* Empty State when no member scanned yet */
-            <div className="p-8 rounded-2xl border border-[#27272a] bg-[#09090b] text-center space-y-4 flex flex-col items-center justify-center min-h-[300px]">
+            <div className="p-8 rounded-2xl border border-slate-200/90 bg-[#f1f5f9] text-center space-y-4 flex flex-col items-center justify-center min-h-[300px]">
               <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 animate-bounce">
                 <QrCode className="h-10 w-10" />
               </div>
               <div className="space-y-1 max-w-sm">
                 <h4 className="font-bold text-white text-sm">Ready to Scan Member QR Code</h4>
-                <p className="text-xs text-[#a1a1aa]">
+                <p className="text-xs text-slate-500">
                   Point camera at patron's physical member card or digital phone QR pass to load active loans, compute overdue status, and perform instant check-ins.
                 </p>
               </div>
@@ -1168,7 +1168,7 @@ export const MemberQrScanner: React.FC<MemberQrScannerProps> = ({
                 <button
                   type="button"
                   onClick={() => setScanMode('SAMPLES')}
-                  className="px-3.5 py-1.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-white text-xs font-semibold cursor-pointer border border-[#27272a] transition-colors"
+                  className="px-3.5 py-1.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-white text-xs font-semibold cursor-pointer border border-slate-200/90 transition-colors"
                 >
                   ✨ Select Test Member
                 </button>
@@ -1184,9 +1184,9 @@ export const MemberQrScanner: React.FC<MemberQrScannerProps> = ({
           )}
 
           {/* Real-time Session Activity & Check-in Audit Trail */}
-          <div className="p-4 rounded-2xl border border-[#27272a] bg-[#09090b] space-y-2.5">
+          <div className="p-4 rounded-2xl border border-slate-200/90 bg-[#f1f5f9] space-y-2.5">
             <div className="flex items-center justify-between text-[11px]">
-              <span className="font-mono font-bold text-[#a1a1aa] uppercase flex items-center space-x-1.5">
+              <span className="font-mono font-bold text-slate-500 uppercase flex items-center space-x-1.5">
                 <Clock className="h-3.5 w-3.5 text-emerald-400" />
                 <span>Live Scanner Session Log ({scanHistory.length})</span>
               </span>
@@ -1208,7 +1208,7 @@ export const MemberQrScanner: React.FC<MemberQrScannerProps> = ({
                 scanHistory.map((item) => (
                   <div
                     key={item.id}
-                    className="flex items-center justify-between p-1.5 rounded-lg bg-[#121214] border border-[#27272a]/60 text-zinc-300"
+                    className="flex items-center justify-between p-1.5 rounded-lg bg-white border border-slate-200/90/60 text-zinc-300"
                   >
                     <div className="flex items-center space-x-2 truncate">
                       <span className="text-[#71717a]">[{item.timestamp}]</span>
@@ -1239,8 +1239,8 @@ export const MemberQrScanner: React.FC<MemberQrScannerProps> = ({
       {/* Member QR Pass Modal / Digital ID Card Popup */}
       {previewQrMember && (
         <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 animate-fadeIn">
-          <div className="bg-[#121214] border border-emerald-500/40 rounded-3xl p-6 max-w-sm w-full space-y-4 shadow-2xl text-center">
-            <div className="flex items-center justify-between border-b border-[#27272a] pb-3">
+          <div className="bg-white border border-emerald-500/40 rounded-3xl p-6 max-w-sm w-full space-y-4 shadow-2xl text-center">
+            <div className="flex items-center justify-between border-b border-slate-200/90 pb-3">
               <div className="flex items-center space-x-2 text-emerald-400 font-bold text-xs">
                 <ShieldCheck className="h-4 w-4" />
                 <span>Digital Library Pass QR</span>
@@ -1248,7 +1248,7 @@ export const MemberQrScanner: React.FC<MemberQrScannerProps> = ({
               <button
                 type="button"
                 onClick={() => setPreviewQrMember(null)}
-                className="p-1 rounded-lg text-[#a1a1aa] hover:text-white cursor-pointer"
+                className="p-1 rounded-lg text-slate-500 hover:text-white cursor-pointer"
               >
                 <X className="h-4 w-4" />
               </button>
@@ -1261,10 +1261,10 @@ export const MemberQrScanner: React.FC<MemberQrScannerProps> = ({
             <div className="space-y-1">
               <h4 className="text-base font-bold text-white">{previewQrMember.name}</h4>
               <p className="text-xs text-emerald-400 font-mono font-bold">{previewQrMember.memberCode}</p>
-              <p className="text-[11px] text-[#a1a1aa]">{previewQrMember.role} • {previewQrMember.department || 'Main Campus'}</p>
+              <p className="text-[11px] text-slate-500">{previewQrMember.role} • {previewQrMember.department || 'Main Campus'}</p>
             </div>
 
-            <div className="p-2 rounded-xl bg-[#09090b] border border-[#27272a] text-[10px] text-zinc-400 font-mono">
+            <div className="p-2 rounded-xl bg-[#f1f5f9] border border-slate-200/90 text-[10px] text-slate-500 font-mono">
               Scan this code using another device or the scanner above to instantly test recognition.
             </div>
 

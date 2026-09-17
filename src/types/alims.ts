@@ -1,4 +1,17 @@
-export type AppTheme = 'pakistan-flag' | 'pakistan-dark' | 'light-clean' | 'dark-slate' | 'high-contrast';
+export type AppTheme =
+  | 'pakistan-flag'
+  | 'oxford-navy'
+  | 'persian-turquoise'
+  | 'antique-parchment'
+  | 'nordic-spruce'
+  | 'royal-amethyst'
+  | 'crimson-harvard'
+  | 'cashmere-amber'
+  | 'midnight-alexandria'
+  | 'pakistan-dark'
+  | 'light-clean'
+  | 'dark-slate'
+  | 'high-contrast';
 
 export interface LibraryScheme {
   id: string;
@@ -88,31 +101,65 @@ export interface UserProfile {
   googleAccountLinkedAt?: string;
 }
 
+export type MarcSubjectTag = '600' | '610' | '611' | '630' | '650' | '651' | '653' | '655';
+
+export interface MarcSubjectSubdivisions {
+  general?: string;      // $x
+  geographic?: string;   // $z
+  chronological?: string; // $y
+  form?: string;         // $v
+}
+
+export interface MarcSubjectEntry {
+  id: string;
+  tag: MarcSubjectTag;
+  ind1?: string;
+  ind2?: string;
+  term: string;
+  subdivisions?: MarcSubjectSubdivisions;
+  thesaurusSource?: 'LCSH' | 'FAST' | 'SEARS' | 'MESH' | 'NLP' | 'LOCAL' | string;
+  formattedHeading: string;
+  rawMarcString?: string;
+}
+
 export interface BookRecord {
   id: string;
   isbn: string;
   title: string;
+  subtitle?: string;
   authors: string[];
   department: string;
   callNumber: string;
   edition: string;
   publisherName: string;
-  publisherLocation: string;
+  publisherLocation?: string;
+  publisherPlace?: string;
   publisherYear: number;
   pageCount: number;
   totalCopies: number;
   availableCopies: number;
-  shelfLocation: string;
+  copiesTotal?: number;
+  copiesAvailable?: number;
+  shelfLocation?: string;
   subjects: string[];
+  subjectEntries?: MarcSubjectEntry[];
   coverUrl: string;
-  format: 'HARDCOVER' | 'PAPERBACK' | 'DIGITAL';
+  format?: 'HARDCOVER' | 'PAPERBACK' | 'DIGITAL';
   accessionNumber?: string;
   copyNumber?: string;
   copyNo?: string;
   description?: string;
   generalNotes?: string;
   notes?: string;
+  ddcClassification?: string;
+  cutterNumber?: string;
+  seriesStatement?: string;
+  status?: string;
+  cataloguedDate?: string;
+  cataloguerName?: string;
+  isCustomAdded?: boolean;
   marcTags?: Record<string, string>;
+  marc21Tags?: Array<{ tag: string; ind1?: string; ind2?: string; subfields: any }>;
 }
 
 export interface BookCopy {

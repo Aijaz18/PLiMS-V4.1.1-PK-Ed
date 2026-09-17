@@ -50,10 +50,10 @@ export const CirculationSlipModal: React.FC<CirculationSlipModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in">
-      <div className="relative w-full max-w-lg rounded-2xl border border-[#27272a] bg-[#121214] p-6 shadow-2xl space-y-5 max-h-[95vh] overflow-y-auto">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in">
+      <div className="relative w-full max-w-lg rounded-2xl border border-slate-200/90 bg-white p-6 shadow-2xl space-y-5 max-h-[95vh] overflow-y-auto">
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-[#27272a] pb-3">
+        <div className="flex items-center justify-between border-b border-slate-200/90 pb-3">
           <div className="flex items-center space-x-2.5">
             <div className={`p-2 rounded-xl border ${isIssue ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' : 'bg-blue-500/20 text-blue-400 border-blue-500/30'}`}>
               <Printer className="h-5 w-5" />
@@ -62,13 +62,13 @@ export const CirculationSlipModal: React.FC<CirculationSlipModalProps> = ({
               <h3 className="text-sm font-bold text-white">
                 {isIssue ? 'Official Book Issue Slip (Borrow Receipt)' : 'Official Book Return Receipt (Check-In)'}
               </h3>
-              <p className="text-[11px] text-[#a1a1aa] font-mono">Receipt No: {data.receiptNumber}</p>
+              <p className="text-[11px] text-slate-500 font-mono">Receipt No: {data.receiptNumber}</p>
             </div>
           </div>
 
           <button
             onClick={onClose}
-            className="p-1.5 rounded-xl hover:bg-zinc-800 text-[#a1a1aa] hover:text-white cursor-pointer transition-colors"
+            className="p-1.5 rounded-xl hover:bg-zinc-800 text-slate-500 hover:text-white cursor-pointer transition-colors"
           >
             <X className="h-5 w-5" />
           </button>
@@ -85,9 +85,9 @@ export const CirculationSlipModal: React.FC<CirculationSlipModalProps> = ({
               {data.institutionName || 'INSTITUTION OF HIGHER LEARNING'}
             </div>
             {data.libraryLocation && (
-              <div className="text-[10px] text-zinc-500">{data.libraryLocation}</div>
+              <div className="text-[10px] text-slate-400">{data.libraryLocation}</div>
             )}
-            <div className="mt-2 inline-block px-2.5 py-0.5 rounded bg-zinc-900 text-white font-bold text-[10px] uppercase">
+            <div className="mt-2 inline-block px-2.5 py-0.5 rounded bg-white text-white font-bold text-[10px] uppercase">
               {isIssue ? '*** BOOK ISSUE SLIP ***' : '*** BOOK RETURN RECEIPT ***'}
             </div>
           </div>
@@ -194,7 +194,7 @@ export const CirculationSlipModal: React.FC<CirculationSlipModalProps> = ({
             </div>
           </div>
 
-          <div className="text-[9px] text-zinc-500 text-center pt-1 font-sans">
+          <div className="text-[9px] text-slate-400 text-center pt-1 font-sans">
             {isIssue
               ? `Please retain this receipt. Overdue fine is PKR ${data.finePerDay || 50}/day.`
               : 'Book returned into active library catalog inventory.'}
@@ -215,7 +215,7 @@ export const CirculationSlipModal: React.FC<CirculationSlipModalProps> = ({
           <button
             type="button"
             onClick={handleDownload}
-            className="w-full py-2.5 px-3 rounded-xl bg-[#18181b] hover:bg-[#27272a] border border-[#27272a] text-zinc-200 font-bold text-xs flex items-center justify-center space-x-2 cursor-pointer transition-all"
+            className="w-full py-2.5 px-3 rounded-xl bg-[#18181b] hover:bg-[#27272a] border border-slate-200/90 text-zinc-200 font-bold text-xs flex items-center justify-center space-x-2 cursor-pointer transition-all"
           >
             <Download className="h-4 w-4 text-blue-400" />
             <span>Download .TXT</span>
@@ -224,7 +224,7 @@ export const CirculationSlipModal: React.FC<CirculationSlipModalProps> = ({
           <button
             type="button"
             onClick={handleCopy}
-            className="w-full py-2.5 px-3 rounded-xl bg-[#18181b] hover:bg-[#27272a] border border-[#27272a] text-zinc-200 font-bold text-xs flex items-center justify-center space-x-2 cursor-pointer transition-all"
+            className="w-full py-2.5 px-3 rounded-xl bg-[#18181b] hover:bg-[#27272a] border border-slate-200/90 text-zinc-200 font-bold text-xs flex items-center justify-center space-x-2 cursor-pointer transition-all"
           >
             {copied ? (
               <>

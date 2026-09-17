@@ -53,7 +53,14 @@ import {
 
 import { BookRecord, BookCopy, UserProfile, CirculationTransaction, DigitalAsset, LibrarySettings, UserRole, BookReservation, AppTheme } from './types/alims';
 import { AppLanguage } from './utils/i18n';
+import { getThemeConfig, applyThemeToDocument } from './utils/themeConfig';
+import { subscribeToFirebaseAuth, logOutOfFirebase } from './services/firebase';
 import { processGoogleUserAuth, GoogleOAuthPayload } from './services/googleAuth';
+import {
+  BackgroundLayer,
+  loadSavedBgConfig,
+  MainPageBgConfig
+} from './components/MainThemeBgSelector';
 
 export function App() {
   const [currentTab, setCurrentTab] = useState<ModuleTab>('DASHBOARD');
@@ -63,6 +70,17 @@ export function App() {
   const [currentLanguage, setCurrentLanguage] = useState<AppLanguage>(() => {
     return (localStorage.getItem('pslims_language') as AppLanguage) || 'en';
   });
+  const [bgConfig, setBgConfig] = useState<MainPageBgConfig>(() => loadSavedBgConfig());
+
+  // Listen for background config updates from Theme Studio
+  useEffect(() => {
+    const handleStorage = () => {
+      setBgConfig(loadSavedBgConfig());
+    };
+    window.addEventListener('storage', handleStorage);
+    return () => window.removeEventListener('storage', handleStorage);
+  }, []);
+
   const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
   const [isAddBranchModalOpen, setIsAddBranchModalOpen] = useState(false);
   const [branchModalInitialMode, setBranchModalInitialMode] = useState<'BRANCH' | 'STAFF'>('BRANCH');
@@ -90,12 +108,38 @@ export function App() {
     return Boolean(urlParams.get('code')) || window.location.pathname.startsWith('/auth/google/callback');
   });
 
-  // Core Database States - Persisted in Browser Local Storage
+  // Core Database States - Persisted in Browser Local Storage with intelligent seed-merging
   const [settings, setSettings] = useState<LibrarySettings>(() => loadLocalData('pslims_db_settings', initialSettings));
-  const [users, setUsers] = useState<UserProfile[]>(() => loadLocalData('pslims_db_users', initialUsers));
-  const [books, setBooks] = useState<BookRecord[]>(() => loadLocalData('pslims_db_books', initialBooks));
-  const [copies, setCopies] = useState(() => loadLocalData('pslims_db_copies', initialCopies));
-  const [transactions, setTransactions] = useState<CirculationTransaction[]>(() => loadLocalData('pslims_db_transactions', initialTransactions));
+  const [users, setUsers] = useState<UserProfile[]>(() => {
+    const loaded = loadLocalData<UserProfile[]>('pslims_db_users', initialUsers);
+    const existingIds = new Set((loaded || []).map(u => u.id));
+    const missing = initialUsers.filter(u => !existingIds.has(u.id));
+    return [...(loaded || []), ...missing].map(u => {
+      const isStaff = ['SUPER_ADMIN', 'SYSTEM_ADMIN', 'PRINCIPAL', 'CHIEF_LIBRARIAN', 'LIBRARIAN', 'ASSISTANT_LIBRARIAN', 'ACCOUNTS_OFFICER'].includes(u.role);
+      if (isStaff && (!u.maxBorrowLimit || u.maxBorrowLimit < 9999)) {
+        return { ...u, maxBorrowLimit: 99999 };
+      }
+      return u;
+    });
+  });
+  const [books, setBooks] = useState<BookRecord[]>(() => {
+    const loaded = loadLocalData<BookRecord[]>('pslims_db_books', initialBooks);
+    const existingIds = new Set((loaded || []).map(b => b.id));
+    const missing = initialBooks.filter(b => !existingIds.has(b.id));
+    return [...(loaded || []), ...missing];
+  });
+  const [copies, setCopies] = useState<BookCopy[]>(() => {
+    const loaded = loadLocalData<BookCopy[]>('pslims_db_copies', initialCopies);
+    const existingIds = new Set((loaded || []).map(c => c.id));
+    const missing = initialCopies.filter(c => !existingIds.has(c.id));
+    return [...(loaded || []), ...missing];
+  });
+  const [transactions, setTransactions] = useState<CirculationTransaction[]>(() => {
+    const loaded = loadLocalData<CirculationTransaction[]>('pslims_db_transactions', initialTransactions);
+    const existingIds = new Set((loaded || []).map(t => t.id));
+    const missing = initialTransactions.filter(t => !existingIds.has(t.id));
+    return [...(loaded || []), ...missing];
+  });
   const [digitalAssets, setDigitalAssets] = useState<DigitalAsset[]>(() => loadLocalData('pslims_db_digital_assets', initialDigitalAssets));
   const [reservations, setReservations] = useState<BookReservation[]>(() => loadLocalData('pslims_db_reservations', initialReservations));
   const [lastSyncTime, setLastSyncTime] = useState<string | null>(null);
@@ -290,7 +334,7 @@ export function App() {
 
   // Theme & Language effects on document root
   useEffect(() => {
-    document.documentElement.className = `theme-${currentTheme}`;
+    applyThemeToDocument(currentTheme);
     localStorage.setItem('pslims_theme', currentTheme);
   }, [currentTheme]);
 
@@ -776,58 +820,73 @@ export function App() {
     );
   }
 
+  const activeThemeDef = getThemeConfig(currentTheme);
+
   return (
-    <div className="flex h-screen bg-[#09090b] text-[#fafafa] font-sans antialiased overflow-hidden selection:bg-blue-500 selection:text-white">
-      {/* Sidebar Navigation */}
-      <Sidebar
-        activeTab={currentTab}
-        onSelectTab={setCurrentTab}
-        userRole={currentUser.role}
+    <div className={`relative h-screen w-full flex flex-col overflow-hidden ${activeThemeDef.canvasBg} ${activeThemeDef.isDark ? 'text-slate-100' : 'text-slate-800'} selection:bg-blue-600 selection:text-white font-sans antialiased transition-colors duration-300`}>
+      {/* Decorative Brand Accent Stripe across top masthead */}
+      <div className={`h-1 w-full ${activeThemeDef.headerTopStripe} shrink-0 z-50 shadow-xs`} />
+
+      {/* Top Header - Spanning full screen width */}
+      <Header
+        currentUser={currentUser}
+        activeBranch={activeBranch}
+        branches={settings.branches}
+        currentTheme={currentTheme}
         currentLanguage={currentLanguage}
+        currentTab={currentTab}
+        settings={settings}
+        onChangeTheme={setCurrentTheme}
+        onChangeLanguage={setCurrentLanguage}
+        onChangeBranch={setActiveBranch}
+        onOpenCommandPalette={() => setIsCommandPaletteOpen(true)}
+        onOpenAddBranchModal={() => {
+          setBranchModalInitialMode('BRANCH');
+          setIsAddBranchModalOpen(true);
+        }}
+        onUpdateUser={handleUpdateUser}
+        onNavigateTab={setCurrentTab}
+        onLogout={async () => {
+          try {
+            await logOutOfFirebase();
+          } catch {
+            // ignore
+          }
+          try {
+            await fetch('/api/auth/logout', { method: 'POST' });
+          } catch {
+            // ignore
+          }
+          localStorage.removeItem('pslims_is_authenticated');
+          localStorage.removeItem('pslims_auth_user_id');
+          localStorage.removeItem('pslims_auth_branch');
+          localStorage.removeItem('pslims_google_auth_payload');
+          setIsAuthenticated(false);
+        }}
       />
 
-      {/* Main Content Area */}
-      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-        {/* Top Header */}
-        <Header
-          currentUser={currentUser}
-          activeBranch={activeBranch}
-          branches={settings.branches}
-          currentTheme={currentTheme}
+      {/* Body Area: Sidebar on Left, Content Area on Right */}
+      <div className="flex-1 flex overflow-hidden">
+        {/* Sidebar Navigation */}
+        <Sidebar
+          activeTab={currentTab}
+          onSelectTab={setCurrentTab}
+          userRole={currentUser.role}
           currentLanguage={currentLanguage}
-          settings={settings}
-          onChangeTheme={setCurrentTheme}
-          onChangeLanguage={setCurrentLanguage}
-          onChangeBranch={setActiveBranch}
-          onOpenCommandPalette={() => setIsCommandPaletteOpen(true)}
-          onOpenAddBranchModal={() => {
-            setBranchModalInitialMode('BRANCH');
-            setIsAddBranchModalOpen(true);
-          }}
-          onUpdateUser={handleUpdateUser}
-          onLogout={async () => {
-            try {
-              await fetch('/api/auth/logout', { method: 'POST' });
-            } catch {
-              // ignore
-            }
-            localStorage.removeItem('pslims_is_authenticated');
-            localStorage.removeItem('pslims_auth_user_id');
-            localStorage.removeItem('pslims_auth_branch');
-            localStorage.removeItem('pslims_google_auth_payload');
-            setIsAuthenticated(false);
-          }}
+          currentTheme={currentTheme}
         />
 
-        {/* Persistent Offline Sync & Connection Bar */}
-        <OfflineSyncBar
-          onSyncTriggered={handleSyncOfflineQueue}
-          lastSyncTime={lastSyncTime}
-        />
+        {/* Main Content Area */}
+        <div className={`flex-1 flex flex-col min-w-0 overflow-hidden ${activeThemeDef.canvasBg} transition-colors duration-300`}>
+          {/* Persistent Offline Sync & Connection Bar */}
+          <OfflineSyncBar
+            onSyncTriggered={handleSyncOfflineQueue}
+            lastSyncTime={lastSyncTime}
+          />
 
-        {/* Viewport Scrollable Area */}
-        <main className="flex-1 overflow-y-auto p-4 md:p-6 space-y-6">
-          <ErrorBoundary>
+          {/* Viewport Scrollable Area */}
+          <main className="flex-1 overflow-y-auto p-4 md:p-5 lg:p-6 space-y-5 scrollbar-thin scrollbar-thumb-slate-300">
+            <ErrorBoundary>
             {currentTab === 'MY_LIBRARY' && (
               <MyLibraryModule
                 currentUser={currentUser}
@@ -851,11 +910,15 @@ export function App() {
                 currentUser={currentUser}
                 settings={settings}
                 branches={settings.branches}
+                activeBranch={activeBranch}
+                currentTheme={currentTheme}
                 onAddBranch={handleAddBranch}
                 onDeleteBranch={handleDeleteBranch}
                 onUpdateUser={handleUpdateUser}
                 onNavigateTab={setCurrentTab}
                 onOpenAiAssistant={() => setCurrentTab('AI_ASSISTANT')}
+                onIssueBook={handleIssueBook}
+                onReturnBook={handleReturnBook}
               />
             )}
 
@@ -906,6 +969,12 @@ export function App() {
                 onAddBranch={handleAddBranch}
                 onDeleteBranch={handleDeleteBranch}
                 onPayFine={handlePayFine}
+                onImportBooks={(newBks, newCps) => {
+                  setBooks(prev => [...newBks, ...prev]);
+                  if (newCps && newCps.length > 0) {
+                    setCopies(prev => [...newCps, ...prev]);
+                  }
+                }}
               />
             )}
 
@@ -959,11 +1028,20 @@ export function App() {
             {currentTab === 'IMPORT_EXPORT' && (
               <ImportExportModule
                 books={books}
+                copies={copies}
                 users={users}
                 transactions={transactions}
                 settings={settings}
-                onImportBooks={newBks => setBooks(prev => [...newBks, ...prev])}
+                onImportBooks={(newBks, newCps) => {
+                  setBooks(prev => [...newBks, ...prev]);
+                  if (newCps && newCps.length > 0) {
+                    setCopies(prev => [...newCps, ...prev]);
+                  }
+                }}
                 onImportUsers={newUsrs => setUsers(prev => [...newUsrs, ...prev])}
+                onAddCopies={handleAddCopies}
+                onDeleteAllBooks={handleDeleteAllBooks}
+                onRestoreSampleBooks={handleRestoreSampleBooks}
               />
             )}
 
@@ -993,7 +1071,21 @@ export function App() {
             )}
           </ErrorBoundary>
         </main>
+
+        {/* Bottom Status Bar */}
+        <footer className="h-8 bg-white border-t border-slate-200/90 px-4 sm:px-6 flex items-center justify-between text-[11px] text-slate-500 font-medium shrink-0">
+          <div>PLiMS V4.1.1 | Pakistan Library Management System</div>
+          <div className="flex items-center space-x-3">
+            <span className="flex items-center space-x-1.5 text-emerald-600 font-semibold">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block animate-pulse"></span>
+              <span>System Online</span>
+            </span>
+            <span className="text-slate-300">|</span>
+            <span>Last Sync: {lastSyncTime ? `Sep 15, 2026 ${lastSyncTime}` : 'Sep 15, 2026 08:58:45 PM'}</span>
+          </div>
+        </footer>
       </div>
+    </div>
 
       {/* Keyboard Command Palette Modal */}
       <CommandPalette

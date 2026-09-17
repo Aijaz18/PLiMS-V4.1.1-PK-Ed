@@ -20,18 +20,31 @@ import {
   Search,
   HelpCircle,
   Layers,
-  Table
+  Table,
+  UploadCloud,
+  Trash2,
+  PlusCircle
 } from 'lucide-react';
 import * as XLSX from 'xlsx';
-import { BookRecord, UserProfile, CirculationTransaction, SystemSettings } from '../../types/alims';
+import { BookRecord, BookCopy, UserProfile, CirculationTransaction, SystemSettings } from '../../types/alims';
+import { HighCapacityExportModal } from '../catalog/HighCapacityExportModal';
+import { HighCapacityImportModal } from '../catalog/HighCapacityImportModal';
+import { PurgeCatalogModal } from '../catalog/PurgeCatalogModal';
+import { LibrarianHoldingsBuilderModal } from '../catalog/LibrarianHoldingsBuilderModal';
+import { isReferenceCatalogActive, setReferenceCatalogActive } from '../../services/catalog300kEngine';
+import { idbClearAll } from '../../services/offlineStorage';
 
 interface ImportExportModuleProps {
   books: BookRecord[];
+  copies?: BookCopy[];
   users: UserProfile[];
   transactions?: CirculationTransaction[];
   settings?: SystemSettings;
-  onImportBooks?: (newBooks: BookRecord[]) => void;
+  onImportBooks?: (newBooks: BookRecord[], newCopies?: BookCopy[]) => void;
   onImportUsers?: (newUsers: UserProfile[]) => void;
+  onAddCopies?: (newCopies: BookCopy[]) => void;
+  onDeleteAllBooks?: () => void;
+  onRestoreSampleBooks?: () => void;
 }
 
 interface AttachedFileInfo {
@@ -45,15 +58,43 @@ interface AttachedFileInfo {
 
 export const ImportExportModule: React.FC<ImportExportModuleProps> = ({
   books,
+  copies = [],
   users,
   transactions = [],
   settings,
   onImportBooks,
-  onImportUsers
+  onImportUsers,
+  onAddCopies,
+  onDeleteAllBooks,
+  onRestoreSampleBooks
 }) => {
   const [activeTab, setActiveTab] = useState<'EXPORT' | 'IMPORT' | 'MARC_CONVERTER' | 'LOCALHOST_PACKAGE'>('IMPORT');
   const [exportTarget, setExportTarget] = useState<'BOOKS' | 'MEMBERS' | 'TRANSACTIONS' | 'FULL_DATABASE'>('BOOKS');
   const [exportFormat, setExportFormat] = useState<'CSV' | 'JSON' | 'EXCEL' | 'MARCXML'>('EXCEL');
+
+  // High-Capacity 300,000+ Titles / 660,000+ Holdings Modals
+  const [isHighCapacityExportOpen, setIsHighCapacityExportOpen] = useState(false);
+  const [isHighCapacityImportOpen, setIsHighCapacityImportOpen] = useState(false);
+
+  // Purge & Rapid Clean Slate and Holdings Provisioning Modals
+  const [isPurgeModalOpen, setIsPurgeModalOpen] = useState(false);
+  const [isHoldingsBuilderOpen, setIsHoldingsBuilderOpen] = useState(false);
+
+  const handlePurgeAllToCleanSlate = () => {
+    setReferenceCatalogActive(false);
+    if (onDeleteAllBooks) onDeleteAllBooks();
+    idbClearAll().catch(() => {});
+  };
+
+  const handlePurgeCustomOnly = () => {
+    if (onDeleteAllBooks) onDeleteAllBooks();
+    idbClearAll().catch(() => {});
+  };
+
+  const handleRestoreReferenceCatalog = () => {
+    setReferenceCatalogActive(true);
+    if (onRestoreSampleBooks) onRestoreSampleBooks();
+  };
 
   // Import State
   const [importTarget, setImportTarget] = useState<'BOOKS' | 'MEMBERS'>('BOOKS');
@@ -670,13 +711,13 @@ export const ImportExportModule: React.FC<ImportExportModuleProps> = ({
   return (
     <div className="space-y-6">
       {/* Top Banner */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-5 rounded-2xl bg-gradient-to-r from-[#121214] via-[#18181b] to-[#121214] border border-[#27272a] shadow-lg">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-5 rounded-2xl bg-gradient-to-r from-[#121214] via-[#18181b] to-[#121214] border border-slate-200/90 shadow-lg">
         <div>
           <div className="flex items-center space-x-2">
             <Database className="h-6 w-6 text-emerald-400" />
-            <h2 className="text-xl font-bold text-[#fafafa]">Centralized Import & Export Center</h2>
+            <h2 className="text-xl font-bold text-slate-900">Centralized Import & Export Center</h2>
           </div>
-          <p className="text-xs text-[#a1a1aa] mt-1">
+          <p className="text-xs text-slate-500 mt-1">
             Batch Data Ingestion & Open Source ISO/MARC21 Data Exchange Hub (CSV, Excel .xlsx, MARCXML, JSON)
           </p>
         </div>
@@ -684,19 +725,19 @@ export const ImportExportModule: React.FC<ImportExportModuleProps> = ({
         <div className="flex items-center space-x-2">
           <span className="px-3 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-semibold flex items-center space-x-1.5">
             <CheckCircle2 className="h-4 w-4" />
-            <span>Excel, CSV & Koha/SLiMS Ready</span>
+            <span>Excel, CSV & Standard ILS Ready</span>
           </span>
         </div>
       </div>
 
       {/* Tabs */}
-      <div className="flex items-center space-x-2 border-b border-[#27272a] pb-3 overflow-x-auto">
+      <div className="flex items-center space-x-2 border-b border-slate-200/90 pb-3 overflow-x-auto">
         <button
           onClick={() => setActiveTab('IMPORT')}
           className={`px-4 py-2 rounded-xl text-xs font-semibold flex items-center space-x-2 transition-all cursor-pointer shrink-0 ${
             activeTab === 'IMPORT'
               ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/20'
-              : 'bg-[#121214] border border-[#27272a] text-[#a1a1aa] hover:text-[#fafafa]'
+              : 'bg-white border border-slate-200/90 text-slate-500 hover:text-slate-900'
           }`}
         >
           <Upload className="h-4 w-4" />
@@ -708,7 +749,7 @@ export const ImportExportModule: React.FC<ImportExportModuleProps> = ({
           className={`px-4 py-2 rounded-xl text-xs font-semibold flex items-center space-x-2 transition-all cursor-pointer shrink-0 ${
             activeTab === 'EXPORT'
               ? 'bg-blue-600 text-white shadow-md shadow-blue-600/20'
-              : 'bg-[#121214] border border-[#27272a] text-[#a1a1aa] hover:text-[#fafafa]'
+              : 'bg-white border border-slate-200/90 text-slate-500 hover:text-slate-900'
           }`}
         >
           <Download className="h-4 w-4" />
@@ -720,7 +761,7 @@ export const ImportExportModule: React.FC<ImportExportModuleProps> = ({
           className={`px-4 py-2 rounded-xl text-xs font-semibold flex items-center space-x-2 transition-all cursor-pointer shrink-0 ${
             activeTab === 'MARC_CONVERTER'
               ? 'bg-purple-600 text-white shadow-md shadow-purple-600/20'
-              : 'bg-[#121214] border border-[#27272a] text-[#a1a1aa] hover:text-[#fafafa]'
+              : 'bg-white border border-slate-200/90 text-slate-500 hover:text-slate-900'
           }`}
         >
           <FileCode className="h-4 w-4 text-purple-300" />
@@ -732,7 +773,7 @@ export const ImportExportModule: React.FC<ImportExportModuleProps> = ({
           className={`px-4 py-2 rounded-xl text-xs font-semibold flex items-center space-x-2 transition-all cursor-pointer shrink-0 ${
             activeTab === 'LOCALHOST_PACKAGE'
               ? 'bg-amber-600 text-white shadow-md shadow-amber-600/20'
-              : 'bg-[#121214] border border-[#27272a] text-[#a1a1aa] hover:text-[#fafafa]'
+              : 'bg-white border border-slate-200/90 text-slate-500 hover:text-slate-900'
           }`}
         >
           <Building2 className="h-4 w-4 text-amber-300" />
@@ -743,22 +784,73 @@ export const ImportExportModule: React.FC<ImportExportModuleProps> = ({
       {/* TAB 1: BATCH IMPORT HUB */}
       {activeTab === 'IMPORT' && (
         <div className="space-y-6">
+          {/* High-Capacity 300k & Holdings Bulk Ingest Banner */}
+          <div className="p-5 rounded-2xl bg-gradient-to-r from-emerald-700 via-teal-700 to-slate-900 text-white flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-lg">
+            <div className="space-y-1">
+              <div className="flex items-center space-x-2">
+                <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/30 border border-emerald-400/40 text-[11px] font-bold uppercase text-emerald-200">
+                  Unlimited Storage Ingestion Engine
+                </span>
+                <span className="px-2 py-0.5 rounded-full bg-teal-500/30 text-[10px] font-bold text-teal-200">
+                  IndexedDB Engine
+                </span>
+              </div>
+              <h3 className="text-base font-bold flex items-center space-x-2">
+                <UploadCloud className="h-5 w-5 text-emerald-300" />
+                <span>Bulk Ingest Bibliographic Titles & Physical Holdings</span>
+              </h3>
+              <p className="text-xs text-emerald-100 max-w-2xl">
+                Ingest thousands of MARC21/RDA titles, auto-generate physical barcodes & accessions across campuses, or seed ready-to-circulate academic batches with 1 click.
+              </p>
+            </div>
+            <div className="flex items-center space-x-2 shrink-0 flex-wrap gap-y-2">
+              <button
+                type="button"
+                onClick={() => setIsHighCapacityImportOpen(true)}
+                className="px-4 py-2.5 rounded-xl bg-white text-emerald-900 hover:bg-emerald-50 font-bold text-xs flex items-center space-x-1.5 shrink-0 transition-all cursor-pointer shadow-md"
+              >
+                <UploadCloud className="h-4 w-4 text-emerald-600" />
+                <span>Bulk File Ingest</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setIsHoldingsBuilderOpen(true)}
+                className="px-4 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-white font-bold text-xs flex items-center space-x-1.5 shrink-0 transition-all cursor-pointer shadow-md"
+                title="Add holding books on institutional needs up to 3 Lakhs"
+              >
+                <PlusCircle className="h-4 w-4" />
+                <span>+ Provision Holdings (Up to 3L)</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setIsPurgeModalOpen(true)}
+                className="px-4 py-2.5 rounded-xl bg-red-600 hover:bg-red-500 text-white font-bold text-xs flex items-center space-x-1.5 shrink-0 transition-all cursor-pointer shadow-md"
+                title="Purge / Remove catalog records within a minute and reset to clean slate"
+              >
+                <Trash2 className="h-4 w-4" />
+                <span>Purge / Reset Catalog</span>
+              </button>
+            </div>
+          </div>
+
           {/* Ingestion Configuration & Dropzone Card */}
-          <div className="p-6 rounded-2xl border border-[#27272a] bg-[#121214] space-y-5">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#27272a] pb-4">
+          <div className="p-6 rounded-2xl border border-slate-200/90 bg-white space-y-5">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200/90 pb-4">
               <div>
-                <h3 className="text-sm font-bold text-[#fafafa] flex items-center space-x-2">
+                <h3 className="text-sm font-bold text-slate-900 flex items-center space-x-2">
                   <Upload className="h-4 w-4 text-emerald-400" />
                   <span>Batch Data Ingestion Engine</span>
                 </h3>
-                <p className="text-xs text-[#a1a1aa] mt-0.5">
+                <p className="text-xs text-slate-500 mt-0.5">
                   Import bibliographic holdings or patron records from CSV spreadsheets, Excel workbooks (.xlsx/.xls), or JSON exports.
                 </p>
               </div>
 
               {/* Target Selector */}
               <div className="flex items-center space-x-2 shrink-0">
-                <span className="text-xs text-[#a1a1aa]">Ingestion Target:</span>
+                <span className="text-xs text-slate-500">Ingestion Target:</span>
                 <select
                   value={importTarget}
                   onChange={e => {
@@ -768,7 +860,7 @@ export const ImportExportModule: React.FC<ImportExportModuleProps> = ({
                     setImportStatus(null);
                     setImportError(null);
                   }}
-                  className="bg-[#09090b] border border-[#27272a] rounded-xl px-3 py-1.5 text-xs text-[#fafafa] font-bold cursor-pointer focus:outline-none focus:border-emerald-500"
+                  className="bg-[#f1f5f9] border border-slate-200/90 rounded-xl px-3 py-1.5 text-xs text-slate-900 font-bold cursor-pointer focus:outline-none focus:border-emerald-500"
                 >
                   <option value="BOOKS">📚 Bibliographic Books Catalog</option>
                   <option value="MEMBERS">👥 Patron / Member Profiles</option>
@@ -795,7 +887,7 @@ export const ImportExportModule: React.FC<ImportExportModuleProps> = ({
               className={`p-8 rounded-2xl border-2 border-dashed text-center space-y-4 transition-all cursor-pointer relative select-none ${
                 dragActive
                   ? 'border-emerald-500 bg-emerald-500/10 scale-[1.01] shadow-xl ring-4 ring-emerald-500/20'
-                  : 'border-[#27272a] bg-[#09090b] hover:border-emerald-500/60 hover:bg-[#0c0c0e]'
+                  : 'border-slate-200/90 bg-[#f1f5f9] hover:border-emerald-500/60 hover:bg-[#0c0c0e]'
               }`}
             >
               <div className="w-14 h-14 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center mx-auto text-emerald-400">
@@ -803,10 +895,10 @@ export const ImportExportModule: React.FC<ImportExportModuleProps> = ({
               </div>
 
               <div>
-                <h4 className="font-bold text-base text-[#fafafa]">
+                <h4 className="font-bold text-base text-slate-900">
                   Drag & Drop your CSV or Excel (.xlsx) file here
                 </h4>
-                <p className="text-xs text-[#a1a1aa] mt-1 max-w-md mx-auto leading-relaxed">
+                <p className="text-xs text-slate-500 mt-1 max-w-md mx-auto leading-relaxed">
                   Supports <strong className="text-emerald-400">Excel (.xlsx, .xls)</strong>, <strong className="text-blue-400">CSV</strong>, TSV, JSON, and MARCXML records. Or click anywhere in this box to browse from your device.
                 </p>
               </div>
@@ -830,7 +922,7 @@ export const ImportExportModule: React.FC<ImportExportModuleProps> = ({
                     e.stopPropagation();
                     handleLoadSampleDemo();
                   }}
-                  className="px-3.5 py-2 rounded-xl bg-[#18181b] hover:bg-[#27272a] text-zinc-300 hover:text-white text-xs cursor-pointer border border-[#27272a] flex items-center space-x-1.5"
+                  className="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-[#27272a] text-slate-700 hover:text-white text-xs cursor-pointer border border-slate-200/90 flex items-center space-x-1.5"
                 >
                   <Sparkles className="h-3.5 w-3.5 text-amber-400" />
                   <span>Load Sample Demo Batch</span>
@@ -838,12 +930,12 @@ export const ImportExportModule: React.FC<ImportExportModuleProps> = ({
               </div>
 
               {/* Supported Formats Pills */}
-              <div className="flex flex-wrap items-center justify-center gap-2 pt-2 text-[10px] font-mono text-[#71717a]">
-                <span className="px-2 py-0.5 rounded bg-[#18181b] border border-[#27272a]">.XLSX</span>
-                <span className="px-2 py-0.5 rounded bg-[#18181b] border border-[#27272a]">.XLS</span>
-                <span className="px-2 py-0.5 rounded bg-[#18181b] border border-[#27272a]">.CSV</span>
-                <span className="px-2 py-0.5 rounded bg-[#18181b] border border-[#27272a]">.TSV</span>
-                <span className="px-2 py-0.5 rounded bg-[#18181b] border border-[#27272a]">.JSON</span>
+              <div className="flex flex-wrap items-center justify-center gap-2 pt-2 text-[10px] font-mono text-slate-400">
+                <span className="px-2 py-0.5 rounded bg-slate-100 border border-slate-200/90">.XLSX</span>
+                <span className="px-2 py-0.5 rounded bg-slate-100 border border-slate-200/90">.XLS</span>
+                <span className="px-2 py-0.5 rounded bg-slate-100 border border-slate-200/90">.CSV</span>
+                <span className="px-2 py-0.5 rounded bg-slate-100 border border-slate-200/90">.TSV</span>
+                <span className="px-2 py-0.5 rounded bg-slate-100 border border-slate-200/90">.JSON</span>
               </div>
             </div>
 
@@ -861,7 +953,7 @@ export const ImportExportModule: React.FC<ImportExportModuleProps> = ({
                         {attachedFile.format}
                       </span>
                     </div>
-                    <div className="text-[11px] text-[#a1a1aa] flex items-center space-x-2 mt-0.5">
+                    <div className="text-[11px] text-slate-500 flex items-center space-x-2 mt-0.5">
                       <span>{(attachedFile.size / 1024).toFixed(1)} KB</span>
                       <span>•</span>
                       <span className="text-emerald-400 font-bold">{attachedFile.rowCount} Record(s) Detected</span>
@@ -883,7 +975,7 @@ export const ImportExportModule: React.FC<ImportExportModuleProps> = ({
                   <button
                     type="button"
                     onClick={handleRemoveAttachedFile}
-                    className="p-2 rounded-xl bg-[#18181b] hover:bg-red-500/20 hover:text-red-400 text-zinc-400 text-xs border border-[#27272a] cursor-pointer"
+                    className="p-2 rounded-xl bg-slate-100 hover:bg-red-500/20 hover:text-red-400 text-slate-500 text-xs border border-slate-200/90 cursor-pointer"
                     title="Remove attached file"
                   >
                     <X className="h-4 w-4" />
@@ -911,8 +1003,8 @@ export const ImportExportModule: React.FC<ImportExportModuleProps> = ({
             )}
 
             {/* Sample Template Download Helper Bar */}
-            <div className="pt-2 border-t border-[#27272a] flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
-              <div className="text-[#a1a1aa] flex items-center space-x-1.5">
+            <div className="pt-2 border-t border-slate-200/90 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+              <div className="text-slate-500 flex items-center space-x-1.5">
                 <HelpCircle className="h-4 w-4 text-emerald-400" />
                 <span>Need a starter spreadsheet template?</span>
               </div>
@@ -921,7 +1013,7 @@ export const ImportExportModule: React.FC<ImportExportModuleProps> = ({
                 <button
                   type="button"
                   onClick={() => handleDownloadSampleTemplate(importTarget, 'EXCEL')}
-                  className="px-3 py-1.5 rounded-lg bg-[#18181b] hover:bg-[#27272a] text-emerald-400 hover:text-emerald-300 font-medium text-xs border border-emerald-500/30 flex items-center space-x-1 cursor-pointer"
+                  className="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-[#27272a] text-emerald-400 hover:text-emerald-300 font-medium text-xs border border-emerald-500/30 flex items-center space-x-1 cursor-pointer"
                 >
                   <FileSpreadsheet className="h-3.5 w-3.5" />
                   <span>Download {importTarget === 'BOOKS' ? 'Books' : 'Members'} Template (.xlsx)</span>
@@ -930,7 +1022,7 @@ export const ImportExportModule: React.FC<ImportExportModuleProps> = ({
                 <button
                   type="button"
                   onClick={() => handleDownloadSampleTemplate(importTarget, 'CSV')}
-                  className="px-3 py-1.5 rounded-lg bg-[#18181b] hover:bg-[#27272a] text-blue-400 hover:text-blue-300 font-medium text-xs border border-blue-500/30 flex items-center space-x-1 cursor-pointer"
+                  className="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-[#27272a] text-blue-400 hover:text-blue-300 font-medium text-xs border border-blue-500/30 flex items-center space-x-1 cursor-pointer"
                 >
                   <FileText className="h-3.5 w-3.5" />
                   <span>Download CSV Template</span>
@@ -941,31 +1033,31 @@ export const ImportExportModule: React.FC<ImportExportModuleProps> = ({
 
           {/* INGESTION PREVIEW TABLE */}
           {importedPreview && importedPreview.length > 0 && (
-            <div className="p-6 rounded-2xl border border-[#27272a] bg-[#121214] space-y-4">
+            <div className="p-6 rounded-2xl border border-slate-200/90 bg-white space-y-4">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div className="flex items-center space-x-2">
                   <Table className="h-4 w-4 text-emerald-400" />
-                  <h4 className="text-xs font-bold text-[#fafafa] uppercase tracking-wider font-mono">
+                  <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider font-mono">
                     Ingestion Live Preview ({filteredPreview.length} of {importedPreview.length} Records)
                   </h4>
                 </div>
 
                 <div className="relative w-full sm:w-64">
-                  <Search className="h-3.5 w-3.5 text-[#71717a] absolute left-3 top-2.5" />
+                  <Search className="h-3.5 w-3.5 text-slate-400 absolute left-3 top-2.5" />
                   <input
                     type="text"
                     value={previewSearch}
                     onChange={e => setPreviewSearch(e.target.value)}
                     placeholder="Search parsed preview..."
-                    className="w-full bg-[#09090b] border border-[#27272a] rounded-xl pl-9 pr-3 py-1.5 text-xs text-[#fafafa] focus:outline-none focus:border-emerald-500"
+                    className="w-full bg-[#f1f5f9] border border-slate-200/90 rounded-xl pl-9 pr-3 py-1.5 text-xs text-slate-900 focus:outline-none focus:border-emerald-500"
                   />
                 </div>
               </div>
 
-              <div className="rounded-xl border border-[#27272a] overflow-x-auto bg-[#09090b]">
+              <div className="rounded-xl border border-slate-200/90 overflow-x-auto bg-[#f1f5f9]">
                 <table className="w-full text-left text-xs border-collapse">
                   <thead>
-                    <tr className="border-b border-[#27272a] text-[#a1a1aa] bg-[#121214]">
+                    <tr className="border-b border-slate-200/90 text-slate-500 bg-white">
                       <th className="p-3">#</th>
                       <th className="p-3 font-mono">{importTarget === 'BOOKS' ? 'ISBN / Accession' : 'Member Code'}</th>
                       <th className="p-3">{importTarget === 'BOOKS' ? 'Book Title & Authors' : 'Patron Full Name'}</th>
@@ -975,19 +1067,19 @@ export const ImportExportModule: React.FC<ImportExportModuleProps> = ({
                       <th className="p-3 text-center">Validation</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-[#27272a]">
+                  <tbody className="divide-y divide-slate-100">
                     {filteredPreview.slice(0, 50).map((item, idx) => (
                       <tr key={idx} className="hover:bg-zinc-900/50 transition-colors">
-                        <td className="p-3 text-[#71717a] font-mono text-[11px]">{idx + 1}</td>
+                        <td className="p-3 text-slate-400 font-mono text-[11px]">{idx + 1}</td>
                         <td className="p-3 font-mono text-blue-400 font-bold">{item.isbn || item.memberCode}</td>
                         <td className="p-3">
-                          <div className="font-bold text-[#fafafa]">{item.title || item.name}</div>
+                          <div className="font-bold text-slate-900">{item.title || item.name}</div>
                           {item.authors && (
-                            <div className="text-[11px] text-[#a1a1aa]">
+                            <div className="text-[11px] text-slate-500">
                               By {Array.isArray(item.authors) ? item.authors.join(', ') : item.authors}
                             </div>
                           )}
-                          {item.email && <div className="text-[10px] text-zinc-400 font-mono">{item.email}</div>}
+                          {item.email && <div className="text-[10px] text-slate-500 font-mono">{item.email}</div>}
                         </td>
                         <td className="p-3">
                           {importTarget === 'BOOKS' ? (
@@ -997,12 +1089,12 @@ export const ImportExportModule: React.FC<ImportExportModuleProps> = ({
                               <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-blue-500/10 text-blue-400 border border-blue-500/20">
                                 {item.role}
                               </span>
-                              <div className="text-[10px] text-zinc-400 mt-0.5">{item.designation}</div>
+                              <div className="text-[10px] text-slate-500 mt-0.5">{item.designation}</div>
                             </div>
                           )}
                         </td>
-                        <td className="p-3 text-[#a1a1aa]">{item.department}</td>
-                        <td className="p-3 text-right font-mono font-bold text-[#fafafa]">
+                        <td className="p-3 text-slate-500">{item.department}</td>
+                        <td className="p-3 text-right font-mono font-bold text-slate-900">
                           {item.totalCopies ?? item.maxBorrowLimit}
                         </td>
                         <td className="p-3 text-center">
@@ -1017,7 +1109,7 @@ export const ImportExportModule: React.FC<ImportExportModuleProps> = ({
               </div>
 
               {filteredPreview.length > 50 && (
-                <p className="text-center text-xs text-[#a1a1aa] pt-2">
+                <p className="text-center text-xs text-slate-500 pt-2">
                   Showing first 50 of {filteredPreview.length} parsed records. Click <strong>Commit Ingestion</strong> above to save all records.
                 </p>
               )}
@@ -1029,28 +1121,57 @@ export const ImportExportModule: React.FC<ImportExportModuleProps> = ({
       {/* TAB 2: EXPORT CENTER */}
       {activeTab === 'EXPORT' && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="p-6 rounded-2xl border border-[#27272a] bg-[#121214] space-y-5">
-            <h3 className="text-sm font-bold text-[#fafafa] flex items-center space-x-2">
+          {/* High-Capacity 300,000+ Titles / 660,000+ Holdings Export Banner */}
+          <div className="md:col-span-2 p-5 rounded-2xl bg-gradient-to-r from-blue-700 via-indigo-700 to-slate-900 text-white flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-lg">
+            <div className="space-y-1">
+              <div className="flex items-center space-x-2">
+                <span className="px-2.5 py-0.5 rounded-full bg-blue-500/30 border border-blue-400/40 text-[11px] font-bold uppercase text-blue-200">
+                  Unlimited 300,000+ Titles (3.0 Lakhs) / ~660k Holdings
+                </span>
+                <span className="px-2 py-0.5 rounded-full bg-indigo-500/30 text-[10px] font-bold text-indigo-200">
+                  10 DDC Classes
+                </span>
+              </div>
+              <h3 className="text-base font-bold flex items-center space-x-2">
+                <Layers className="h-5 w-5 text-blue-300" />
+                <span>High-Capacity Bibliographic & Holdings Export Engine</span>
+              </h3>
+              <p className="text-xs text-blue-100 max-w-2xl">
+                Export up to 300,000 titles and 660,000+ physical copies across 10 Dewey Decimal classes in CSV, MARC21 (.mrc), MARCXML, Excel, or JSON without browser memory bottlenecks.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setIsHighCapacityExportOpen(true)}
+              className="px-5 py-2.5 rounded-xl bg-white text-blue-900 hover:bg-blue-50 font-bold text-xs flex items-center space-x-2 shrink-0 transition-all cursor-pointer shadow-md"
+            >
+              <Download className="h-4 w-4 text-blue-600" />
+              <span>Launch 300k Export Engine</span>
+            </button>
+          </div>
+
+          <div className="p-6 rounded-2xl border border-slate-200/90 bg-white space-y-5">
+            <h3 className="text-sm font-bold text-slate-900 flex items-center space-x-2">
               <Download className="h-4 w-4 text-blue-400" />
               <span>Configure Data Export Stream</span>
             </h3>
 
             <div className="space-y-4 text-xs">
               <div>
-                <label className="block text-[#a1a1aa] mb-1.5 font-medium">1. Select Target Dataset</label>
+                <label className="block text-slate-500 mb-1.5 font-medium">1. Select Target Dataset</label>
                 <div className="grid grid-cols-2 gap-2">
                   <button
                     onClick={() => setExportTarget('BOOKS')}
                     className={`p-3 rounded-xl border text-left flex items-center space-x-2 cursor-pointer transition-all ${
                       exportTarget === 'BOOKS'
                         ? 'bg-blue-600/20 border-blue-500 text-white'
-                        : 'bg-[#09090b] border-[#27272a] text-[#a1a1aa]'
+                        : 'bg-[#f1f5f9] border-slate-200/90 text-slate-500'
                     }`}
                   >
                     <BookOpen className="h-4 w-4 text-blue-400 shrink-0" />
                     <div>
                       <div className="font-bold">Bibliographic Holdings</div>
-                      <div className="text-[10px] text-[#71717a]">{books.length} Records</div>
+                      <div className="text-[10px] text-slate-400">{books.length} Records</div>
                     </div>
                   </button>
 
@@ -1059,13 +1180,13 @@ export const ImportExportModule: React.FC<ImportExportModuleProps> = ({
                     className={`p-3 rounded-xl border text-left flex items-center space-x-2 cursor-pointer transition-all ${
                       exportTarget === 'MEMBERS'
                         ? 'bg-blue-600/20 border-blue-500 text-white'
-                        : 'bg-[#09090b] border-[#27272a] text-[#a1a1aa]'
+                        : 'bg-[#f1f5f9] border-slate-200/90 text-slate-500'
                     }`}
                   >
                     <Users className="h-4 w-4 text-emerald-400 shrink-0" />
                     <div>
                       <div className="font-bold">Patrons & Staff Directory</div>
-                      <div className="text-[10px] text-[#71717a]">{users.length} Profiles</div>
+                      <div className="text-[10px] text-slate-400">{users.length} Profiles</div>
                     </div>
                   </button>
 
@@ -1074,13 +1195,13 @@ export const ImportExportModule: React.FC<ImportExportModuleProps> = ({
                     className={`p-3 rounded-xl border text-left flex items-center space-x-2 cursor-pointer transition-all ${
                       exportTarget === 'TRANSACTIONS'
                         ? 'bg-blue-600/20 border-blue-500 text-white'
-                        : 'bg-[#09090b] border-[#27272a] text-[#a1a1aa]'
+                        : 'bg-[#f1f5f9] border-slate-200/90 text-slate-500'
                     }`}
                   >
                     <FileText className="h-4 w-4 text-amber-400 shrink-0" />
                     <div>
                       <div className="font-bold">Circulation Logs</div>
-                      <div className="text-[10px] text-[#71717a]">{transactions.length} Records</div>
+                      <div className="text-[10px] text-slate-400">{transactions.length} Records</div>
                     </div>
                   </button>
 
@@ -1089,27 +1210,27 @@ export const ImportExportModule: React.FC<ImportExportModuleProps> = ({
                     className={`p-3 rounded-xl border text-left flex items-center space-x-2 cursor-pointer transition-all ${
                       exportTarget === 'FULL_DATABASE'
                         ? 'bg-blue-600/20 border-blue-500 text-white'
-                        : 'bg-[#09090b] border-[#27272a] text-[#a1a1aa]'
+                        : 'bg-[#f1f5f9] border-slate-200/90 text-slate-500'
                     }`}
                   >
                     <Database className="h-4 w-4 text-purple-400 shrink-0" />
                     <div>
                       <div className="font-bold">Full PLiMS System Backup</div>
-                      <div className="text-[10px] text-[#71717a]">All Tables & Configs</div>
+                      <div className="text-[10px] text-slate-400">All Tables & Configs</div>
                     </div>
                   </button>
                 </div>
               </div>
 
               <div>
-                <label className="block text-[#a1a1aa] mb-1.5 font-medium">2. Select Export File Format</label>
+                <label className="block text-slate-500 mb-1.5 font-medium">2. Select Export File Format</label>
                 <div className="grid grid-cols-4 gap-2">
                   <button
                     onClick={() => setExportFormat('EXCEL')}
                     className={`py-2 rounded-xl border font-mono text-center cursor-pointer transition-all ${
                       exportFormat === 'EXCEL'
                         ? 'bg-emerald-600 text-white border-emerald-500 font-bold shadow-md'
-                        : 'bg-[#09090b] border-[#27272a] text-[#a1a1aa]'
+                        : 'bg-[#f1f5f9] border-slate-200/90 text-slate-500'
                     }`}
                   >
                     Excel (.xlsx)
@@ -1120,7 +1241,7 @@ export const ImportExportModule: React.FC<ImportExportModuleProps> = ({
                     className={`py-2 rounded-xl border font-mono text-center cursor-pointer transition-all ${
                       exportFormat === 'CSV'
                         ? 'bg-blue-600 text-white border-blue-500 font-bold shadow-md'
-                        : 'bg-[#09090b] border-[#27272a] text-[#a1a1aa]'
+                        : 'bg-[#f1f5f9] border-slate-200/90 text-slate-500'
                     }`}
                   >
                     CSV
@@ -1131,7 +1252,7 @@ export const ImportExportModule: React.FC<ImportExportModuleProps> = ({
                     className={`py-2 rounded-xl border font-mono text-center cursor-pointer transition-all ${
                       exportFormat === 'JSON'
                         ? 'bg-amber-600 text-white border-amber-500 font-bold shadow-md'
-                        : 'bg-[#09090b] border-[#27272a] text-[#a1a1aa]'
+                        : 'bg-[#f1f5f9] border-slate-200/90 text-slate-500'
                     }`}
                   >
                     JSON
@@ -1142,7 +1263,7 @@ export const ImportExportModule: React.FC<ImportExportModuleProps> = ({
                     className={`py-2 rounded-xl border font-mono text-center cursor-pointer transition-all ${
                       exportFormat === 'MARCXML'
                         ? 'bg-purple-600 text-white border-purple-500 font-bold shadow-md'
-                        : 'bg-[#09090b] border-[#27272a] text-[#a1a1aa]'
+                        : 'bg-[#f1f5f9] border-slate-200/90 text-slate-500'
                     }`}
                   >
                     MARC21
@@ -1160,35 +1281,35 @@ export const ImportExportModule: React.FC<ImportExportModuleProps> = ({
             </div>
           </div>
 
-          <div className="p-6 rounded-2xl border border-[#27272a] bg-[#121214] flex flex-col justify-between">
+          <div className="p-6 rounded-2xl border border-slate-200/90 bg-white flex flex-col justify-between">
             <div className="space-y-4">
-              <h3 className="text-sm font-bold text-[#fafafa] flex items-center space-x-2">
+              <h3 className="text-sm font-bold text-slate-900 flex items-center space-x-2">
                 <FileSpreadsheet className="h-4 w-4 text-emerald-400" />
                 <span>Export Stream Information</span>
               </h3>
 
-              <div className="bg-[#09090b] p-4 rounded-xl border border-[#27272a] text-xs space-y-2 font-mono">
-                <div className="flex justify-between text-[#a1a1aa]">
+              <div className="bg-[#f1f5f9] p-4 rounded-xl border border-slate-200/90 text-xs space-y-2 font-mono">
+                <div className="flex justify-between text-slate-500">
                   <span>Target Dataset:</span>
                   <span className="text-blue-400 font-bold">{exportTarget}</span>
                 </div>
-                <div className="flex justify-between text-[#a1a1aa]">
+                <div className="flex justify-between text-slate-500">
                   <span>Output Encoding:</span>
                   <span className="text-emerald-400 font-bold">UTF-8 / ISO-2709</span>
                 </div>
-                <div className="flex justify-between text-[#a1a1aa]">
+                <div className="flex justify-between text-slate-500">
                   <span>Delimiter Standard:</span>
-                  <span className="text-[#fafafa]">Workbook Binary / Comma Separated</span>
+                  <span className="text-slate-900">Workbook Binary / Comma Separated</span>
                 </div>
-                <div className="flex justify-between text-[#a1a1aa]">
+                <div className="flex justify-between text-slate-500">
                   <span>Selected Format:</span>
                   <span className="text-amber-400 font-bold">{exportFormat}</span>
                 </div>
               </div>
 
-              <p className="text-xs text-[#a1a1aa] leading-relaxed">
+              <p className="text-xs text-slate-500 leading-relaxed">
                 Export files generated from PLiMS studio are 100% compliant with standard ILS systems including
-                Koha, SLiMS 9 Bulian, LibraryThing, and MARC21 ISO-2709 cataloguing specifications.
+                SLiMS 9 Bulian, LibraryThing, and MARC21 ISO-2709 cataloguing specifications.
               </p>
             </div>
 
@@ -1202,20 +1323,20 @@ export const ImportExportModule: React.FC<ImportExportModuleProps> = ({
 
       {/* TAB 3: MARC CONVERTER */}
       {activeTab === 'MARC_CONVERTER' && (
-        <div className="p-6 rounded-2xl border border-[#27272a] bg-[#121214] space-y-4 font-mono text-xs">
-          <h3 className="text-sm font-bold text-[#fafafa] flex items-center space-x-2">
+        <div className="p-6 rounded-2xl border border-slate-200/90 bg-white space-y-4 font-mono text-xs">
+          <h3 className="text-sm font-bold text-slate-900 flex items-center space-x-2">
             <FileCode className="h-4 w-4 text-purple-400" />
             <span>ISO-2709 / MARC21 XML Live Converter</span>
           </h3>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <label className="text-[#a1a1aa]">PLiMS Bibliographic JSON Source</label>
+              <label className="text-slate-500">PLiMS Bibliographic JSON Source</label>
               <textarea
                 readOnly
                 rows={12}
                 value={JSON.stringify(books.slice(0, 2), null, 2)}
-                className="w-full bg-[#09090b] border border-[#27272a] rounded-xl p-3 text-[#fafafa] text-[10px] focus:outline-none"
+                className="w-full bg-[#f1f5f9] border border-slate-200/90 rounded-xl p-3 text-slate-900 text-[10px] focus:outline-none"
               />
             </div>
 
@@ -1225,7 +1346,7 @@ export const ImportExportModule: React.FC<ImportExportModuleProps> = ({
                 readOnly
                 rows={12}
                 value={convertBooksToMARCXML(books.slice(0, 2))}
-                className="w-full bg-[#09090b] border border-[#27272a] rounded-xl p-3 text-emerald-400 text-[10px] focus:outline-none"
+                className="w-full bg-[#f1f5f9] border border-slate-200/90 rounded-xl p-3 text-emerald-400 text-[10px] focus:outline-none"
               />
             </div>
           </div>
@@ -1241,7 +1362,7 @@ export const ImportExportModule: React.FC<ImportExportModuleProps> = ({
               <Building2 className="h-6 w-6" />
               <h3>PSLiMS Localhost PC & XAMPP Deployment Center</h3>
             </div>
-            <p className="text-xs text-[#a1a1aa] leading-relaxed">
+            <p className="text-xs text-slate-500 leading-relaxed">
               Run PSLiMS locally on any Windows PC, Mac, or Linux desktop. You can launch it using a standalone Node.js server, an automated <code className="text-amber-300 font-mono">.bat</code> launcher script, or host the compiled production build inside a local XAMPP <code className="text-amber-300 font-mono">C:\xampp\htdocs\pslims</code> web server directory.
             </p>
           </div>
@@ -1249,14 +1370,14 @@ export const ImportExportModule: React.FC<ImportExportModuleProps> = ({
           {/* Quick Script Download Cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {/* Windows Bat Launcher */}
-            <div className="p-5 rounded-2xl border border-[#27272a] bg-[#121214] space-y-3 flex flex-col justify-between">
+            <div className="p-5 rounded-2xl border border-slate-200/90 bg-white space-y-3 flex flex-col justify-between">
               <div>
                 <div className="text-xs font-mono font-bold text-blue-400 uppercase tracking-wider flex items-center space-x-1.5">
                   <FileCode className="h-4 w-4" />
                   <span>Windows PC Batch Script</span>
                 </div>
-                <h4 className="font-bold text-sm text-[#fafafa] mt-2">start-pslims-windows.bat</h4>
-                <p className="text-[11px] text-[#a1a1aa] mt-1 leading-relaxed">
+                <h4 className="font-bold text-sm text-slate-900 mt-2">start-pslims-windows.bat</h4>
+                <p className="text-[11px] text-slate-500 mt-1 leading-relaxed">
                   One-click Windows batch file that automatically checks Node.js, installs dependencies, and boots the local web server on port 3000.
                 </p>
               </div>
@@ -1296,14 +1417,14 @@ pause`;
             </div>
 
             {/* Mac / Linux Shell Launcher */}
-            <div className="p-5 rounded-2xl border border-[#27272a] bg-[#121214] space-y-3 flex flex-col justify-between">
+            <div className="p-5 rounded-2xl border border-slate-200/90 bg-white space-y-3 flex flex-col justify-between">
               <div>
                 <div className="text-xs font-mono font-bold text-emerald-400 uppercase tracking-wider flex items-center space-x-1.5">
                   <FileCode className="h-4 w-4" />
                   <span>Mac / Linux Shell Script</span>
                 </div>
-                <h4 className="font-bold text-sm text-[#fafafa] mt-2">start-pslims-mac-linux.sh</h4>
-                <p className="text-[11px] text-[#a1a1aa] mt-1 leading-relaxed">
+                <h4 className="font-bold text-sm text-slate-900 mt-2">start-pslims-mac-linux.sh</h4>
+                <p className="text-[11px] text-slate-500 mt-1 leading-relaxed">
                   Executable shell script for macOS and Linux operating systems to launch local library terminal instances.
                 </p>
               </div>
@@ -1335,14 +1456,14 @@ npm run dev`;
             </div>
 
             {/* XAMPP Guide & Package */}
-            <div className="p-5 rounded-2xl border border-[#27272a] bg-[#121214] space-y-3 flex flex-col justify-between">
+            <div className="p-5 rounded-2xl border border-slate-200/90 bg-white space-y-3 flex flex-col justify-between">
               <div>
                 <div className="text-xs font-mono font-bold text-amber-400 uppercase tracking-wider flex items-center space-x-1.5">
                   <FileText className="h-4 w-4" />
                   <span>XAMPP htdocs Guide</span>
                 </div>
-                <h4 className="font-bold text-sm text-[#fafafa] mt-2">XAMPP_HTDOCS_INSTRUCTIONS.txt</h4>
-                <p className="text-[11px] text-[#a1a1aa] mt-1 leading-relaxed">
+                <h4 className="font-bold text-sm text-slate-900 mt-2">XAMPP_HTDOCS_INSTRUCTIONS.txt</h4>
+                <p className="text-[11px] text-slate-500 mt-1 leading-relaxed">
                   Detailed step-by-step documentation for placing PSLiMS static web builds inside XAMPP Apache <code className="text-amber-300 font-mono">htdocs</code> folder.
                 </p>
               </div>
@@ -1398,14 +1519,14 @@ All MARC21 records, library catalog scans, member lists, and overdue notices ope
           </div>
 
           {/* Full Database Backup for Local Seeding */}
-          <div className="p-6 rounded-2xl border border-[#27272a] bg-[#121214] space-y-4">
+          <div className="p-6 rounded-2xl border border-slate-200/90 bg-white space-y-4">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
-                <h4 className="font-bold text-sm text-[#fafafa] flex items-center space-x-2">
+                <h4 className="font-bold text-sm text-slate-900 flex items-center space-x-2">
                   <Database className="h-4 w-4 text-emerald-400" />
                   <span>Download Localhost Initial Seed Database JSON</span>
                 </h4>
-                <p className="text-xs text-[#a1a1aa] mt-0.5">
+                <p className="text-xs text-slate-500 mt-0.5">
                   Export the current catalog, user directory, active loans, and settings as a JSON file to populate your local PC database.
                 </p>
               </div>
@@ -1425,16 +1546,16 @@ All MARC21 records, library catalog scans, member lists, and overdue notices ope
           </div>
 
           {/* Step-by-Step Interactive Accordion Guide */}
-          <div className="p-6 rounded-2xl border border-[#27272a] bg-[#121214] space-y-4">
-            <h4 className="font-bold text-sm text-[#fafafa] flex items-center space-x-2">
+          <div className="p-6 rounded-2xl border border-slate-200/90 bg-white space-y-4">
+            <h4 className="font-bold text-sm text-slate-900 flex items-center space-x-2">
               <Sparkles className="h-4 w-4 text-amber-400" />
               <span>Step-by-Step Localhost PC & XAMPP Setup Walkthrough</span>
             </h4>
 
             <div className="space-y-3 text-xs">
-              <div className="p-4 rounded-xl bg-[#09090b] border border-[#27272a] space-y-1">
+              <div className="p-4 rounded-xl bg-[#f1f5f9] border border-slate-200/90 space-y-1">
                 <div className="font-bold text-amber-300 font-mono">Method A: Using Node.js Desktop Server (Quickest)</div>
-                <p className="text-[#a1a1aa] leading-relaxed">
+                <p className="text-slate-500 leading-relaxed">
                   1. Download Node.js LTS installer from <a href="https://nodejs.org" target="_blank" rel="noreferrer" className="text-blue-400 underline">nodejs.org</a> and install on PC.<br />
                   2. Extract the downloaded PSLiMS project folder to your desktop or documents folder.<br />
                   3. Double-click <code className="text-emerald-400 font-mono">start-pslims-windows.bat</code> (on Windows) or run <code className="text-emerald-400 font-mono">./start-pslims-mac-linux.sh</code> in terminal.<br />
@@ -1442,9 +1563,9 @@ All MARC21 records, library catalog scans, member lists, and overdue notices ope
                 </p>
               </div>
 
-              <div className="p-4 rounded-xl bg-[#09090b] border border-[#27272a] space-y-1">
+              <div className="p-4 rounded-xl bg-[#f1f5f9] border border-slate-200/90 space-y-1">
                 <div className="font-bold text-blue-300 font-mono">Method B: Using XAMPP Apache Server (C:\xampp\htdocs\pslims)</div>
-                <p className="text-[#a1a1aa] leading-relaxed">
+                <p className="text-slate-500 leading-relaxed">
                   1. Download and install XAMPP for Windows from ApacheFriends.<br />
                   2. Place your PSLiMS folder inside <code className="text-amber-300 font-mono">C:\xampp\htdocs\pslims</code>.<br />
                   3. Run <code className="text-emerald-400 font-mono">npm run build</code> in command prompt inside that folder to compile the static application into <code className="text-amber-300 font-mono">dist/</code>.<br />
@@ -1456,6 +1577,58 @@ All MARC21 records, library catalog scans, member lists, and overdue notices ope
           </div>
         </div>
       )}
+
+      {/* High Capacity 300k Export Modal */}
+      <HighCapacityExportModal
+        isOpen={isHighCapacityExportOpen}
+        onClose={() => setIsHighCapacityExportOpen(false)}
+        customBooks={books}
+        filteredBooks={books}
+        existingCopies={copies}
+        activeDdcFilter="ALL"
+      />
+
+      {/* High Capacity Bulk Import Modal */}
+      <HighCapacityImportModal
+        isOpen={isHighCapacityImportOpen}
+        onClose={() => setIsHighCapacityImportOpen(false)}
+        onImportSuccess={(newBooks, newCopies) => {
+          if (onImportBooks) {
+            onImportBooks(newBooks, newCopies);
+          }
+          if (onAddCopies && newCopies.length > 0) {
+            onAddCopies(newCopies);
+          }
+          setIsHighCapacityImportOpen(false);
+        }}
+      />
+
+      {/* 1-Minute Rapid Catalog Purge & Clean Slate Modal */}
+      <PurgeCatalogModal
+        isOpen={isPurgeModalOpen}
+        onClose={() => setIsPurgeModalOpen(false)}
+        onPurgeAllToCleanSlate={handlePurgeAllToCleanSlate}
+        onPurgeCustomOnly={handlePurgeCustomOnly}
+        onRestoreReferenceCatalog={handleRestoreReferenceCatalog}
+        customBooksCount={books.length}
+        totalCatalogCount={isReferenceCatalogActive() ? 300000 + books.length : books.length}
+        isReferenceActive={isReferenceCatalogActive()}
+      />
+
+      {/* Provision Holdings on Need (Up to 3 Lakhs) Builder Modal */}
+      <LibrarianHoldingsBuilderModal
+        isOpen={isHoldingsBuilderOpen}
+        onClose={() => setIsHoldingsBuilderOpen(false)}
+        onAddHoldings={(newBooks, newCopies) => {
+          if (onImportBooks) {
+            onImportBooks(newBooks, newCopies);
+          }
+          if (onAddCopies && newCopies.length > 0) {
+            onAddCopies(newCopies);
+          }
+        }}
+        currentCatalogCount={isReferenceCatalogActive() ? 300000 + books.length : books.length}
+      />
     </div>
   );
 };

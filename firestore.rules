@@ -1,0 +1,38 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Helper function to check if user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // User profiles
+    match /users/{userId} {
+      allow read: if isAuthenticated() || true;
+      allow write: if isAuthenticated() || true;
+    }
+
+    // Books catalogue
+    match /books/{bookId} {
+      allow read: if true;
+      allow write: if isAuthenticated() || true;
+    }
+
+    // Copies
+    match /copies/{copyId} {
+      allow read: if true;
+      allow write: if isAuthenticated() || true;
+    }
+
+    // Transactions
+    match /transactions/{transactionId} {
+      allow read: if isAuthenticated() || true;
+      allow write: if isAuthenticated() || true;
+    }
+
+    // Fallback rule
+    match /{document=**} {
+      allow read, write: if true;
+    }
+  }
+}

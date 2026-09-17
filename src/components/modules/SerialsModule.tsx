@@ -172,14 +172,14 @@ export const SerialsModule: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Header Banner */}
-      <div className="p-6 rounded-2xl bg-[#121214] border border-[#27272a] flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-xl">
+      <div className="p-6 rounded-2xl bg-white border border-slate-200/90 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-xl">
         <div>
           <div className="flex items-center space-x-2 text-rose-400 text-xs font-semibold uppercase tracking-wider mb-1">
             <Newspaper className="h-4 w-4" />
             <span>Periodicals & Journal Holdings</span>
           </div>
-          <h1 className="text-2xl font-bold font-serif text-[#fafafa]">Serials & Periodicals Control</h1>
-          <p className="text-xs text-[#a1a1aa] mt-1">
+          <h1 className="text-2xl font-bold font-serif text-slate-900">Serials & Periodicals Control</h1>
+          <p className="text-xs text-slate-500 mt-1">
             Manage journal subscriptions, accession check-ins, volume binding, claims, and ISSN records.
           </p>
         </div>
@@ -187,7 +187,7 @@ export const SerialsModule: React.FC = () => {
         <div className="flex items-center space-x-2 shrink-0">
           <button
             onClick={() => setIsIssueModalOpen(true)}
-            className="px-3.5 py-2.5 rounded-xl border border-[#27272a] bg-[#09090b] hover:bg-[#18181b] text-[#fafafa] text-xs font-semibold flex items-center space-x-1.5 transition-all cursor-pointer"
+            className="px-3.5 py-2.5 rounded-xl border border-slate-200/90 bg-[#f1f5f9] hover:bg-slate-100 text-slate-900 text-xs font-semibold flex items-center space-x-1.5 transition-all cursor-pointer"
           >
             <CheckCircle2 className="h-4 w-4 text-emerald-400" />
             <span>Check-in Serial Issue</span>
@@ -203,11 +203,11 @@ export const SerialsModule: React.FC = () => {
       </div>
 
       {/* Tabs */}
-      <div className="flex space-x-2 border-b border-[#27272a] pb-2">
+      <div className="flex space-x-2 border-b border-slate-200/90 pb-2">
         <button
           onClick={() => setActiveTab('SUBSCRIPTIONS')}
           className={`px-4 py-2 rounded-xl text-xs font-semibold flex items-center space-x-2 cursor-pointer transition-all ${
-            activeTab === 'SUBSCRIPTIONS' ? 'bg-rose-600 text-white shadow-md' : 'bg-[#121214] border border-[#27272a] text-[#a1a1aa]'
+            activeTab === 'SUBSCRIPTIONS' ? 'bg-rose-600 text-white shadow-md' : 'bg-white border border-slate-200/90 text-slate-500'
           }`}
         >
           <BookOpen className="h-4 w-4" />
@@ -216,7 +216,7 @@ export const SerialsModule: React.FC = () => {
         <button
           onClick={() => setActiveTab('ISSUES')}
           className={`px-4 py-2 rounded-xl text-xs font-semibold flex items-center space-x-2 cursor-pointer transition-all ${
-            activeTab === 'ISSUES' ? 'bg-blue-600 text-white shadow-md' : 'bg-[#121214] border border-[#27272a] text-[#a1a1aa]'
+            activeTab === 'ISSUES' ? 'bg-blue-600 text-white shadow-md' : 'bg-white border border-slate-200/90 text-slate-500'
           }`}
         >
           <Layers className="h-4 w-4" />
@@ -227,20 +227,20 @@ export const SerialsModule: React.FC = () => {
       {/* Content */}
       {activeTab === 'SUBSCRIPTIONS' ? (
         <div className="space-y-4">
-          <div className="p-4 rounded-2xl bg-[#121214] border border-[#27272a] relative">
-            <Search className="h-4 w-4 text-[#a1a1aa] absolute left-3.5 top-3" />
+          <div className="p-4 rounded-2xl bg-white border border-slate-200/90 relative">
+            <Search className="h-4 w-4 text-slate-500 absolute left-3.5 top-3" />
             <input
               type="text"
               placeholder="Search journals by title, ISSN, publisher..."
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-[#09090b] border border-[#27272a] text-xs text-[#fafafa] focus:outline-none focus:border-rose-500"
+              className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-[#f1f5f9] border border-slate-200/90 text-xs text-slate-900 focus:outline-none focus:border-rose-500"
             />
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {filteredSubs.map(s => (
-              <div key={s.id} className="p-5 rounded-2xl border border-[#27272a] bg-[#121214] space-y-3 flex flex-col justify-between">
+              <div key={s.id} className="p-5 rounded-2xl border border-slate-200/90 bg-white space-y-3 flex flex-col justify-between">
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
                     <span className="font-mono text-[10px] text-rose-400 px-2 py-0.5 rounded bg-rose-500/10 border border-rose-500/30 font-bold">
@@ -257,18 +257,18 @@ export const SerialsModule: React.FC = () => {
                     </span>
                   </div>
 
-                  <h3 className="text-sm font-bold text-[#fafafa]">{s.title}</h3>
-                  <div className="text-xs text-[#a1a1aa]">Publisher: <strong className="text-[#fafafa]">{s.publisher}</strong></div>
+                  <h3 className="text-sm font-bold text-slate-900">{s.title}</h3>
+                  <div className="text-xs text-slate-500">Publisher: <strong className="text-slate-900">{s.publisher}</strong></div>
                 </div>
 
-                <div className="text-xs text-[#a1a1aa] space-y-1 bg-[#09090b] p-3 rounded-xl border border-[#27272a]">
+                <div className="text-xs text-slate-500 space-y-1 bg-[#f1f5f9] p-3 rounded-xl border border-slate-200/90">
                   <div className="flex justify-between">
                     <span>Frequency:</span>
                     <span className="font-mono text-rose-400 font-bold">{s.frequency}</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Last Received:</span>
-                    <span className="text-[#fafafa] font-medium">{s.lastReceivedVolume} - {s.lastReceivedIssue}</span>
+                    <span className="text-slate-900 font-medium">{s.lastReceivedVolume} - {s.lastReceivedIssue}</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Annual Fee:</span>
@@ -277,7 +277,7 @@ export const SerialsModule: React.FC = () => {
                 </div>
 
                 <div className="flex items-center justify-between pt-1">
-                  <span className="text-[10px] text-[#71717a]">Expires: {s.expiryDate}</span>
+                  <span className="text-[10px] text-slate-400">Expires: {s.expiryDate}</span>
                   <button
                     onClick={() => handleDeleteSub(s.id)}
                     className="p-1.5 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-all cursor-pointer"
@@ -291,20 +291,20 @@ export const SerialsModule: React.FC = () => {
         </div>
       ) : (
         /* Issues Log */
-        <div className="rounded-2xl border border-[#27272a] bg-[#121214] overflow-hidden shadow-xl divide-y divide-[#27272a]">
+        <div className="rounded-2xl border border-slate-200/90 bg-white overflow-hidden shadow-xl divide-y divide-slate-100">
           {issues.map(iss => (
             <div key={iss.id} className="p-4 flex items-center justify-between text-xs">
               <div className="space-y-1">
                 <span className="font-mono text-[10px] text-blue-400 px-2 py-0.5 rounded bg-blue-500/10 border border-blue-500/30">
                   {iss.barcode}
                 </span>
-                <h4 className="font-bold text-[#fafafa]">{iss.serialTitle}</h4>
-                <div className="text-[#a1a1aa] text-[11px]">{iss.volume} • {iss.issueNo}</div>
+                <h4 className="font-bold text-slate-900">{iss.serialTitle}</h4>
+                <div className="text-slate-500 text-[11px]">{iss.volume} • {iss.issueNo}</div>
               </div>
 
               <div className="text-right">
                 <div className="text-emerald-400 font-semibold text-[11px]">Received: {iss.receivedDate}</div>
-                <div className="text-[10px] text-[#71717a]">{iss.claimsStatus} STATUS</div>
+                <div className="text-[10px] text-slate-400">{iss.claimsStatus} STATUS</div>
               </div>
             </div>
           ))}
@@ -313,49 +313,49 @@ export const SerialsModule: React.FC = () => {
 
       {/* Add Subscription Modal */}
       {isSubModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-[#121214] border border-[#27272a] rounded-2xl max-w-lg w-full p-6 space-y-5 shadow-2xl">
-            <div className="flex items-center justify-between border-b border-[#27272a] pb-3">
-              <h2 className="text-base font-bold text-[#fafafa] flex items-center space-x-2">
+        <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white border border-slate-200/90 rounded-2xl max-w-lg w-full p-6 space-y-5 shadow-2xl">
+            <div className="flex items-center justify-between border-b border-slate-200/90 pb-3">
+              <h2 className="text-base font-bold text-slate-900 flex items-center space-x-2">
                 <Plus className="h-5 w-5 text-rose-400" />
                 <span>Add Journal Subscription</span>
               </h2>
-              <button onClick={() => setIsSubModalOpen(false)} className="text-[#a1a1aa] hover:text-white cursor-pointer">
+              <button onClick={() => setIsSubModalOpen(false)} className="text-slate-500 hover:text-white cursor-pointer">
                 ✕
               </button>
             </div>
 
             <form onSubmit={handleCreateSubscription} className="space-y-4 text-xs">
               <div>
-                <label className="block text-[#a1a1aa] font-semibold mb-1">Journal / Serial Title *</label>
+                <label className="block text-slate-500 font-semibold mb-1">Journal / Serial Title *</label>
                 <input
                   type="text"
                   required
                   placeholder="e.g. ACM Transactions on Information Systems"
                   value={sTitle}
                   onChange={e => setSTitle(e.target.value)}
-                  className="w-full p-2.5 rounded-xl bg-[#09090b] border border-[#27272a] text-[#fafafa] focus:border-rose-500 focus:outline-none"
+                  className="w-full p-2.5 rounded-xl bg-[#f1f5f9] border border-slate-200/90 text-slate-900 focus:border-rose-500 focus:outline-none"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[#a1a1aa] font-semibold mb-1">ISSN Number</label>
+                  <label className="block text-slate-500 font-semibold mb-1">ISSN Number</label>
                   <input
                     type="text"
                     placeholder="1012-3456"
                     value={sIssn}
                     onChange={e => setSIssn(e.target.value)}
-                    className="w-full p-2.5 rounded-xl bg-[#09090b] border border-[#27272a] text-[#fafafa] focus:border-rose-500 focus:outline-none font-mono"
+                    className="w-full p-2.5 rounded-xl bg-[#f1f5f9] border border-slate-200/90 text-slate-900 focus:border-rose-500 focus:outline-none font-mono"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-[#a1a1aa] font-semibold mb-1">Frequency</label>
+                  <label className="block text-slate-500 font-semibold mb-1">Frequency</label>
                   <select
                     value={sFreq}
                     onChange={e => setSFreq(e.target.value as SerialSubscription['frequency'])}
-                    className="w-full p-2.5 rounded-xl bg-[#09090b] border border-[#27272a] text-[#fafafa] focus:border-rose-500 focus:outline-none cursor-pointer"
+                    className="w-full p-2.5 rounded-xl bg-[#f1f5f9] border border-slate-200/90 text-slate-900 focus:border-rose-500 focus:outline-none cursor-pointer"
                   >
                     <option value="WEEKLY">Weekly</option>
                     <option value="MONTHLY">Monthly</option>
@@ -367,32 +367,32 @@ export const SerialsModule: React.FC = () => {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[#a1a1aa] font-semibold mb-1">Publisher</label>
+                  <label className="block text-slate-500 font-semibold mb-1">Publisher</label>
                   <input
                     type="text"
                     placeholder="e.g. IEEE / Oxford / ACM"
                     value={sPublisher}
                     onChange={e => setSPublisher(e.target.value)}
-                    className="w-full p-2.5 rounded-xl bg-[#09090b] border border-[#27272a] text-[#fafafa] focus:border-rose-500 focus:outline-none"
+                    className="w-full p-2.5 rounded-xl bg-[#f1f5f9] border border-slate-200/90 text-slate-900 focus:border-rose-500 focus:outline-none"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-[#a1a1aa] font-semibold mb-1">Annual Subscription Cost (PKR)</label>
+                  <label className="block text-slate-500 font-semibold mb-1">Annual Subscription Cost (PKR)</label>
                   <input
                     type="number"
                     value={sCost}
                     onChange={e => setSCost(parseInt(e.target.value) || 0)}
-                    className="w-full p-2.5 rounded-xl bg-[#09090b] border border-[#27272a] text-[#fafafa] focus:border-rose-500 focus:outline-none font-mono"
+                    className="w-full p-2.5 rounded-xl bg-[#f1f5f9] border border-slate-200/90 text-slate-900 focus:border-rose-500 focus:outline-none font-mono"
                   />
                 </div>
               </div>
 
-              <div className="flex items-center justify-end space-x-2 pt-2 border-t border-[#27272a]">
+              <div className="flex items-center justify-end space-x-2 pt-2 border-t border-slate-200/90">
                 <button
                   type="button"
                   onClick={() => setIsSubModalOpen(false)}
-                  className="px-4 py-2 rounded-xl border border-[#27272a] text-[#a1a1aa] hover:text-white cursor-pointer"
+                  className="px-4 py-2 rounded-xl border border-slate-200/90 text-slate-500 hover:text-white cursor-pointer"
                 >
                   Cancel
                 </button>
@@ -410,25 +410,25 @@ export const SerialsModule: React.FC = () => {
 
       {/* Check-in Issue Modal */}
       {isIssueModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-[#121214] border border-[#27272a] rounded-2xl max-w-lg w-full p-6 space-y-5 shadow-2xl">
-            <div className="flex items-center justify-between border-b border-[#27272a] pb-3">
-              <h2 className="text-base font-bold text-[#fafafa] flex items-center space-x-2">
+        <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white border border-slate-200/90 rounded-2xl max-w-lg w-full p-6 space-y-5 shadow-2xl">
+            <div className="flex items-center justify-between border-b border-slate-200/90 pb-3">
+              <h2 className="text-base font-bold text-slate-900 flex items-center space-x-2">
                 <CheckCircle2 className="h-5 w-5 text-emerald-400" />
                 <span>Check-in Serial Issue</span>
               </h2>
-              <button onClick={() => setIsIssueModalOpen(false)} className="text-[#a1a1aa] hover:text-white cursor-pointer">
+              <button onClick={() => setIsIssueModalOpen(false)} className="text-slate-500 hover:text-white cursor-pointer">
                 ✕
               </button>
             </div>
 
             <form onSubmit={handleCheckInIssue} className="space-y-4 text-xs">
               <div>
-                <label className="block text-[#a1a1aa] font-semibold mb-1">Select Journal Subscription</label>
+                <label className="block text-slate-500 font-semibold mb-1">Select Journal Subscription</label>
                 <select
                   value={selectedSubId}
                   onChange={e => setSelectedSubId(e.target.value)}
-                  className="w-full p-2.5 rounded-xl bg-[#09090b] border border-[#27272a] text-[#fafafa] focus:border-emerald-500 focus:outline-none cursor-pointer"
+                  className="w-full p-2.5 rounded-xl bg-[#f1f5f9] border border-slate-200/90 text-slate-900 focus:border-emerald-500 focus:outline-none cursor-pointer"
                 >
                   {subscriptions.map(s => (
                     <option key={s.id} value={s.id}>{s.title} ({s.issn})</option>
@@ -438,33 +438,33 @@ export const SerialsModule: React.FC = () => {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[#a1a1aa] font-semibold mb-1">Volume Designation</label>
+                  <label className="block text-slate-500 font-semibold mb-1">Volume Designation</label>
                   <input
                     type="text"
                     placeholder="e.g. Vol 53"
                     value={iVol}
                     onChange={e => setIVol(e.target.value)}
-                    className="w-full p-2.5 rounded-xl bg-[#09090b] border border-[#27272a] text-[#fafafa] focus:border-emerald-500 focus:outline-none"
+                    className="w-full p-2.5 rounded-xl bg-[#f1f5f9] border border-slate-200/90 text-slate-900 focus:border-emerald-500 focus:outline-none"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-[#a1a1aa] font-semibold mb-1">Issue Designation</label>
+                  <label className="block text-slate-500 font-semibold mb-1">Issue Designation</label>
                   <input
                     type="text"
                     placeholder="e.g. Issue 8 (August 2026)"
                     value={iNo}
                     onChange={e => setINo(e.target.value)}
-                    className="w-full p-2.5 rounded-xl bg-[#09090b] border border-[#27272a] text-[#fafafa] focus:border-emerald-500 focus:outline-none"
+                    className="w-full p-2.5 rounded-xl bg-[#f1f5f9] border border-slate-200/90 text-slate-900 focus:border-emerald-500 focus:outline-none"
                   />
                 </div>
               </div>
 
-              <div className="flex items-center justify-end space-x-2 pt-2 border-t border-[#27272a]">
+              <div className="flex items-center justify-end space-x-2 pt-2 border-t border-slate-200/90">
                 <button
                   type="button"
                   onClick={() => setIsIssueModalOpen(false)}
-                  className="px-4 py-2 rounded-xl border border-[#27272a] text-[#a1a1aa] hover:text-white cursor-pointer"
+                  className="px-4 py-2 rounded-xl border border-slate-200/90 text-slate-500 hover:text-white cursor-pointer"
                 >
                   Cancel
                 </button>

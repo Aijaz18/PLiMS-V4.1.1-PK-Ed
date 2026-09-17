@@ -142,10 +142,10 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fadeIn">
-      <div className="relative w-full max-w-2xl rounded-2xl border border-emerald-500/30 bg-[#121214] p-6 shadow-2xl text-xs space-y-5 max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-md animate-fadeIn">
+      <div className="relative w-full max-w-2xl rounded-2xl border border-emerald-500/30 bg-white p-6 shadow-2xl text-xs space-y-5 max-h-[90vh] overflow-y-auto">
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-[#27272a] pb-4">
+        <div className="flex items-center justify-between border-b border-slate-200/90 pb-4">
           <div className="flex items-center space-x-3">
             <div className="p-3 rounded-xl bg-emerald-600/20 text-emerald-400 border border-emerald-500/30">
               <User className="h-6 w-6" />
@@ -157,7 +157,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                   {currentUser.role}
                 </span>
               </div>
-              <p className="text-xs text-[#a1a1aa] mt-0.5">
+              <p className="text-xs text-slate-500 mt-0.5">
                 Manage your user profile particulars, change default password, and customize theme settings.
               </p>
             </div>
@@ -165,21 +165,21 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
 
           <button
             onClick={onClose}
-            className="p-2 rounded-xl bg-[#09090b] text-[#a1a1aa] hover:text-white hover:bg-zinc-800 transition-colors"
+            className="p-2 rounded-xl bg-[#f1f5f9] text-slate-500 hover:text-white hover:bg-zinc-800 transition-colors"
           >
             <X className="h-5 w-5" />
           </button>
         </div>
 
         {/* Modal Navigation Tabs */}
-        <div className="flex items-center space-x-2 border-b border-[#27272a] pb-3">
+        <div className="flex items-center space-x-2 border-b border-slate-200/90 pb-3">
           <button
             type="button"
             onClick={() => setActiveTab('PROFILE')}
             className={`px-4 py-2.5 rounded-xl text-xs font-bold flex items-center space-x-2 transition-all cursor-pointer ${
               activeTab === 'PROFILE'
                 ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/30'
-                : 'text-[#a1a1aa] hover:text-white bg-[#09090b] border border-[#27272a]'
+                : 'text-slate-500 hover:text-white bg-[#f1f5f9] border border-slate-200/90'
             }`}
           >
             <User className="h-4 w-4" />
@@ -212,7 +212,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                 <span>Main Page Theme & Background Studio</span>
                 <Sparkles className="h-3.5 w-3.5 text-amber-400 animate-pulse" />
               </h3>
-              <p className="text-[11px] text-[#a1a1aa] mt-0.5">
+              <p className="text-[11px] text-slate-500 mt-0.5">
                 Customize main page background colors, video loops, preset images, and overlay darkness.
               </p>
             </div>
@@ -236,7 +236,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
         {activeTab === 'PROFILE' && (
           <form onSubmit={handleProfileSubmit} className="space-y-4">
             {/* Google Authentication Status Badge */}
-            <div className="flex items-center justify-between p-3 rounded-xl bg-[#09090b] border border-[#27272a]">
+            <div className="flex items-center justify-between p-3 rounded-xl bg-[#f1f5f9] border border-slate-200/90">
               <div className="flex items-center space-x-2.5">
                 <div className="w-6 h-6 rounded-full bg-white flex items-center justify-center p-1 shrink-0">
                   <svg viewBox="0 0 24 24" width="16" height="16" xmlns="http://www.w3.org/2000/svg">
@@ -252,10 +252,10 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                     {currentUser.authProvider === 'GOOGLE' || currentUser.googleSub ? (
                       <span className="px-1.5 py-0.5 rounded text-[10px] font-mono bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">Linked & Verified</span>
                     ) : (
-                      <span className="px-1.5 py-0.5 rounded text-[10px] font-mono bg-zinc-800 text-zinc-400 border border-zinc-700">Not Linked</span>
+                      <span className="px-1.5 py-0.5 rounded text-[10px] font-mono bg-zinc-800 text-slate-500 border border-zinc-700">Not Linked</span>
                     )}
                   </div>
-                  <div className="text-[11px] text-zinc-400">
+                  <div className="text-[11px] text-slate-500">
                     {currentUser.authProvider === 'GOOGLE' || currentUser.googleSub
                       ? `Identity verified via Google OpenID Connect (${currentUser.email})`
                       : 'You can sign in with your Google account at login to automatically link this profile.'}
@@ -264,27 +264,27 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
               </div>
             </div>
 
-            <div className="flex items-center space-x-4 p-3 rounded-xl bg-[#09090b] border border-[#27272a]">
+            <div className="flex items-center space-x-4 p-3 rounded-xl bg-[#f1f5f9] border border-slate-200/90">
               <img
                 src={form.avatarUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150'}
                 alt={form.name}
                 className="w-14 h-14 rounded-full object-cover border-2 border-emerald-500/40"
               />
               <div className="flex-1 space-y-1">
-                <label className="text-[11px] font-bold text-[#a1a1aa] block">Avatar / Profile Photo URL</label>
+                <label className="text-[11px] font-bold text-slate-500 block">Avatar / Profile Photo URL</label>
                 <input
                   type="text"
                   value={form.avatarUrl || ''}
                   onChange={e => setForm({ ...form, avatarUrl: e.target.value })}
                   placeholder="https://images.unsplash.com/..."
-                  className="w-full bg-[#121214] border border-[#27272a] rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-emerald-500 font-mono"
+                  className="w-full bg-white border border-slate-200/90 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-emerald-500 font-mono"
                 />
               </div>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="space-y-1">
-                <label className="text-[#a1a1aa] flex items-center space-x-1 font-medium">
+                <label className="text-slate-500 flex items-center space-x-1 font-medium">
                   <User className="h-3.5 w-3.5 text-emerald-400" />
                   <span>Full Name</span>
                 </label>
@@ -293,12 +293,12 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                   required
                   value={form.name || ''}
                   onChange={e => setForm({ ...form, name: e.target.value })}
-                  className="w-full bg-[#09090b] border border-[#27272a] rounded-xl px-3.5 py-2 text-white focus:outline-none focus:border-emerald-500 font-medium"
+                  className="w-full bg-[#f1f5f9] border border-slate-200/90 rounded-xl px-3.5 py-2 text-white focus:outline-none focus:border-emerald-500 font-medium"
                 />
               </div>
 
               <div className="space-y-1">
-                <label className="text-[#a1a1aa] flex items-center space-x-1 font-medium">
+                <label className="text-slate-500 flex items-center space-x-1 font-medium">
                   <Mail className="h-3.5 w-3.5 text-blue-400" />
                   <span>Email Address</span>
                 </label>
@@ -307,12 +307,12 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                   required
                   value={form.email || ''}
                   onChange={e => setForm({ ...form, email: e.target.value })}
-                  className="w-full bg-[#09090b] border border-[#27272a] rounded-xl px-3.5 py-2 text-white focus:outline-none focus:border-emerald-500 font-medium"
+                  className="w-full bg-[#f1f5f9] border border-slate-200/90 rounded-xl px-3.5 py-2 text-white focus:outline-none focus:border-emerald-500 font-medium"
                 />
               </div>
 
               <div className="space-y-1">
-                <label className="text-[#a1a1aa] flex items-center space-x-1 font-medium">
+                <label className="text-slate-500 flex items-center space-x-1 font-medium">
                   <Phone className="h-3.5 w-3.5 text-emerald-400" />
                   <span>Mobile Number</span>
                 </label>
@@ -321,12 +321,12 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                   placeholder="+92 300 1234567"
                   value={form.mobileNo || form.phone || ''}
                   onChange={e => setForm({ ...form, mobileNo: e.target.value, phone: e.target.value })}
-                  className="w-full bg-[#09090b] border border-[#27272a] rounded-xl px-3.5 py-2 text-white focus:outline-none focus:border-emerald-500 font-medium"
+                  className="w-full bg-[#f1f5f9] border border-slate-200/90 rounded-xl px-3.5 py-2 text-white focus:outline-none focus:border-emerald-500 font-medium"
                 />
               </div>
 
               <div className="space-y-1">
-                <label className="text-[#a1a1aa] flex items-center space-x-1 font-medium">
+                <label className="text-slate-500 flex items-center space-x-1 font-medium">
                   <PhoneCall className="h-3.5 w-3.5 text-amber-400" />
                   <span>Office / Landline Phone</span>
                 </label>
@@ -335,12 +335,12 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                   placeholder="+92 51 9260000"
                   value={form.officeNo || ''}
                   onChange={e => setForm({ ...form, officeNo: e.target.value })}
-                  className="w-full bg-[#09090b] border border-[#27272a] rounded-xl px-3.5 py-2 text-white focus:outline-none focus:border-emerald-500 font-medium"
+                  className="w-full bg-[#f1f5f9] border border-slate-200/90 rounded-xl px-3.5 py-2 text-white focus:outline-none focus:border-emerald-500 font-medium"
                 />
               </div>
 
               <div className="space-y-1">
-                <label className="text-[#a1a1aa] flex items-center space-x-1 font-medium">
+                <label className="text-slate-500 flex items-center space-x-1 font-medium">
                   <MapPin className="h-3.5 w-3.5 text-red-400" />
                   <span>Location / Campus Place</span>
                 </label>
@@ -349,12 +349,12 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                   placeholder="Central Library Building, Islamabad"
                   value={form.location || ''}
                   onChange={e => setForm({ ...form, location: e.target.value })}
-                  className="w-full bg-[#09090b] border border-[#27272a] rounded-xl px-3.5 py-2 text-white focus:outline-none focus:border-emerald-500 font-medium"
+                  className="w-full bg-[#f1f5f9] border border-slate-200/90 rounded-xl px-3.5 py-2 text-white focus:outline-none focus:border-emerald-500 font-medium"
                 />
               </div>
 
               <div className="space-y-1">
-                <label className="text-[#a1a1aa] flex items-center space-x-1 font-medium">
+                <label className="text-slate-500 flex items-center space-x-1 font-medium">
                   <Building2 className="h-3.5 w-3.5 text-purple-400" />
                   <span>Department / Faculty</span>
                 </label>
@@ -363,20 +363,20 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                   placeholder="Library Science / IT"
                   value={form.department || ''}
                   onChange={e => setForm({ ...form, department: e.target.value })}
-                  className="w-full bg-[#09090b] border border-[#27272a] rounded-xl px-3.5 py-2 text-white focus:outline-none focus:border-emerald-500 font-medium"
+                  className="w-full bg-[#f1f5f9] border border-slate-200/90 rounded-xl px-3.5 py-2 text-white focus:outline-none focus:border-emerald-500 font-medium"
                 />
               </div>
             </div>
 
             {/* Quick Security & Password Shortcut Card */}
-            <div className="p-3.5 rounded-xl bg-[#09090b] border border-emerald-500/30 flex items-center justify-between">
+            <div className="p-3.5 rounded-xl bg-[#f1f5f9] border border-emerald-500/30 flex items-center justify-between">
               <div className="flex items-center space-x-2.5">
                 <div className="p-2 rounded-lg bg-emerald-500/20 text-emerald-400">
                   <Key className="h-4 w-4" />
                 </div>
                 <div>
                   <div className="text-xs font-bold text-white">Login Password & Credentials</div>
-                  <div className="text-[10px] text-[#a1a1aa]">Need to change your account password or PIN?</div>
+                  <div className="text-[10px] text-slate-500">Need to change your account password or PIN?</div>
                 </div>
               </div>
               <button
@@ -388,7 +388,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
               </button>
             </div>
 
-            <div className="flex items-center justify-between pt-3 border-t border-[#27272a]">
+            <div className="flex items-center justify-between pt-3 border-t border-slate-200/90">
               {savedSuccess ? (
                 <span className="text-emerald-400 font-bold flex items-center space-x-1.5 animate-bounce">
                   <CheckCircle2 className="h-4 w-4" />
@@ -404,7 +404,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                 <button
                   type="button"
                   onClick={onClose}
-                  className="px-4 py-2 rounded-xl bg-[#09090b] border border-[#27272a] text-[#a1a1aa] hover:text-white font-bold cursor-pointer"
+                  className="px-4 py-2 rounded-xl bg-[#f1f5f9] border border-slate-200/90 text-slate-500 hover:text-white font-bold cursor-pointer"
                 >
                   Cancel
                 </button>
@@ -423,12 +423,12 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
         {/* Tab 2: Change Password Form */}
         {activeTab === 'PASSWORD' && (
           <form onSubmit={handlePasswordSubmit} className="space-y-4">
-            <div className="p-4 rounded-xl bg-[#09090b] border border-[#27272a] space-y-2">
+            <div className="p-4 rounded-xl bg-[#f1f5f9] border border-slate-200/90 space-y-2">
               <div className="flex items-center space-x-2 text-white font-bold">
                 <Shield className="h-4 w-4 text-emerald-400" />
                 <span>Replace Temporary or Current Password</span>
               </div>
-              <p className="text-xs text-[#a1a1aa] leading-relaxed">
+              <p className="text-xs text-slate-500 leading-relaxed">
                 Initial system credentials are automatically provided in the fields. You can replace and update your secure password anytime from the Dashboard and it will remain the same and secure. Once updated, your new password will be required for all future sign-ins.
               </p>
             </div>
@@ -449,9 +449,9 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
 
             <div className="space-y-3">
               <div className="space-y-1">
-                <label className="text-[#a1a1aa] font-medium flex items-center justify-between">
+                <label className="text-slate-500 font-medium flex items-center justify-between">
                   <span>Current Account Password *</span>
-                  <span className="text-[10px] text-zinc-500 font-mono">Verify identity</span>
+                  <span className="text-[10px] text-slate-400 font-mono">Verify identity</span>
                 </label>
                 <div className="relative">
                   <input
@@ -460,7 +460,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                     value={currentPasswordInput}
                     onChange={e => setCurrentPasswordInput(e.target.value)}
                     placeholder="Enter current password..."
-                    className="w-full bg-[#09090b] border border-[#27272a] rounded-xl px-3.5 py-2.5 text-white focus:outline-none focus:border-emerald-500 font-mono pr-10"
+                    className="w-full bg-[#f1f5f9] border border-slate-200/90 rounded-xl px-3.5 py-2.5 text-white focus:outline-none focus:border-emerald-500 font-mono pr-10"
                   />
                   <button
                     type="button"
@@ -474,32 +474,32 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <label className="text-[#a1a1aa] font-medium">New Password *</label>
+                  <label className="text-slate-500 font-medium">New Password *</label>
                   <input
                     type={showPassword ? 'text' : 'password'}
                     required
                     value={newPasswordInput}
                     onChange={e => setNewPasswordInput(e.target.value)}
                     placeholder="Enter new password (min 5 chars)..."
-                    className="w-full bg-[#09090b] border border-[#27272a] rounded-xl px-3.5 py-2.5 text-white focus:outline-none focus:border-emerald-500 font-mono"
+                    className="w-full bg-[#f1f5f9] border border-slate-200/90 rounded-xl px-3.5 py-2.5 text-white focus:outline-none focus:border-emerald-500 font-mono"
                   />
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-[#a1a1aa] font-medium">Confirm New Password *</label>
+                  <label className="text-slate-500 font-medium">Confirm New Password *</label>
                   <input
                     type={showPassword ? 'text' : 'password'}
                     required
                     value={confirmPasswordInput}
                     onChange={e => setConfirmPasswordInput(e.target.value)}
                     placeholder="Re-enter new password..."
-                    className="w-full bg-[#09090b] border border-[#27272a] rounded-xl px-3.5 py-2.5 text-white focus:outline-none focus:border-emerald-500 font-mono"
+                    className="w-full bg-[#f1f5f9] border border-slate-200/90 rounded-xl px-3.5 py-2.5 text-white focus:outline-none focus:border-emerald-500 font-mono"
                   />
                 </div>
               </div>
             </div>
 
-            <div className="flex items-center justify-between pt-3 border-t border-[#27272a]">
+            <div className="flex items-center justify-between pt-3 border-t border-slate-200/90">
               <span className="text-[#71717a] text-[11px]">
                 Account: <strong className="text-zinc-300 font-mono">{currentUser.email}</strong>
               </span>
@@ -508,7 +508,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                 <button
                   type="button"
                   onClick={onClose}
-                  className="px-4 py-2 rounded-xl bg-[#09090b] border border-[#27272a] text-[#a1a1aa] hover:text-white font-bold cursor-pointer"
+                  className="px-4 py-2 rounded-xl bg-[#f1f5f9] border border-slate-200/90 text-slate-500 hover:text-white font-bold cursor-pointer"
                 >
                   Cancel
                 </button>

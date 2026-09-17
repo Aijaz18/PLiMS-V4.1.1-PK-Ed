@@ -112,14 +112,14 @@ export const AuthorityControlModule: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Top Header Banner */}
-      <div className="p-6 rounded-2xl bg-[#121214] border border-[#27272a] flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-xl">
+      <div className="p-6 rounded-2xl bg-white border border-slate-200/90 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-xl">
         <div>
           <div className="flex items-center space-x-2 text-indigo-400 text-xs font-semibold uppercase tracking-wider mb-1">
             <ShieldCheck className="h-4 w-4" />
             <span>LCSH & MARC21 Vocabulary Control</span>
           </div>
-          <h1 className="text-2xl font-bold font-serif text-[#fafafa]">Authority Control (LCSH)</h1>
-          <p className="text-xs text-[#a1a1aa] mt-1">
+          <h1 className="text-2xl font-bold font-serif text-slate-900">Authority Control (LCSH)</h1>
+          <p className="text-xs text-slate-500 mt-1">
             Manage standardized Library of Congress subject headings, personal names, corporate bodies, and cross-references.
           </p>
         </div>
@@ -134,15 +134,15 @@ export const AuthorityControlModule: React.FC = () => {
       </div>
 
       {/* Search & Filter Bar */}
-      <div className="p-4 rounded-2xl bg-[#121214] border border-[#27272a] grid grid-cols-1 md:grid-cols-12 gap-3">
+      <div className="p-4 rounded-2xl bg-white border border-slate-200/90 grid grid-cols-1 md:grid-cols-12 gap-3">
         <div className="md:col-span-8 relative">
-          <Search className="h-4 w-4 text-[#a1a1aa] absolute left-3.5 top-3" />
+          <Search className="h-4 w-4 text-slate-500 absolute left-3.5 top-3" />
           <input
             type="text"
             placeholder="Search headings, LCCN, or scope notes..."
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-[#09090b] border border-[#27272a] text-xs text-[#fafafa] placeholder-[#a1a1aa] focus:border-indigo-500 focus:outline-none"
+            className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-[#f1f5f9] border border-slate-200/90 text-xs text-slate-900 placeholder-[#a1a1aa] focus:border-indigo-500 focus:outline-none"
           />
         </div>
 
@@ -150,7 +150,7 @@ export const AuthorityControlModule: React.FC = () => {
           <select
             value={selectedType}
             onChange={e => setSelectedType(e.target.value)}
-            className="w-full px-3.5 py-2.5 rounded-xl bg-[#09090b] border border-[#27272a] text-xs text-[#fafafa] focus:border-indigo-500 focus:outline-none cursor-pointer"
+            className="w-full px-3.5 py-2.5 rounded-xl bg-[#f1f5f9] border border-slate-200/90 text-xs text-slate-900 focus:border-indigo-500 focus:outline-none cursor-pointer"
           >
             <option value="ALL">All Authority Types</option>
             <option value="TOPICAL_SUBJECT">Topical Subject (MARC 150)</option>
@@ -162,21 +162,21 @@ export const AuthorityControlModule: React.FC = () => {
       </div>
 
       {/* Authority List Table */}
-      <div className="rounded-2xl border border-[#27272a] bg-[#121214] overflow-hidden shadow-xl">
-        <div className="p-4 border-b border-[#27272a] flex items-center justify-between text-xs text-[#a1a1aa]">
+      <div className="rounded-2xl border border-slate-200/90 bg-white overflow-hidden shadow-xl">
+        <div className="p-4 border-b border-slate-200/90 flex items-center justify-between text-xs text-slate-500">
           <span>Showing {filteredAuthorities.length} Authority Records</span>
           <span className="font-mono text-[10px] text-indigo-400">Standard: MARC21 / LCSH 2026</span>
         </div>
 
-        <div className="divide-y divide-[#27272a]">
+        <div className="divide-y divide-slate-100">
           {filteredAuthorities.map(rec => (
-            <div key={rec.id} className="p-5 hover:bg-[#18181b]/50 transition-all flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div key={rec.id} className="p-5 hover:bg-slate-100/50 transition-all flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div className="space-y-1.5 max-w-3xl">
                 <div className="flex items-center space-x-2">
                   <span className="px-2 py-0.5 rounded bg-indigo-500/10 text-indigo-400 border border-indigo-500/30 font-mono text-[10px] font-bold">
                     MARC {rec.marcTag}
                   </span>
-                  <span className="px-2 py-0.5 rounded bg-[#09090b] text-[#a1a1aa] border border-[#27272a] font-mono text-[10px]">
+                  <span className="px-2 py-0.5 rounded bg-[#f1f5f9] text-slate-500 border border-slate-200/90 font-mono text-[10px]">
                     LCCN: {rec.lccn}
                   </span>
                   <span className="text-[10px] text-emerald-400 font-semibold flex items-center space-x-1">
@@ -185,14 +185,14 @@ export const AuthorityControlModule: React.FC = () => {
                   </span>
                 </div>
 
-                <h3 className="text-sm font-bold text-[#fafafa]">{rec.heading}</h3>
-                <p className="text-xs text-[#a1a1aa] leading-relaxed">{rec.scopeNote}</p>
+                <h3 className="text-sm font-bold text-slate-900">{rec.heading}</h3>
+                <p className="text-xs text-slate-500 leading-relaxed">{rec.scopeNote}</p>
 
                 {rec.seeAlso.length > 0 && (
-                  <div className="flex items-center space-x-2 text-[11px] text-[#a1a1aa] pt-1">
+                  <div className="flex items-center space-x-2 text-[11px] text-slate-500 pt-1">
                     <span className="font-semibold text-indigo-400">See Also (5XX):</span>
                     {rec.seeAlso.map((s, idx) => (
-                      <span key={idx} className="px-2 py-0.5 rounded bg-[#09090b] border border-[#27272a] text-[10px]">
+                      <span key={idx} className="px-2 py-0.5 rounded bg-[#f1f5f9] border border-slate-200/90 text-[10px]">
                         {s}
                       </span>
                     ))}
@@ -216,34 +216,34 @@ export const AuthorityControlModule: React.FC = () => {
 
       {/* Add Authority Heading Modal */}
       {isAddModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-[#121214] border border-[#27272a] rounded-2xl max-w-lg w-full p-6 space-y-5 shadow-2xl">
-            <div className="flex items-center justify-between border-b border-[#27272a] pb-3">
-              <h2 className="text-base font-bold text-[#fafafa] flex items-center space-x-2">
+        <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white border border-slate-200/90 rounded-2xl max-w-lg w-full p-6 space-y-5 shadow-2xl">
+            <div className="flex items-center justify-between border-b border-slate-200/90 pb-3">
+              <h2 className="text-base font-bold text-slate-900 flex items-center space-x-2">
                 <Plus className="h-5 w-5 text-indigo-400" />
                 <span>Add Authority Heading</span>
               </h2>
-              <button onClick={() => setIsAddModalOpen(false)} className="text-[#a1a1aa] hover:text-white cursor-pointer">
+              <button onClick={() => setIsAddModalOpen(false)} className="text-slate-500 hover:text-white cursor-pointer">
                 ✕
               </button>
             </div>
 
             <form onSubmit={handleAddAuthority} className="space-y-4 text-xs">
               <div>
-                <label className="block text-[#a1a1aa] font-semibold mb-1">Standard Heading Name *</label>
+                <label className="block text-slate-500 font-semibold mb-1">Standard Heading Name *</label>
                 <input
                   type="text"
                   required
                   placeholder="e.g. Quantum computing -- Industrial applications"
                   value={newHeading}
                   onChange={e => setNewHeading(e.target.value)}
-                  className="w-full p-2.5 rounded-xl bg-[#09090b] border border-[#27272a] text-[#fafafa] focus:border-indigo-500 focus:outline-none"
+                  className="w-full p-2.5 rounded-xl bg-[#f1f5f9] border border-slate-200/90 text-slate-900 focus:border-indigo-500 focus:outline-none"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[#a1a1aa] font-semibold mb-1">Authority Type</label>
+                  <label className="block text-slate-500 font-semibold mb-1">Authority Type</label>
                   <select
                     value={newType}
                     onChange={e => {
@@ -254,7 +254,7 @@ export const AuthorityControlModule: React.FC = () => {
                       if (val === 'CORPORATE_BODY') setNewMarcTag('110');
                       if (val === 'GEOGRAPHIC_NAME') setNewMarcTag('151');
                     }}
-                    className="w-full p-2.5 rounded-xl bg-[#09090b] border border-[#27272a] text-[#fafafa] focus:border-indigo-500 focus:outline-none cursor-pointer"
+                    className="w-full p-2.5 rounded-xl bg-[#f1f5f9] border border-slate-200/90 text-slate-900 focus:border-indigo-500 focus:outline-none cursor-pointer"
                   >
                     <option value="TOPICAL_SUBJECT">Topical Subject</option>
                     <option value="PERSONAL_NAME">Personal Name</option>
@@ -264,54 +264,54 @@ export const AuthorityControlModule: React.FC = () => {
                 </div>
 
                 <div>
-                  <label className="block text-[#a1a1aa] font-semibold mb-1">MARC21 Field Tag</label>
+                  <label className="block text-slate-500 font-semibold mb-1">MARC21 Field Tag</label>
                   <input
                     type="text"
                     value={newMarcTag}
                     onChange={e => setNewMarcTag(e.target.value)}
-                    className="w-full p-2.5 rounded-xl bg-[#09090b] border border-[#27272a] text-[#fafafa] focus:border-indigo-500 focus:outline-none font-mono"
+                    className="w-full p-2.5 rounded-xl bg-[#f1f5f9] border border-slate-200/90 text-slate-900 focus:border-indigo-500 focus:outline-none font-mono"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-[#a1a1aa] font-semibold mb-1">LCCN Control Number (Optional)</label>
+                <label className="block text-slate-500 font-semibold mb-1">LCCN Control Number (Optional)</label>
                 <input
                   type="text"
                   placeholder="e.g. sh202600123"
                   value={newLccn}
                   onChange={e => setNewLccn(e.target.value)}
-                  className="w-full p-2.5 rounded-xl bg-[#09090b] border border-[#27272a] text-[#fafafa] focus:border-indigo-500 focus:outline-none font-mono"
+                  className="w-full p-2.5 rounded-xl bg-[#f1f5f9] border border-slate-200/90 text-slate-900 focus:border-indigo-500 focus:outline-none font-mono"
                 />
               </div>
 
               <div>
-                <label className="block text-[#a1a1aa] font-semibold mb-1">Scope / Application Note</label>
+                <label className="block text-slate-500 font-semibold mb-1">Scope / Application Note</label>
                 <textarea
                   rows={2}
                   placeholder="Usage instructions and definition scope..."
                   value={newScopeNote}
                   onChange={e => setNewScopeNote(e.target.value)}
-                  className="w-full p-2.5 rounded-xl bg-[#09090b] border border-[#27272a] text-[#fafafa] focus:border-indigo-500 focus:outline-none"
+                  className="w-full p-2.5 rounded-xl bg-[#f1f5f9] border border-slate-200/90 text-slate-900 focus:border-indigo-500 focus:outline-none"
                 />
               </div>
 
               <div>
-                <label className="block text-[#a1a1aa] font-semibold mb-1">See Also References (Comma separated)</label>
+                <label className="block text-slate-500 font-semibold mb-1">See Also References (Comma separated)</label>
                 <input
                   type="text"
                   placeholder="e.g. Supercomputing, Quantum information"
                   value={newSeeAlso}
                   onChange={e => setNewSeeAlso(e.target.value)}
-                  className="w-full p-2.5 rounded-xl bg-[#09090b] border border-[#27272a] text-[#fafafa] focus:border-indigo-500 focus:outline-none"
+                  className="w-full p-2.5 rounded-xl bg-[#f1f5f9] border border-slate-200/90 text-slate-900 focus:border-indigo-500 focus:outline-none"
                 />
               </div>
 
-              <div className="flex items-center justify-end space-x-2 pt-2 border-t border-[#27272a]">
+              <div className="flex items-center justify-end space-x-2 pt-2 border-t border-slate-200/90">
                 <button
                   type="button"
                   onClick={() => setIsAddModalOpen(false)}
-                  className="px-4 py-2 rounded-xl border border-[#27272a] text-[#a1a1aa] hover:text-white cursor-pointer"
+                  className="px-4 py-2 rounded-xl border border-slate-200/90 text-slate-500 hover:text-white cursor-pointer"
                 >
                   Cancel
                 </button>

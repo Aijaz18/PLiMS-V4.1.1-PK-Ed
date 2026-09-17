@@ -89,31 +89,31 @@ export const OfflineSyncBar: React.FC<OfflineSyncBarProps> = ({
   };
 
   return (
-    <div className="w-full bg-[#121214] border-b border-[#27272a] px-6 py-2.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+    <div className="w-full bg-white border-b border-slate-200/90 px-6 py-2 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
       {/* Network Status Badge */}
       <div className="flex items-center space-x-3">
-        <div className={`flex items-center space-x-2 px-3 py-1 rounded-full border font-mono font-bold ${
+        <div className={`flex items-center space-x-2 px-3 py-1 rounded-full border font-mono font-bold text-[11px] ${
           effectiveOnline
-            ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
-            : 'bg-amber-500/10 border-amber-500/30 text-amber-300 animate-pulse'
+            ? 'bg-emerald-50 border-emerald-200 text-emerald-700'
+            : 'bg-amber-50 border-amber-200 text-amber-700 animate-pulse'
         }`}>
           {effectiveOnline ? (
             <>
-              <Wifi className="h-3.5 w-3.5" />
+              <Wifi className="h-3.5 w-3.5 text-emerald-600" />
               <span>Online • Cloud Sync Active</span>
             </>
           ) : (
             <>
-              <WifiOff className="h-3.5 w-3.5 text-amber-400" />
+              <WifiOff className="h-3.5 w-3.5 text-amber-600" />
               <span>Offline Mode Active • Scans Saved to LocalStorage</span>
             </>
           )}
         </div>
 
         {/* Local Storage Database Pill */}
-        <div className="hidden md:flex items-center space-x-1.5 text-[#a1a1aa] font-mono text-[11px]">
-          <HardDrive className="h-3.5 w-3.5 text-emerald-400" />
-          <span>Local Storage Persistence: <strong className="text-[#fafafa]">Active (Indexed Cache)</strong></span>
+        <div className="hidden md:flex items-center space-x-1.5 text-slate-500 font-mono text-[11px]">
+          <HardDrive className="h-3.5 w-3.5 text-emerald-600" />
+          <span>Local Storage Persistence: <strong className="text-slate-800 font-semibold">Active (Indexed Cache)</strong></span>
         </div>
       </div>
 
@@ -125,22 +125,22 @@ export const OfflineSyncBar: React.FC<OfflineSyncBarProps> = ({
           onClick={handleToggleSimulatedOffline}
           className={`px-2.5 py-1 rounded-lg border text-[11px] font-mono font-semibold flex items-center space-x-1.5 transition-all cursor-pointer ${
             isSimulatedOffline
-              ? 'bg-amber-500/20 border-amber-500/40 text-amber-300'
-              : 'bg-[#09090b] border-[#27272a] text-[#a1a1aa] hover:text-white'
+              ? 'bg-amber-100 border-amber-300 text-amber-800'
+              : 'bg-slate-50 border-slate-200 text-slate-600 hover:text-slate-900 hover:bg-slate-100'
           }`}
           title="Simulate Wi-Fi disconnection to test offline barcode scanning"
         >
-          <Zap className="h-3 w-3 text-amber-400" />
-          <span>{isSimulatedOffline ? 'Disable Offline Test Mode' : 'Simulate Unstable Connection'}</span>
+          <Zap className="h-3 w-3 text-amber-500" />
+          <span>{isSimulatedOffline ? 'Disable Offline Test Mode' : 'Simulate Connection Test'}</span>
         </button>
 
         {/* Queued Records Badge & Drawer Opener */}
         <button
           type="button"
           onClick={() => setIsQueueModalOpen(true)}
-          className="px-3 py-1 rounded-lg bg-[#09090b] border border-[#27272a] text-[#fafafa] font-mono font-bold text-[11px] flex items-center space-x-1.5 hover:border-emerald-500/40 transition-all cursor-pointer"
+          className="px-3 py-1 rounded-lg bg-slate-50 border border-slate-200 text-slate-800 font-mono font-bold text-[11px] flex items-center space-x-1.5 hover:border-emerald-500/40 hover:bg-slate-100 transition-all cursor-pointer"
         >
-          <List className="h-3.5 w-3.5 text-emerald-400" />
+          <List className="h-3.5 w-3.5 text-emerald-600" />
           <span>Offline Queue ({queuedCount})</span>
         </button>
 
@@ -158,56 +158,56 @@ export const OfflineSyncBar: React.FC<OfflineSyncBarProps> = ({
 
       {/* Offline Queue Inspector Modal */}
       {isQueueModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-[#121214] border border-[#27272a] rounded-2xl p-6 max-w-xl w-full space-y-4 shadow-2xl">
-            <div className="flex items-center justify-between border-b border-[#27272a] pb-3">
+        <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white border border-slate-200/90 rounded-2xl p-6 max-w-xl w-full space-y-4 shadow-2xl">
+            <div className="flex items-center justify-between border-b border-slate-200/90 pb-3">
               <div className="flex items-center space-x-2">
-                <Database className="h-5 w-5 text-emerald-400" />
-                <h3 className="font-bold text-[#fafafa] text-sm">
+                <Database className="h-5 w-5 text-emerald-600" />
+                <h3 className="font-bold text-slate-900 text-sm">
                   Local Persistence & Offline Queue Inspector
                 </h3>
               </div>
               <button
                 onClick={() => setIsQueueModalOpen(false)}
-                className="text-[#a1a1aa] hover:text-white cursor-pointer"
+                className="text-slate-400 hover:text-slate-700 cursor-pointer"
               >
                 <X className="h-5 w-5" />
               </button>
             </div>
 
-            <p className="text-xs text-[#a1a1aa]">
+            <p className="text-xs text-slate-500">
               Transactions and catalog updates performed while offline are recorded locally in browser LocalStorage. They automatically sync to the main database when connectivity resumes.
             </p>
 
             <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
               {queue.length === 0 ? (
-                <div className="p-8 text-center text-xs text-[#a1a1aa] border border-dashed border-[#27272a] rounded-xl">
+                <div className="p-8 text-center text-xs text-slate-500 border border-dashed border-slate-200 rounded-xl">
                   No pending offline scans or circulation updates. All local records are synced!
                 </div>
               ) : (
                 queue.map((item) => (
                   <div
                     key={item.id}
-                    className="p-3 rounded-xl border border-[#27272a] bg-[#09090b] flex items-center justify-between text-xs space-x-3"
+                    className="p-3 rounded-xl border border-slate-200/90 bg-[#f1f5f9] flex items-center justify-between text-xs space-x-3"
                   >
                     <div>
-                      <div className="font-bold text-[#fafafa] font-mono flex items-center space-x-2">
-                        <span className="text-emerald-400">{item.type}</span>
+                      <div className="font-bold text-slate-900 font-mono flex items-center space-x-2">
+                        <span className="text-emerald-600">{item.type}</span>
                         <span>•</span>
-                        <span className="text-white">{item.copyBarcode}</span>
+                        <span className="text-slate-800">{item.copyBarcode}</span>
                       </div>
-                      <div className="text-[11px] text-[#a1a1aa] mt-0.5">{item.details}</div>
-                      <div className="text-[10px] text-[#a1a1aa] font-mono mt-0.5">Recorded at {item.timestamp}</div>
+                      <div className="text-[11px] text-slate-500 mt-0.5">{item.details}</div>
+                      <div className="text-[10px] text-slate-400 font-mono mt-0.5">Recorded at {item.timestamp}</div>
                     </div>
 
                     <div className="shrink-0">
                       {item.status === 'QUEUED' && (
-                        <span className="px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30 text-[10px] font-mono font-bold">
+                        <span className="px-2 py-0.5 rounded bg-amber-100 text-amber-800 border border-amber-300 text-[10px] font-mono font-bold">
                           ⏳ QUEUED
                         </span>
                       )}
                       {item.status === 'SYNCED' && (
-                        <span className="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[10px] font-mono font-bold">
+                        <span className="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 border border-emerald-300 text-[10px] font-mono font-bold">
                           ✓ SYNCED
                         </span>
                       )}
@@ -217,11 +217,11 @@ export const OfflineSyncBar: React.FC<OfflineSyncBarProps> = ({
               )}
             </div>
 
-            <div className="flex items-center justify-between pt-2 border-t border-[#27272a]">
+            <div className="flex items-center justify-between pt-2 border-t border-slate-200/90">
               <button
                 type="button"
                 onClick={handleClearSynced}
-                className="text-xs text-[#a1a1aa] hover:text-red-400 flex items-center space-x-1 cursor-pointer font-mono"
+                className="text-xs text-slate-500 hover:text-red-600 flex items-center space-x-1 cursor-pointer font-mono"
               >
                 <Trash2 className="h-3.5 w-3.5" />
                 <span>Clear Synced Records</span>
@@ -231,7 +231,7 @@ export const OfflineSyncBar: React.FC<OfflineSyncBarProps> = ({
                 <button
                   type="button"
                   onClick={() => setIsQueueModalOpen(false)}
-                  className="px-4 py-2 rounded-xl bg-[#09090b] border border-[#27272a] text-[#fafafa] text-xs cursor-pointer"
+                  className="px-4 py-2 rounded-xl bg-slate-100 border border-slate-200 text-slate-700 text-xs font-semibold cursor-pointer hover:bg-slate-200"
                 >
                   Close
                 </button>

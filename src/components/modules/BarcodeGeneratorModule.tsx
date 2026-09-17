@@ -886,20 +886,20 @@ export const BarcodeGeneratorModule: React.FC<BarcodeGeneratorModuleProps> = ({
   return (
     <div className="space-y-6">
       {/* Top Header & Main Tab Switcher */}
-      <div className="p-5 rounded-2xl bg-[#121214] border border-[#27272a] flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="p-5 rounded-2xl bg-white border border-slate-200/90 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <div className="flex items-center space-x-2.5">
             <div className="p-2 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400">
               <QrCode className="h-6 w-6" />
             </div>
             <div>
-              <h2 className="text-xl font-bold text-[#fafafa] flex items-center space-x-2">
+              <h2 className="text-xl font-bold text-slate-900 flex items-center space-x-2">
                 <span>Barcode & RFID Smart Labels Hub</span>
                 <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
                   ISO 28560 / EPC Gen2
                 </span>
               </h2>
-              <p className="text-xs text-[#a1a1aa] mt-0.5">
+              <p className="text-xs text-slate-500 mt-0.5">
                 Generate high-res accession barcodes, encode smart RFID book tags with EAS security bits, and verify scans with live camera & contactless readers
               </p>
             </div>
@@ -907,14 +907,14 @@ export const BarcodeGeneratorModule: React.FC<BarcodeGeneratorModuleProps> = ({
         </div>
 
         {/* 3 Master Tabs */}
-        <div className="flex items-center bg-[#09090b] p-1 rounded-xl border border-[#27272a]">
+        <div className="flex items-center bg-[#f1f5f9] p-1 rounded-xl border border-slate-200/90">
           <button
             type="button"
             onClick={() => setActiveModuleTab('BARCODE_STUDIO')}
             className={`px-3.5 py-2 rounded-lg text-xs font-bold flex items-center space-x-2 transition-all cursor-pointer ${
               activeModuleTab === 'BARCODE_STUDIO'
                 ? 'bg-emerald-600 text-white shadow-md'
-                : 'text-[#a1a1aa] hover:text-[#fafafa]'
+                : 'text-slate-500 hover:text-slate-900'
             }`}
           >
             <BarcodeIcon className="h-4 w-4" />
@@ -927,7 +927,7 @@ export const BarcodeGeneratorModule: React.FC<BarcodeGeneratorModuleProps> = ({
             className={`px-3.5 py-2 rounded-lg text-xs font-bold flex items-center space-x-2 transition-all cursor-pointer ${
               activeModuleTab === 'RFID_ENCODER'
                 ? 'bg-purple-600 text-white shadow-md'
-                : 'text-[#a1a1aa] hover:text-[#fafafa]'
+                : 'text-slate-500 hover:text-slate-900'
             }`}
           >
             <Radio className="h-4 w-4" />
@@ -940,7 +940,7 @@ export const BarcodeGeneratorModule: React.FC<BarcodeGeneratorModuleProps> = ({
             className={`px-3.5 py-2 rounded-lg text-xs font-bold flex items-center space-x-2 transition-all cursor-pointer ${
               activeModuleTab === 'SCANNER_HUB'
                 ? 'bg-blue-600 text-white shadow-md'
-                : 'text-[#a1a1aa] hover:text-[#fafafa]'
+                : 'text-slate-500 hover:text-slate-900'
             }`}
           >
             <Zap className="h-4 w-4" />
@@ -955,11 +955,11 @@ export const BarcodeGeneratorModule: React.FC<BarcodeGeneratorModuleProps> = ({
       {activeModuleTab === 'BARCODE_STUDIO' && (
         <div className="space-y-6">
           {/* Action Bar */}
-          <div className="flex flex-wrap items-center justify-between gap-3 p-4 rounded-xl bg-[#18181b] border border-[#27272a]">
-            <div className="flex flex-wrap items-center gap-3 text-xs text-[#a1a1aa]">
+          <div className="flex flex-wrap items-center justify-between gap-3 p-4 rounded-xl bg-slate-100 border border-slate-200/90">
+            <div className="flex flex-wrap items-center gap-3 text-xs text-slate-500">
               <div className="flex items-center space-x-2">
                 <Tag className="h-4 w-4 text-emerald-400" />
-                <span>Active: <strong className="text-[#fafafa] font-mono">{activeCode}</strong></span>
+                <span>Active: <strong className="text-slate-900 font-mono">{activeCode}</strong></span>
               </div>
               <div className="h-4 w-px bg-[#27272a] hidden sm:block" />
               <button
@@ -978,7 +978,7 @@ export const BarcodeGeneratorModule: React.FC<BarcodeGeneratorModuleProps> = ({
                 type="button"
                 onClick={() => setIsPrintPreview(!isPrintPreview)}
                 className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center space-x-1.5 transition-all cursor-pointer ${
-                  isPrintPreview ? 'bg-emerald-600 text-white' : 'bg-[#121214] border border-[#27272a] text-[#fafafa] hover:border-emerald-500/50'
+                  isPrintPreview ? 'bg-emerald-600 text-white' : 'bg-white border border-slate-200/90 text-slate-900 hover:border-emerald-500/50'
                 }`}
               >
                 <Grid className="h-3.5 w-3.5 text-emerald-400" />
@@ -1030,9 +1030,9 @@ export const BarcodeGeneratorModule: React.FC<BarcodeGeneratorModuleProps> = ({
             {/* Left Controls (5 Cols) */}
             <div className="lg:col-span-5 space-y-5">
               {/* 1. Target Data Selection */}
-              <div className="p-5 rounded-2xl border border-[#27272a] bg-[#121214] space-y-4">
+              <div className="p-5 rounded-2xl border border-slate-200/90 bg-white space-y-4">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-xs font-mono font-bold uppercase text-[#a1a1aa] flex items-center space-x-2">
+                  <h3 className="text-xs font-mono font-bold uppercase text-slate-500 flex items-center space-x-2">
                     <BookOpen className="h-4 w-4 text-emerald-400" />
                     <span>1. Select Catalog Item / Code</span>
                   </h3>
@@ -1048,7 +1048,7 @@ export const BarcodeGeneratorModule: React.FC<BarcodeGeneratorModuleProps> = ({
                     type="button"
                     onClick={() => setSourceType('CATALOG')}
                     className={`p-2.5 rounded-xl border text-left font-medium flex items-center space-x-2 transition-all cursor-pointer ${
-                      sourceType === 'CATALOG' ? 'border-emerald-500 bg-emerald-500/10 text-emerald-300' : 'border-[#27272a] bg-[#09090b] text-[#a1a1aa]'
+                      sourceType === 'CATALOG' ? 'border-emerald-500 bg-emerald-500/10 text-emerald-300' : 'border-slate-200/90 bg-[#f1f5f9] text-slate-500'
                     }`}
                   >
                     <BookOpen className="h-4 w-4 shrink-0" />
@@ -1059,7 +1059,7 @@ export const BarcodeGeneratorModule: React.FC<BarcodeGeneratorModuleProps> = ({
                     type="button"
                     onClick={() => setSourceType('CUSTOM')}
                     className={`p-2.5 rounded-xl border text-left font-medium flex items-center space-x-2 transition-all cursor-pointer ${
-                      sourceType === 'CUSTOM' ? 'border-emerald-500 bg-emerald-500/10 text-emerald-300' : 'border-[#27272a] bg-[#09090b] text-[#a1a1aa]'
+                      sourceType === 'CUSTOM' ? 'border-emerald-500 bg-emerald-500/10 text-emerald-300' : 'border-slate-200/90 bg-[#f1f5f9] text-slate-500'
                     }`}
                   >
                     <FileText className="h-4 w-4 shrink-0" />
@@ -1070,9 +1070,9 @@ export const BarcodeGeneratorModule: React.FC<BarcodeGeneratorModuleProps> = ({
                 {sourceType === 'CATALOG' && (
                   <div className="space-y-2 pt-1">
                     {/* Choose and Select All Titles Button Bar */}
-                    <div className="p-3 rounded-xl bg-[#18181b] border border-[#27272a] space-y-2">
+                    <div className="p-3 rounded-xl bg-slate-100 border border-slate-200/90 space-y-2">
                       <div className="flex items-center justify-between">
-                        <span className="text-xs font-bold text-[#fafafa]">Bulk Title Selection</span>
+                        <span className="text-xs font-bold text-slate-900">Bulk Title Selection</span>
                         <div className="flex items-center space-x-1.5">
                           <button
                             type="button"
@@ -1084,7 +1084,7 @@ export const BarcodeGeneratorModule: React.FC<BarcodeGeneratorModuleProps> = ({
                           <button
                             type="button"
                             onClick={handleDeselectAllTitles}
-                            className="px-2 py-1 rounded bg-[#09090b] hover:bg-[#27272a] text-red-400 text-[10px] font-medium border border-[#27272a] cursor-pointer"
+                            className="px-2 py-1 rounded bg-[#f1f5f9] hover:bg-[#27272a] text-red-400 text-[10px] font-medium border border-slate-200/90 cursor-pointer"
                           >
                             Clear
                           </button>
@@ -1102,14 +1102,14 @@ export const BarcodeGeneratorModule: React.FC<BarcodeGeneratorModuleProps> = ({
                     </div>
 
                     <div className="space-y-1">
-                      <label className="text-[11px] text-[#a1a1aa]">Active Single Preview Book</label>
+                      <label className="text-[11px] text-slate-500">Active Single Preview Book</label>
                       <select
                         value={selectedBookId}
                         onChange={(e) => setSelectedBookId(e.target.value)}
-                        className="w-full bg-[#09090b] border border-[#27272a] rounded-xl px-3 py-2 text-xs text-[#fafafa] focus:outline-none focus:border-emerald-500"
+                        className="w-full bg-[#f1f5f9] border border-slate-200/90 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-emerald-500"
                       >
                         {books.map(b => (
-                          <option key={b.id} value={b.id} className="bg-[#121214] text-[#fafafa]">
+                          <option key={b.id} value={b.id} className="bg-white text-slate-900">
                             {selectedBookIds.includes(b.id) ? '✓ ' : '○ '} {b.title} ({b.isbn || b.accessionNumber || b.id})
                           </option>
                         ))}
@@ -1121,30 +1121,30 @@ export const BarcodeGeneratorModule: React.FC<BarcodeGeneratorModuleProps> = ({
                 {sourceType === 'CUSTOM' && (
                   <div className="space-y-3 pt-1">
                     <div className="space-y-1">
-                      <label className="text-[11px] text-[#a1a1aa]">Accession / Barcode Text</label>
+                      <label className="text-[11px] text-slate-500">Accession / Barcode Text</label>
                       <input
                         type="text"
                         value={customText}
                         onChange={(e) => setCustomText(e.target.value)}
-                        className="w-full bg-[#09090b] border border-[#27272a] rounded-xl px-3 py-2 text-xs text-[#fafafa] focus:outline-none focus:border-emerald-500 font-mono"
+                        className="w-full bg-[#f1f5f9] border border-slate-200/90 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-emerald-500 font-mono"
                       />
                     </div>
                     <div className="space-y-1">
-                      <label className="text-[11px] text-[#a1a1aa]">Label Display Heading / Title</label>
+                      <label className="text-[11px] text-slate-500">Label Display Heading / Title</label>
                       <input
                         type="text"
                         value={customTitle}
                         onChange={(e) => setCustomTitle(e.target.value)}
-                        className="w-full bg-[#09090b] border border-[#27272a] rounded-xl px-3 py-2 text-xs text-[#fafafa] focus:outline-none focus:border-emerald-500"
+                        className="w-full bg-[#f1f5f9] border border-slate-200/90 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-emerald-500"
                       />
                     </div>
                     <div className="space-y-1">
-                      <label className="text-[11px] text-[#a1a1aa]">Call Number Notation</label>
+                      <label className="text-[11px] text-slate-500">Call Number Notation</label>
                       <input
                         type="text"
                         value={customCallNo}
                         onChange={(e) => setCustomCallNo(e.target.value)}
-                        className="w-full bg-[#09090b] border border-[#27272a] rounded-xl px-3 py-2 text-xs text-[#fafafa] focus:outline-none focus:border-emerald-500 font-mono"
+                        className="w-full bg-[#f1f5f9] border border-slate-200/90 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-emerald-500 font-mono"
                       />
                     </div>
                   </div>
@@ -1152,20 +1152,20 @@ export const BarcodeGeneratorModule: React.FC<BarcodeGeneratorModuleProps> = ({
               </div>
 
               {/* 2. Symbology & Dimensions */}
-              <div className="p-5 rounded-2xl border border-[#27272a] bg-[#121214] space-y-4">
-                <h3 className="text-xs font-mono font-bold uppercase text-[#a1a1aa] flex items-center space-x-2">
+              <div className="p-5 rounded-2xl border border-slate-200/90 bg-white space-y-4">
+                <h3 className="text-xs font-mono font-bold uppercase text-slate-500 flex items-center space-x-2">
                   <Settings className="h-4 w-4 text-emerald-400" />
                   <span>2. Label Format & Symbology</span>
                 </h3>
 
                 <div className="space-y-1.5">
-                  <label className="text-[11px] text-[#a1a1aa]">Symbology Format</label>
+                  <label className="text-[11px] text-slate-500">Symbology Format</label>
                   <div className="grid grid-cols-2 gap-2 text-xs">
                     <button
                       type="button"
                       onClick={() => setCodeType('BOTH')}
                       className={`p-2 rounded-xl border font-semibold flex items-center justify-center space-x-1.5 cursor-pointer ${
-                        codeType === 'BOTH' ? 'border-emerald-500 bg-emerald-500/10 text-emerald-300' : 'border-[#27272a] bg-[#09090b] text-[#a1a1aa]'
+                        codeType === 'BOTH' ? 'border-emerald-500 bg-emerald-500/10 text-emerald-300' : 'border-slate-200/90 bg-[#f1f5f9] text-slate-500'
                       }`}
                     >
                       <Sparkles className="h-3.5 w-3.5" />
@@ -1176,7 +1176,7 @@ export const BarcodeGeneratorModule: React.FC<BarcodeGeneratorModuleProps> = ({
                       type="button"
                       onClick={() => setCodeType('CODE128')}
                       className={`p-2 rounded-xl border font-semibold flex items-center justify-center space-x-1.5 cursor-pointer ${
-                        codeType === 'CODE128' ? 'border-emerald-500 bg-emerald-500/10 text-emerald-300' : 'border-[#27272a] bg-[#09090b] text-[#a1a1aa]'
+                        codeType === 'CODE128' ? 'border-emerald-500 bg-emerald-500/10 text-emerald-300' : 'border-slate-200/90 bg-[#f1f5f9] text-slate-500'
                       }`}
                     >
                       <BarcodeIcon className="h-3.5 w-3.5" />
@@ -1187,7 +1187,7 @@ export const BarcodeGeneratorModule: React.FC<BarcodeGeneratorModuleProps> = ({
                       type="button"
                       onClick={() => setCodeType('CODE39')}
                       className={`p-2 rounded-xl border font-semibold flex items-center justify-center space-x-1.5 cursor-pointer ${
-                        codeType === 'CODE39' ? 'border-emerald-500 bg-emerald-500/10 text-emerald-300' : 'border-[#27272a] bg-[#09090b] text-[#a1a1aa]'
+                        codeType === 'CODE39' ? 'border-emerald-500 bg-emerald-500/10 text-emerald-300' : 'border-slate-200/90 bg-[#f1f5f9] text-slate-500'
                       }`}
                     >
                       <BarcodeIcon className="h-3.5 w-3.5" />
@@ -1198,7 +1198,7 @@ export const BarcodeGeneratorModule: React.FC<BarcodeGeneratorModuleProps> = ({
                       type="button"
                       onClick={() => setCodeType('QR_CODE')}
                       className={`p-2 rounded-xl border font-semibold flex items-center justify-center space-x-1.5 cursor-pointer ${
-                        codeType === 'QR_CODE' ? 'border-emerald-500 bg-emerald-500/10 text-emerald-300' : 'border-[#27272a] bg-[#09090b] text-[#a1a1aa]'
+                        codeType === 'QR_CODE' ? 'border-emerald-500 bg-emerald-500/10 text-emerald-300' : 'border-slate-200/90 bg-[#f1f5f9] text-slate-500'
                       }`}
                     >
                       <QrCode className="h-3.5 w-3.5" />
@@ -1208,45 +1208,45 @@ export const BarcodeGeneratorModule: React.FC<BarcodeGeneratorModuleProps> = ({
                 </div>
 
                 {/* Elements Toggles */}
-                <div className="space-y-2 pt-2 border-t border-[#27272a]">
-                  <label className="text-[11px] font-semibold text-[#fafafa] block">Include Elements:</label>
+                <div className="space-y-2 pt-2 border-t border-slate-200/90">
+                  <label className="text-[11px] font-semibold text-slate-900 block">Include Elements:</label>
                   <div className="grid grid-cols-2 gap-2 text-xs">
-                    <label className="flex items-center space-x-2 text-[#a1a1aa] cursor-pointer">
+                    <label className="flex items-center space-x-2 text-slate-500 cursor-pointer">
                       <input
                         type="checkbox"
                         checked={showInstitution}
                         onChange={(e) => setShowInstitution(e.target.checked)}
-                        className="rounded border-[#27272a] text-emerald-500 focus:ring-emerald-500"
+                        className="rounded border-slate-200/90 text-emerald-500 focus:ring-emerald-500"
                       />
                       <span>Library Name</span>
                     </label>
 
-                    <label className="flex items-center space-x-2 text-[#a1a1aa] cursor-pointer">
+                    <label className="flex items-center space-x-2 text-slate-500 cursor-pointer">
                       <input
                         type="checkbox"
                         checked={showTitle}
                         onChange={(e) => setShowTitle(e.target.checked)}
-                        className="rounded border-[#27272a] text-emerald-500 focus:ring-emerald-500"
+                        className="rounded border-slate-200/90 text-emerald-500 focus:ring-emerald-500"
                       />
                       <span>Book Title</span>
                     </label>
 
-                    <label className="flex items-center space-x-2 text-[#a1a1aa] cursor-pointer">
+                    <label className="flex items-center space-x-2 text-slate-500 cursor-pointer">
                       <input
                         type="checkbox"
                         checked={showCallNo}
                         onChange={(e) => setShowCallNo(e.target.checked)}
-                        className="rounded border-[#27272a] text-emerald-500 focus:ring-emerald-500"
+                        className="rounded border-slate-200/90 text-emerald-500 focus:ring-emerald-500"
                       />
                       <span>Call Number</span>
                     </label>
 
-                    <label className="flex items-center space-x-2 text-[#a1a1aa] cursor-pointer">
+                    <label className="flex items-center space-x-2 text-slate-500 cursor-pointer">
                       <input
                         type="checkbox"
                         checked={showAccession}
                         onChange={(e) => setShowAccession(e.target.checked)}
-                        className="rounded border-[#27272a] text-emerald-500 focus:ring-emerald-500"
+                        className="rounded border-slate-200/90 text-emerald-500 focus:ring-emerald-500"
                       />
                       <span>Accession Code</span>
                     </label>
@@ -1257,9 +1257,9 @@ export const BarcodeGeneratorModule: React.FC<BarcodeGeneratorModuleProps> = ({
 
             {/* Right Live Preview (7 Cols) */}
             <div className="lg:col-span-7 space-y-5">
-              <div className="p-6 rounded-2xl border border-[#27272a] bg-[#121214] space-y-4">
+              <div className="p-6 rounded-2xl border border-slate-200/90 bg-white space-y-4">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-xs font-mono font-bold uppercase text-[#a1a1aa] flex items-center space-x-2">
+                  <h3 className="text-xs font-mono font-bold uppercase text-slate-500 flex items-center space-x-2">
                     <Sparkles className="h-4 w-4 text-emerald-400" />
                     <span>Live Sticker Label Preview</span>
                   </h3>
@@ -1443,12 +1443,12 @@ export const BarcodeGeneratorModule: React.FC<BarcodeGeneratorModuleProps> = ({
       {activeModuleTab === 'RFID_ENCODER' && (
         <div className="space-y-6">
           {/* Sub Header & Mode Selection */}
-          <div className="flex flex-wrap items-center justify-between gap-3 p-4 rounded-xl bg-[#18181b] border border-[#27272a]">
+          <div className="flex flex-wrap items-center justify-between gap-3 p-4 rounded-xl bg-slate-100 border border-slate-200/90">
             <div className="flex items-center space-x-2">
               <Radio className="h-5 w-5 text-purple-400 animate-pulse" />
               <div>
-                <span className="text-sm font-bold text-[#fafafa]">Smart RFID Tag Programmer & Inlay Studio</span>
-                <p className="text-xs text-[#a1a1aa]">Encode ISO 28560-2 UHF/HF transponders with EAS anti-theft security bits</p>
+                <span className="text-sm font-bold text-slate-900">Smart RFID Tag Programmer & Inlay Studio</span>
+                <p className="text-xs text-slate-500">Encode ISO 28560-2 UHF/HF transponders with EAS anti-theft security bits</p>
               </div>
             </div>
 
@@ -1487,8 +1487,8 @@ export const BarcodeGeneratorModule: React.FC<BarcodeGeneratorModuleProps> = ({
             {/* Left Options (5 cols) */}
             <div className="lg:col-span-5 space-y-5">
               {/* Target Type */}
-              <div className="p-5 rounded-2xl border border-[#27272a] bg-[#121214] space-y-4">
-                <h3 className="text-xs font-mono font-bold uppercase text-[#a1a1aa] flex items-center space-x-2">
+              <div className="p-5 rounded-2xl border border-slate-200/90 bg-white space-y-4">
+                <h3 className="text-xs font-mono font-bold uppercase text-slate-500 flex items-center space-x-2">
                   <Cpu className="h-4 w-4 text-purple-400" />
                   <span>1. RFID Tag Profile & Standard</span>
                 </h3>
@@ -1498,7 +1498,7 @@ export const BarcodeGeneratorModule: React.FC<BarcodeGeneratorModuleProps> = ({
                     type="button"
                     onClick={() => setRfidTargetType('BOOK_TAG')}
                     className={`p-3 rounded-xl border text-left font-bold flex items-center space-x-2 transition-all cursor-pointer ${
-                      rfidTargetType === 'BOOK_TAG' ? 'border-purple-500 bg-purple-500/10 text-purple-300' : 'border-[#27272a] bg-[#09090b] text-[#a1a1aa]'
+                      rfidTargetType === 'BOOK_TAG' ? 'border-purple-500 bg-purple-500/10 text-purple-300' : 'border-slate-200/90 bg-[#f1f5f9] text-slate-500'
                     }`}
                   >
                     <BookOpen className="h-4 w-4 shrink-0" />
@@ -1509,7 +1509,7 @@ export const BarcodeGeneratorModule: React.FC<BarcodeGeneratorModuleProps> = ({
                     type="button"
                     onClick={() => setRfidTargetType('PATRON_CARD')}
                     className={`p-3 rounded-xl border text-left font-bold flex items-center space-x-2 transition-all cursor-pointer ${
-                      rfidTargetType === 'PATRON_CARD' ? 'border-purple-500 bg-purple-500/10 text-purple-300' : 'border-[#27272a] bg-[#09090b] text-[#a1a1aa]'
+                      rfidTargetType === 'PATRON_CARD' ? 'border-purple-500 bg-purple-500/10 text-purple-300' : 'border-slate-200/90 bg-[#f1f5f9] text-slate-500'
                     }`}
                   >
                     <User className="h-4 w-4 shrink-0" />
@@ -1522,13 +1522,13 @@ export const BarcodeGeneratorModule: React.FC<BarcodeGeneratorModuleProps> = ({
                   <div className="space-y-3 pt-1">
                     {/* Scope selection: Single vs All Chosen */}
                     <div className="space-y-1.5">
-                      <label className="text-[11px] text-[#a1a1aa]">Programming Scope</label>
+                      <label className="text-[11px] text-slate-500">Programming Scope</label>
                       <div className="grid grid-cols-2 gap-2 text-xs">
                         <button
                           type="button"
                           onClick={() => setRfidTargetScope('SINGLE')}
                           className={`p-2.5 rounded-xl border text-left font-medium flex items-center space-x-1.5 cursor-pointer ${
-                            rfidTargetScope === 'SINGLE' ? 'border-purple-500 bg-purple-500/10 text-purple-300' : 'border-[#27272a] bg-[#09090b] text-[#a1a1aa]'
+                            rfidTargetScope === 'SINGLE' ? 'border-purple-500 bg-purple-500/10 text-purple-300' : 'border-slate-200/90 bg-[#f1f5f9] text-slate-500'
                           }`}
                         >
                           <span>Single Title</span>
@@ -1537,7 +1537,7 @@ export const BarcodeGeneratorModule: React.FC<BarcodeGeneratorModuleProps> = ({
                           type="button"
                           onClick={() => setRfidTargetScope('BATCH_SELECTED')}
                           className={`p-2.5 rounded-xl border text-left font-medium flex items-center space-x-1.5 cursor-pointer ${
-                            rfidTargetScope === 'BATCH_SELECTED' ? 'border-purple-500 bg-purple-500/10 text-purple-300' : 'border-[#27272a] bg-[#09090b] text-[#a1a1aa]'
+                            rfidTargetScope === 'BATCH_SELECTED' ? 'border-purple-500 bg-purple-500/10 text-purple-300' : 'border-slate-200/90 bg-[#f1f5f9] text-slate-500'
                           }`}
                         >
                           <span>Batch ({chosenBooks.length} Chosen)</span>
@@ -1546,7 +1546,7 @@ export const BarcodeGeneratorModule: React.FC<BarcodeGeneratorModuleProps> = ({
                     </div>
 
                     <div className="flex items-center justify-between">
-                      <label className="text-[11px] text-[#a1a1aa]">Active Catalog Book</label>
+                      <label className="text-[11px] text-slate-500">Active Catalog Book</label>
                       <button
                         type="button"
                         onClick={() => setIsTitleModalOpen(true)}
@@ -1559,10 +1559,10 @@ export const BarcodeGeneratorModule: React.FC<BarcodeGeneratorModuleProps> = ({
                     <select
                       value={selectedBookId}
                       onChange={(e) => setSelectedBookId(e.target.value)}
-                      className="w-full bg-[#09090b] border border-[#27272a] rounded-xl px-3 py-2 text-xs text-[#fafafa] focus:outline-none focus:border-purple-500"
+                      className="w-full bg-[#f1f5f9] border border-slate-200/90 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-purple-500"
                     >
                       {books.map(b => (
-                        <option key={b.id} value={b.id} className="bg-[#121214]">
+                        <option key={b.id} value={b.id} className="bg-white">
                           {selectedBookIds.includes(b.id) ? '✓ ' : '○ '} {b.title} ({b.accessionNumber || b.isbn || b.id})
                         </option>
                       ))}
@@ -1570,14 +1570,14 @@ export const BarcodeGeneratorModule: React.FC<BarcodeGeneratorModuleProps> = ({
                   </div>
                 ) : (
                   <div className="space-y-1.5 pt-1">
-                    <label className="text-[11px] text-[#a1a1aa]">Target Patron</label>
+                    <label className="text-[11px] text-slate-500">Target Patron</label>
                     <select
                       value={selectedPatronId}
                       onChange={(e) => setSelectedPatronId(e.target.value)}
-                      className="w-full bg-[#09090b] border border-[#27272a] rounded-xl px-3 py-2 text-xs text-[#fafafa] focus:outline-none focus:border-purple-500"
+                      className="w-full bg-[#f1f5f9] border border-slate-200/90 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-purple-500"
                     >
                       {users.map(u => (
-                        <option key={u.id} value={u.id} className="bg-[#121214]">
+                        <option key={u.id} value={u.id} className="bg-white">
                           {u.name} ({u.memberCode}) - {u.role}
                         </option>
                       ))}
@@ -1587,15 +1587,15 @@ export const BarcodeGeneratorModule: React.FC<BarcodeGeneratorModuleProps> = ({
               </div>
 
               {/* RFID Frequency & Anti-Theft EAS Security */}
-              <div className="p-5 rounded-2xl border border-[#27272a] bg-[#121214] space-y-4">
-                <h3 className="text-xs font-mono font-bold uppercase text-[#a1a1aa] flex items-center space-x-2">
+              <div className="p-5 rounded-2xl border border-slate-200/90 bg-white space-y-4">
+                <h3 className="text-xs font-mono font-bold uppercase text-slate-500 flex items-center space-x-2">
                   <ShieldCheck className="h-4 w-4 text-purple-400" />
                   <span>2. RFID Security & EAS Anti-Theft Bits</span>
                 </h3>
 
                 {/* EAS Anti-Theft Status */}
                 <div className="space-y-2">
-                  <label className="text-[11px] text-[#a1a1aa] block">EAS Anti-Theft Gate Status (Electronic Article Surveillance)</label>
+                  <label className="text-[11px] text-slate-500 block">EAS Anti-Theft Gate Status (Electronic Article Surveillance)</label>
                   <div className="grid grid-cols-2 gap-2 text-xs">
                     <button
                       type="button"
@@ -1606,7 +1606,7 @@ export const BarcodeGeneratorModule: React.FC<BarcodeGeneratorModuleProps> = ({
                       className={`p-3 rounded-xl border font-bold flex items-center justify-center space-x-2 transition-all cursor-pointer ${
                         rfidEasStatus === 'ARMED'
                           ? 'border-red-500 bg-red-500/10 text-red-300'
-                          : 'border-[#27272a] bg-[#09090b] text-[#a1a1aa]'
+                          : 'border-slate-200/90 bg-[#f1f5f9] text-slate-500'
                       }`}
                     >
                       <ShieldAlert className="h-4 w-4 text-red-400" />
@@ -1622,7 +1622,7 @@ export const BarcodeGeneratorModule: React.FC<BarcodeGeneratorModuleProps> = ({
                       className={`p-3 rounded-xl border font-bold flex items-center justify-center space-x-2 transition-all cursor-pointer ${
                         rfidEasStatus === 'DISARMED'
                           ? 'border-emerald-500 bg-emerald-500/10 text-emerald-300'
-                          : 'border-[#27272a] bg-[#09090b] text-[#a1a1aa]'
+                          : 'border-slate-200/90 bg-[#f1f5f9] text-slate-500'
                       }`}
                     >
                       <ShieldCheck className="h-4 w-4 text-emerald-400" />
@@ -1632,14 +1632,14 @@ export const BarcodeGeneratorModule: React.FC<BarcodeGeneratorModuleProps> = ({
                 </div>
 
                 {/* Frequency Standard */}
-                <div className="space-y-1.5 pt-2 border-t border-[#27272a]">
-                  <label className="text-[11px] text-[#a1a1aa]">Frequency Protocol</label>
+                <div className="space-y-1.5 pt-2 border-t border-slate-200/90">
+                  <label className="text-[11px] text-slate-500">Frequency Protocol</label>
                   <div className="grid grid-cols-2 gap-2 text-xs">
                     <button
                       type="button"
                       onClick={() => setRfidFrequency('UHF')}
                       className={`p-2.5 rounded-xl border font-semibold flex items-center justify-center space-x-1.5 cursor-pointer ${
-                        rfidFrequency === 'UHF' ? 'border-purple-500 bg-purple-500/10 text-purple-300' : 'border-[#27272a] bg-[#09090b] text-[#a1a1aa]'
+                        rfidFrequency === 'UHF' ? 'border-purple-500 bg-purple-500/10 text-purple-300' : 'border-slate-200/90 bg-[#f1f5f9] text-slate-500'
                       }`}
                     >
                       <span>UHF (860-960 MHz)</span>
@@ -1649,7 +1649,7 @@ export const BarcodeGeneratorModule: React.FC<BarcodeGeneratorModuleProps> = ({
                       type="button"
                       onClick={() => setRfidFrequency('HF')}
                       className={`p-2.5 rounded-xl border font-semibold flex items-center justify-center space-x-1.5 cursor-pointer ${
-                        rfidFrequency === 'HF' ? 'border-purple-500 bg-purple-500/10 text-purple-300' : 'border-[#27272a] bg-[#09090b] text-[#a1a1aa]'
+                        rfidFrequency === 'HF' ? 'border-purple-500 bg-purple-500/10 text-purple-300' : 'border-slate-200/90 bg-[#f1f5f9] text-slate-500'
                       }`}
                     >
                       <span>HF (13.56 MHz ISO 15693)</span>
@@ -1661,9 +1661,9 @@ export const BarcodeGeneratorModule: React.FC<BarcodeGeneratorModuleProps> = ({
 
             {/* Right Live RFID Visual Tag (7 cols) */}
             <div className="lg:col-span-7 space-y-5">
-              <div className="p-6 rounded-2xl border border-[#27272a] bg-[#121214] space-y-4">
+              <div className="p-6 rounded-2xl border border-slate-200/90 bg-white space-y-4">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-xs font-mono font-bold uppercase text-[#a1a1aa] flex items-center space-x-2">
+                  <h3 className="text-xs font-mono font-bold uppercase text-slate-500 flex items-center space-x-2">
                     <Radio className="h-4 w-4 text-purple-400" />
                     <span>Smart RFID Physical Inlay Graphic (50mm x 50mm)</span>
                   </h3>
@@ -1704,9 +1704,9 @@ export const BarcodeGeneratorModule: React.FC<BarcodeGeneratorModuleProps> = ({
 
                       {/* Microchip Icon Graphic */}
                       <div className="flex items-center justify-center py-2">
-                        <div className="p-3 bg-zinc-900 text-amber-400 rounded-xl shadow-md border border-zinc-700 flex items-center space-x-2">
+                        <div className="p-3 bg-white text-amber-400 rounded-xl shadow-md border border-slate-300 flex items-center space-x-2">
                           <Cpu className="h-6 w-6 text-purple-400" />
-                          <div className="text-left font-mono text-[10px] text-zinc-300 leading-tight">
+                          <div className="text-left font-mono text-[10px] text-slate-700 leading-tight">
                             <div>CHIP UID: <strong className="text-amber-300">{activeRfidChipUid}</strong></div>
                             <div>AFI: <strong className="text-emerald-400">{rfidAfiByte}</strong> | EAS: <strong className={rfidEasStatus === 'ARMED' ? 'text-red-400' : 'text-emerald-400'}>{rfidEasStatus}</strong></div>
                           </div>
@@ -1721,11 +1721,11 @@ export const BarcodeGeneratorModule: React.FC<BarcodeGeneratorModuleProps> = ({
                   </div>
                 ) : (
                   /* Patron Smart Card Preview */
-                  <div className="p-6 rounded-2xl bg-gradient-to-r from-zinc-900 via-zinc-800 to-zinc-900 text-white shadow-2xl border border-zinc-700 relative overflow-hidden max-w-md mx-auto">
-                    <div className="flex items-center justify-between border-b border-zinc-700 pb-3">
+                  <div className="p-6 rounded-2xl bg-gradient-to-r from-zinc-900 via-zinc-800 to-zinc-900 text-white shadow-2xl border border-slate-300 relative overflow-hidden max-w-md mx-auto">
+                    <div className="flex items-center justify-between border-b border-slate-300 pb-3">
                       <div className="flex items-center space-x-2.5">
                         <img src={pslimsLogo} alt="PLiMS Emblem" className="w-6 h-6 rounded-full object-cover border border-emerald-400/40" />
-                        <span className="text-xs font-bold uppercase tracking-wider text-zinc-200">Patron Contactless Smart ID</span>
+                        <span className="text-xs font-bold uppercase tracking-wider text-slate-800">Patron Contactless Smart ID</span>
                       </div>
                       <span className="text-[10px] font-mono bg-purple-500/20 text-purple-300 px-2 py-0.5 rounded border border-purple-500/30">
                         MIFARE 1K
@@ -1734,11 +1734,11 @@ export const BarcodeGeneratorModule: React.FC<BarcodeGeneratorModuleProps> = ({
 
                     <div className="grid grid-cols-12 gap-4 items-center py-4">
                       <div className="col-span-4 flex flex-col items-center justify-center">
-                        <div className="h-16 w-16 rounded-xl bg-zinc-800 border-2 border-emerald-500/40 flex items-center justify-center text-zinc-400 overflow-hidden">
+                        <div className="h-16 w-16 rounded-xl bg-slate-100 border-2 border-emerald-500/40 flex items-center justify-center text-slate-500 overflow-hidden">
                           {selectedPatron?.avatarUrl ? (
                             <img src={selectedPatron.avatarUrl} alt="" className="h-full w-full object-cover" />
                           ) : (
-                            <User className="h-8 w-8 text-zinc-400" />
+                            <User className="h-8 w-8 text-slate-500" />
                           )}
                         </div>
                       </div>
@@ -1746,12 +1746,12 @@ export const BarcodeGeneratorModule: React.FC<BarcodeGeneratorModuleProps> = ({
                       <div className="col-span-8 space-y-1 text-xs">
                         <div className="font-bold text-sm text-white">{selectedPatron?.name || 'Patron Name'}</div>
                         <div className="text-emerald-400 font-mono font-bold">{selectedPatron?.memberCode || 'STU-2024-001'}</div>
-                        <div className="text-zinc-400 text-[11px]">{selectedPatron?.department || 'Department'} • {selectedPatron?.role || 'STUDENT'}</div>
-                        <div className="text-[10px] font-mono text-zinc-500 pt-1">RFID UID: {patronChipUid}</div>
+                        <div className="text-slate-500 text-[11px]">{selectedPatron?.department || 'Department'} • {selectedPatron?.role || 'STUDENT'}</div>
+                        <div className="text-[10px] font-mono text-slate-400 pt-1">RFID UID: {patronChipUid}</div>
                       </div>
                     </div>
 
-                    <div className="flex items-center justify-between border-t border-zinc-700/80 pt-2 text-[10px] text-zinc-400 font-mono">
+                    <div className="flex items-center justify-between border-t border-slate-300/80 pt-2 text-[10px] text-slate-500 font-mono">
                       <span>SEC: ISO/IEC 14443 Type A</span>
                       <span>EXP: {selectedPatron?.expiryDate || '2027-12-31'}</span>
                     </div>
@@ -1759,12 +1759,12 @@ export const BarcodeGeneratorModule: React.FC<BarcodeGeneratorModuleProps> = ({
                 )}
 
                 {/* Encoded Memory Map Preview */}
-                <div className="p-4 rounded-xl bg-[#09090b] border border-[#27272a] text-xs font-mono space-y-1.5 text-[#a1a1aa]">
+                <div className="p-4 rounded-xl bg-[#f1f5f9] border border-slate-200/90 text-xs font-mono space-y-1.5 text-slate-500">
                   <div className="text-purple-400 font-bold text-[11px]">ISO 28560 MEMORY BANK ENCODING MAP:</div>
-                  <div><strong className="text-zinc-300">Bank 00 (Reserved):</strong> Access/Kill PWD [00000000]</div>
-                  <div><strong className="text-zinc-300">Bank 01 (EPC):</strong> <span className="text-emerald-400">{activeEpcHex}</span></div>
-                  <div><strong className="text-zinc-300">Bank 02 (TID):</strong> E2801160600002046890B412</div>
-                  <div className="truncate"><strong className="text-zinc-300">Bank 03 (User):</strong> <span className="text-blue-400">{activeUserMemoryHex}</span></div>
+                  <div><strong className="text-slate-700">Bank 00 (Reserved):</strong> Access/Kill PWD [00000000]</div>
+                  <div><strong className="text-slate-700">Bank 01 (EPC):</strong> <span className="text-emerald-400">{activeEpcHex}</span></div>
+                  <div><strong className="text-slate-700">Bank 02 (TID):</strong> E2801160600002046890B412</div>
+                  <div className="truncate"><strong className="text-slate-700">Bank 03 (User):</strong> <span className="text-blue-400">{activeUserMemoryHex}</span></div>
                 </div>
               </div>
             </div>
@@ -1778,18 +1778,18 @@ export const BarcodeGeneratorModule: React.FC<BarcodeGeneratorModuleProps> = ({
       {activeModuleTab === 'SCANNER_HUB' && (
         <div className="space-y-6">
           {/* Scanner Mode Tabs */}
-          <div className="flex flex-wrap items-center justify-between gap-3 p-4 rounded-xl bg-[#18181b] border border-[#27272a]">
+          <div className="flex flex-wrap items-center justify-between gap-3 p-4 rounded-xl bg-slate-100 border border-slate-200/90">
             <div className="flex items-center space-x-2">
               <Zap className="h-5 w-5 text-blue-400 animate-pulse" />
-              <span className="text-sm font-bold text-[#fafafa]">Universal Barcode & Contactless RFID Reader Terminal</span>
+              <span className="text-sm font-bold text-slate-900">Universal Barcode & Contactless RFID Reader Terminal</span>
             </div>
 
-            <div className="flex items-center gap-1.5 bg-[#09090b] p-1 rounded-xl border border-[#27272a]">
+            <div className="flex items-center gap-1.5 bg-[#f1f5f9] p-1 rounded-xl border border-slate-200/90">
               <button
                 type="button"
                 onClick={() => setScannerMode('RFID_TAP')}
                 className={`px-3 py-1.5 rounded-lg text-xs font-bold flex items-center space-x-1.5 cursor-pointer ${
-                  scannerMode === 'RFID_TAP' ? 'bg-purple-600 text-white' : 'text-[#a1a1aa] hover:text-white'
+                  scannerMode === 'RFID_TAP' ? 'bg-purple-600 text-white' : 'text-slate-500 hover:text-white'
                 }`}
               >
                 <Radio className="h-3.5 w-3.5" />
@@ -1800,7 +1800,7 @@ export const BarcodeGeneratorModule: React.FC<BarcodeGeneratorModuleProps> = ({
                 type="button"
                 onClick={() => setScannerMode('CAMERA')}
                 className={`px-3 py-1.5 rounded-lg text-xs font-bold flex items-center space-x-1.5 cursor-pointer ${
-                  scannerMode === 'CAMERA' ? 'bg-blue-600 text-white' : 'text-[#a1a1aa] hover:text-white'
+                  scannerMode === 'CAMERA' ? 'bg-blue-600 text-white' : 'text-slate-500 hover:text-white'
                 }`}
               >
                 <Camera className="h-3.5 w-3.5" />
@@ -1811,7 +1811,7 @@ export const BarcodeGeneratorModule: React.FC<BarcodeGeneratorModuleProps> = ({
                 type="button"
                 onClick={() => setScannerMode('USB_MANUAL')}
                 className={`px-3 py-1.5 rounded-lg text-xs font-bold flex items-center space-x-1.5 cursor-pointer ${
-                  scannerMode === 'USB_MANUAL' ? 'bg-emerald-600 text-white' : 'text-[#a1a1aa] hover:text-white'
+                  scannerMode === 'USB_MANUAL' ? 'bg-emerald-600 text-white' : 'text-slate-500 hover:text-white'
                 }`}
               >
                 <BarcodeIcon className="h-3.5 w-3.5" />
@@ -1825,9 +1825,9 @@ export const BarcodeGeneratorModule: React.FC<BarcodeGeneratorModuleProps> = ({
             <div className="lg:col-span-7 space-y-5">
               {/* MODE 1: RFID CONTACTLESS TAP SCANNER */}
               {scannerMode === 'RFID_TAP' && (
-                <div className="p-6 rounded-2xl border border-[#27272a] bg-[#121214] space-y-4">
+                <div className="p-6 rounded-2xl border border-slate-200/90 bg-white space-y-4">
                   <div className="flex items-center justify-between">
-                    <h3 className="text-xs font-mono font-bold uppercase text-[#a1a1aa] flex items-center space-x-2">
+                    <h3 className="text-xs font-mono font-bold uppercase text-slate-500 flex items-center space-x-2">
                       <Radio className="h-4 w-4 text-purple-400" />
                       <span>Contactless RFID Reader Pad</span>
                     </h3>
@@ -1837,13 +1837,13 @@ export const BarcodeGeneratorModule: React.FC<BarcodeGeneratorModuleProps> = ({
                   </div>
 
                   {/* Simulated Near Field Tap Pad */}
-                  <div className="p-8 rounded-2xl bg-[#09090b] border-2 border-dashed border-purple-500/40 text-center space-y-3 relative overflow-hidden">
+                  <div className="p-8 rounded-2xl bg-[#f1f5f9] border-2 border-dashed border-purple-500/40 text-center space-y-3 relative overflow-hidden">
                     <div className="h-16 w-16 mx-auto rounded-full bg-purple-500/10 border border-purple-500/30 flex items-center justify-center text-purple-400">
                       <Radio className="h-8 w-8 animate-pulse" />
                     </div>
                     <div>
-                      <div className="text-sm font-bold text-[#fafafa]">Tap Book RFID Tag or Patron Card</div>
-                      <p className="text-xs text-[#a1a1aa] max-w-sm mx-auto mt-1">
+                      <div className="text-sm font-bold text-slate-900">Tap Book RFID Tag or Patron Card</div>
+                      <p className="text-xs text-slate-500 max-w-sm mx-auto mt-1">
                         Place smart transponder near antenna field to read Chip UID, EAS anti-theft status, and catalog metadata
                       </p>
                     </div>
@@ -1851,19 +1851,19 @@ export const BarcodeGeneratorModule: React.FC<BarcodeGeneratorModuleProps> = ({
 
                   {/* Quick Test Tap Presets */}
                   <div className="space-y-2 pt-2">
-                    <label className="text-xs font-semibold text-[#a1a1aa] block">Quick Test Tap (Click to simulate instant scan):</label>
+                    <label className="text-xs font-semibold text-slate-500 block">Quick Test Tap (Click to simulate instant scan):</label>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                       {books.slice(0, 4).map(b => (
                         <button
                           key={b.id}
                           type="button"
                           onClick={() => handleProcessScannedCode(b.accessionNumber || b.isbn || b.id, 'RFID_BOOK_TAP')}
-                          className="p-2.5 rounded-xl bg-[#18181b] hover:bg-[#27272a] border border-[#27272a] text-left text-xs transition-all cursor-pointer flex items-center space-x-2"
+                          className="p-2.5 rounded-xl bg-slate-100 hover:bg-[#27272a] border border-slate-200/90 text-left text-xs transition-all cursor-pointer flex items-center space-x-2"
                         >
                           <BookOpen className="h-4 w-4 text-emerald-400 shrink-0" />
                           <div className="truncate">
-                            <div className="font-bold text-[#fafafa] truncate">{b.title}</div>
-                            <div className="text-[10px] font-mono text-[#a1a1aa]">{b.accessionNumber || b.isbn}</div>
+                            <div className="font-bold text-slate-900 truncate">{b.title}</div>
+                            <div className="text-[10px] font-mono text-slate-500">{b.accessionNumber || b.isbn}</div>
                           </div>
                         </button>
                       ))}
@@ -1873,12 +1873,12 @@ export const BarcodeGeneratorModule: React.FC<BarcodeGeneratorModuleProps> = ({
                           key={u.id}
                           type="button"
                           onClick={() => handleProcessScannedCode(u.memberCode || u.rfidTag || u.id, 'RFID_PATRON_TAP')}
-                          className="p-2.5 rounded-xl bg-[#18181b] hover:bg-[#27272a] border border-[#27272a] text-left text-xs transition-all cursor-pointer flex items-center space-x-2"
+                          className="p-2.5 rounded-xl bg-slate-100 hover:bg-[#27272a] border border-slate-200/90 text-left text-xs transition-all cursor-pointer flex items-center space-x-2"
                         >
                           <User className="h-4 w-4 text-blue-400 shrink-0" />
                           <div className="truncate">
-                            <div className="font-bold text-[#fafafa] truncate">{u.name}</div>
-                            <div className="text-[10px] font-mono text-[#a1a1aa]">{u.memberCode} ({u.role})</div>
+                            <div className="font-bold text-slate-900 truncate">{u.name}</div>
+                            <div className="text-[10px] font-mono text-slate-500">{u.memberCode} ({u.role})</div>
                           </div>
                         </button>
                       ))}
@@ -1889,9 +1889,9 @@ export const BarcodeGeneratorModule: React.FC<BarcodeGeneratorModuleProps> = ({
 
               {/* MODE 2: CAMERA STREAM */}
               {scannerMode === 'CAMERA' && (
-                <div className="p-6 rounded-2xl border border-[#27272a] bg-[#121214] space-y-4">
+                <div className="p-6 rounded-2xl border border-slate-200/90 bg-white space-y-4">
                   <div className="flex items-center justify-between">
-                    <h3 className="text-xs font-mono font-bold uppercase text-[#a1a1aa] flex items-center space-x-2">
+                    <h3 className="text-xs font-mono font-bold uppercase text-slate-500 flex items-center space-x-2">
                       <Camera className="h-4 w-4 text-blue-400" />
                       <span>Live Video Camera Stream Scanner</span>
                     </h3>
@@ -1900,7 +1900,7 @@ export const BarcodeGeneratorModule: React.FC<BarcodeGeneratorModuleProps> = ({
                     </span>
                   </div>
 
-                  <div className="relative rounded-2xl overflow-hidden bg-black aspect-video flex items-center justify-center border border-[#27272a]">
+                  <div className="relative rounded-2xl overflow-hidden bg-black aspect-video flex items-center justify-center border border-slate-200/90">
                     <video ref={videoRef} className="w-full h-full object-cover" />
                     <canvas ref={canvasRef} className="hidden" />
 
@@ -1915,10 +1915,10 @@ export const BarcodeGeneratorModule: React.FC<BarcodeGeneratorModuleProps> = ({
                     </div>
 
                     {cameraError && (
-                      <div className="absolute inset-0 bg-[#09090b]/90 p-6 flex flex-col items-center justify-center text-center space-y-2">
+                      <div className="absolute inset-0 bg-[#f1f5f9]/90 p-6 flex flex-col items-center justify-center text-center space-y-2">
                         <AlertCircle className="h-8 w-8 text-amber-400" />
-                        <div className="text-xs text-[#fafafa] font-bold">Camera Stream Notice</div>
-                        <p className="text-xs text-[#a1a1aa] max-w-sm">{cameraError}</p>
+                        <div className="text-xs text-slate-900 font-bold">Camera Stream Notice</div>
+                        <p className="text-xs text-slate-500 max-w-sm">{cameraError}</p>
                       </div>
                     )}
                   </div>
@@ -1927,9 +1927,9 @@ export const BarcodeGeneratorModule: React.FC<BarcodeGeneratorModuleProps> = ({
 
               {/* MODE 3: USB MANUAL SCANNER */}
               {scannerMode === 'USB_MANUAL' && (
-                <div className="p-6 rounded-2xl border border-[#27272a] bg-[#121214] space-y-4">
+                <div className="p-6 rounded-2xl border border-slate-200/90 bg-white space-y-4">
                   <div className="flex items-center justify-between">
-                    <h3 className="text-xs font-mono font-bold uppercase text-[#a1a1aa] flex items-center space-x-2">
+                    <h3 className="text-xs font-mono font-bold uppercase text-slate-500 flex items-center space-x-2">
                       <BarcodeIcon className="h-4 w-4 text-emerald-400" />
                       <span>USB Handheld Laser & Keyboard Wedge Scanner</span>
                     </h3>
@@ -1944,7 +1944,7 @@ export const BarcodeGeneratorModule: React.FC<BarcodeGeneratorModuleProps> = ({
                     className="space-y-3"
                   >
                     <div className="space-y-1">
-                      <label className="text-xs text-[#a1a1aa]">Scan Barcode or Enter Accession / Member Code</label>
+                      <label className="text-xs text-slate-500">Scan Barcode or Enter Accession / Member Code</label>
                       <div className="relative">
                         <input
                           type="text"
@@ -1952,7 +1952,7 @@ export const BarcodeGeneratorModule: React.FC<BarcodeGeneratorModuleProps> = ({
                           onChange={(e) => setManualScanInput(e.target.value)}
                           placeholder="Aim scanner at barcode or type (e.g. ACC-88001, STU-2024-001)..."
                           autoFocus
-                          className="w-full bg-[#09090b] border-2 border-emerald-500/60 rounded-xl px-4 py-3 text-sm text-[#fafafa] font-mono focus:outline-none focus:border-emerald-400"
+                          className="w-full bg-[#f1f5f9] border-2 border-emerald-500/60 rounded-xl px-4 py-3 text-sm text-slate-900 font-mono focus:outline-none focus:border-emerald-400"
                         />
                         <button
                           type="submit"
@@ -1970,14 +1970,14 @@ export const BarcodeGeneratorModule: React.FC<BarcodeGeneratorModuleProps> = ({
             {/* Right Decoded Payload & History (5 cols) */}
             <div className="lg:col-span-5 space-y-5">
               {/* Active Scanned Result Box */}
-              <div className="p-6 rounded-2xl border border-[#27272a] bg-[#121214] space-y-4">
-                <h3 className="text-xs font-mono font-bold uppercase text-[#a1a1aa] flex items-center space-x-2">
+              <div className="p-6 rounded-2xl border border-slate-200/90 bg-white space-y-4">
+                <h3 className="text-xs font-mono font-bold uppercase text-slate-500 flex items-center space-x-2">
                   <CheckCircle2 className="h-4 w-4 text-emerald-400" />
                   <span>Decoded Payload & Item Status</span>
                 </h3>
 
                 {scannedResult ? (
-                  <div className="p-4 rounded-xl bg-[#09090b] border border-[#27272a] space-y-3">
+                  <div className="p-4 rounded-xl bg-[#f1f5f9] border border-slate-200/90 space-y-3">
                     <div className="flex items-center justify-between">
                       <span className={`px-2.5 py-0.5 rounded text-[10px] font-bold font-mono ${
                         scannedResult.type === 'BOOK' ? 'bg-emerald-500/20 text-emerald-300' : scannedResult.type === 'MEMBER' ? 'bg-blue-500/20 text-blue-300' : 'bg-red-500/20 text-red-300'
@@ -1995,7 +1995,7 @@ export const BarcodeGeneratorModule: React.FC<BarcodeGeneratorModuleProps> = ({
                     </div>
 
                     <div>
-                      <div className="text-sm font-bold text-[#fafafa]">
+                      <div className="text-sm font-bold text-slate-900">
                         {scannedResult.title || scannedResult.name || scannedResult.code}
                       </div>
                       <div className="text-xs font-mono text-emerald-400 mt-0.5">
@@ -2003,7 +2003,7 @@ export const BarcodeGeneratorModule: React.FC<BarcodeGeneratorModuleProps> = ({
                       </div>
                     </div>
 
-                    <div className="text-xs text-[#a1a1aa] border-t border-[#27272a] pt-2">
+                    <div className="text-xs text-slate-500 border-t border-slate-200/90 pt-2">
                       {scannedResult.details}
                     </div>
 
@@ -2014,16 +2014,16 @@ export const BarcodeGeneratorModule: React.FC<BarcodeGeneratorModuleProps> = ({
                     )}
                   </div>
                 ) : (
-                  <div className="p-8 rounded-xl bg-[#09090b] border border-[#27272a] text-center text-xs text-[#a1a1aa]">
+                  <div className="p-8 rounded-xl bg-[#f1f5f9] border border-slate-200/90 text-center text-xs text-slate-500">
                     No item scanned yet. Tap an RFID card, aim webcam at barcode, or scan with USB handheld scanner.
                   </div>
                 )}
               </div>
 
               {/* Session Scan Log */}
-              <div className="p-5 rounded-2xl border border-[#27272a] bg-[#121214] space-y-3">
+              <div className="p-5 rounded-2xl border border-slate-200/90 bg-white space-y-3">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-xs font-mono font-bold uppercase text-[#a1a1aa] flex items-center space-x-2">
+                  <h3 className="text-xs font-mono font-bold uppercase text-slate-500 flex items-center space-x-2">
                     <Clock className="h-4 w-4 text-blue-400" />
                     <span>Session Scan Log ({scanHistoryLog.length})</span>
                   </h3>
@@ -2031,7 +2031,7 @@ export const BarcodeGeneratorModule: React.FC<BarcodeGeneratorModuleProps> = ({
                     <button
                       type="button"
                       onClick={() => setScanHistoryLog([])}
-                      className="text-[11px] text-[#a1a1aa] hover:text-white"
+                      className="text-[11px] text-slate-500 hover:text-white"
                     >
                       Clear
                     </button>
@@ -2040,15 +2040,15 @@ export const BarcodeGeneratorModule: React.FC<BarcodeGeneratorModuleProps> = ({
 
                 <div className="space-y-1.5 max-h-48 overflow-y-auto">
                   {scanHistoryLog.length === 0 ? (
-                    <div className="text-xs text-zinc-500 text-center py-4">Waiting for first scan...</div>
+                    <div className="text-xs text-slate-400 text-center py-4">Waiting for first scan...</div>
                   ) : (
                     scanHistoryLog.map(item => (
-                      <div key={item.id} className="p-2 rounded-lg bg-[#09090b] border border-[#27272a] text-xs flex items-center justify-between">
+                      <div key={item.id} className="p-2 rounded-lg bg-[#f1f5f9] border border-slate-200/90 text-xs flex items-center justify-between">
                         <div className="truncate pr-2">
-                          <span className="text-[#fafafa] font-medium">{item.label}</span>
-                          <div className="text-[10px] text-[#a1a1aa] font-mono">{item.mode} • {item.code}</div>
+                          <span className="text-slate-900 font-medium">{item.label}</span>
+                          <div className="text-[10px] text-slate-500 font-mono">{item.mode} • {item.code}</div>
                         </div>
-                        <span className="text-[10px] font-mono text-zinc-400">{item.time}</span>
+                        <span className="text-[10px] font-mono text-slate-500">{item.time}</span>
                       </div>
                     ))
                   )}

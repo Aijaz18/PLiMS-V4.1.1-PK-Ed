@@ -40,6 +40,7 @@ import {
   BackgroundLayer
 } from './MainThemeBgSelector';
 import pslimsLogo from '../assets/images/plims_emblem_logo_1788759356534.jpg';
+import { PakistanFlyingFlag } from './PakistanFlyingFlag';
 import { GoogleLoginButton } from './GoogleLoginButton';
 import { processGoogleUserAuth, GoogleOAuthPayload } from '../services/googleAuth';
 
@@ -270,11 +271,19 @@ export const LoginPage: React.FC<LoginPageProps> = ({
             className="w-12 h-12 rounded-full object-cover border-2 border-emerald-500/50 shadow-md shadow-emerald-500/20 shrink-0"
           />
           <div>
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-2 flex-wrap sm:flex-nowrap">
               <span className="font-serif text-lg sm:text-xl font-bold tracking-tight text-white">PLiMS</span>
-              <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
-                V4.1 PRO
+              <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 whitespace-nowrap shadow-2xs">
+                V4.1.1 PK edition
               </span>
+              {/* Flying Pakistani Flag on Golden Finial Mast */}
+              <div className="ml-1 pl-1 border-l border-zinc-800">
+                <PakistanFlyingFlag
+                  size="sm"
+                  showMast={true}
+                  title="Parchem-e-Sitāra-o-Hilāl • Islamic Republic of Pakistan"
+                />
+              </div>
             </div>
             <p className="text-[11px] text-zinc-400">Pakistan Library Management System</p>
           </div>
@@ -362,18 +371,29 @@ export const LoginPage: React.FC<LoginPageProps> = ({
 
               {/* Brand Header */}
               <div className="relative z-10">
-                <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 rounded-xl bg-emerald-500/20 border border-emerald-400/30 flex items-center justify-center shadow-inner">
-                    <BookOpen className="w-5 h-5 text-emerald-300" />
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-10 h-10 rounded-xl bg-emerald-500/20 border border-emerald-400/30 flex items-center justify-center shadow-inner shrink-0">
+                      <BookOpen className="w-5 h-5 text-emerald-300" />
+                    </div>
+                    <div>
+                      <h1 className="text-2xl font-black tracking-tight text-white flex items-center gap-1.5 font-sans flex-wrap">
+                        <span>PLiMS</span>
+                        <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-emerald-400/20 text-emerald-300 border border-emerald-300/30 whitespace-nowrap shadow-xs">
+                          V4.1.1 PK edition
+                        </span>
+                      </h1>
+                      <p className="text-[11px] text-emerald-200/80 font-medium">Pakistan Library Management System</p>
+                    </div>
                   </div>
-                  <div>
-                    <h1 className="text-2xl font-black tracking-tight text-white flex items-center gap-1.5 font-sans">
-                      <span>PLiMS</span>
-                      <span className="text-[10px] font-mono font-bold px-1.5 py-0.2 rounded bg-emerald-400/20 text-emerald-300 border border-emerald-300/30">
-                        PRO
-                      </span>
-                    </h1>
-                    <p className="text-[11px] text-emerald-200/80 font-medium">Pakistan Library Management System</p>
+
+                  {/* Majestic Flying Pakistani Flag with Golden Finial Mast */}
+                  <div className="p-1.5 rounded-xl bg-emerald-950/50 border border-emerald-400/30 backdrop-blur-xs shadow-md shrink-0">
+                    <PakistanFlyingFlag
+                      size="md"
+                      showMast={true}
+                      title="Islamic Republic of Pakistan • National Flag Flying Proudly"
+                    />
                   </div>
                 </div>
 
@@ -458,8 +478,15 @@ export const LoginPage: React.FC<LoginPageProps> = ({
                 {/* Primary Actions: Google OAuth & Register */}
                 <div className="space-y-3.5 pt-2">
                   
-                  {/* Primary Method 1: Continue with Google */}
-                  <div className="w-full">
+                  {/* Primary Method 1: Continue with Google (Powered by Firebase Authentication) */}
+                  <div className="w-full space-y-1.5">
+                    <div className="flex items-center justify-between text-[11px] text-emerald-800 bg-emerald-50/90 border border-emerald-200/80 px-2.5 py-1 rounded-lg">
+                      <div className="flex items-center space-x-1.5 font-medium">
+                        <span className="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                        <span>Firebase Authentication</span>
+                      </div>
+                      <span className="font-mono text-[10px] text-emerald-700 bg-emerald-100/60 px-1.5 py-0.5 rounded">Google Account</span>
+                    </div>
                     <GoogleLoginButton
                       variant="emerald"
                       text="Continue with Google"
