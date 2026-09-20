@@ -4,6 +4,7 @@ import { Header } from './components/Header';
 import { CommandPalette } from './components/CommandPalette';
 import { AddBranchAndStaffModal } from './components/AddBranchAndStaffModal';
 import { LoginPage } from './components/LoginPage';
+import { PublicOpacPage } from './components/PublicOpacPage';
 import { DigitalLibrarianChatbot } from './components/DigitalLibrarianChatbot';
 
 // Import Feature Modules
@@ -106,6 +107,13 @@ export function App() {
     if (typeof window === 'undefined') return false;
     const urlParams = new URLSearchParams(window.location.search);
     return Boolean(urlParams.get('code')) || window.location.pathname.startsWith('/auth/google/callback');
+  });
+
+  // Public OPAC Home Page vs. Login Portal display state for unauthenticated visitors
+  const [isLoginViewOpen, setIsLoginViewOpen] = useState<boolean>(() => {
+    if (typeof window === 'undefined') return false;
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get('view') === 'login' || window.location.pathname.startsWith('/login');
   });
 
   // Core Database States - Persisted in Browser Local Storage with intelligent seed-merging
@@ -798,6 +806,21 @@ export function App() {
   }
 
   if (!isAuthenticated) {
+    if (!isLoginViewOpen) {
+      return (
+        <ErrorBoundary fallbackTitle="Public OPAC Discovery Error">
+          <PublicOpacPage
+            books={books}
+            copies={copies}
+            settings={settings}
+            currentUser={currentUser}
+            isAuthenticated={false}
+            onOpenLogin={() => setIsLoginViewOpen(true)}
+          />
+        </ErrorBoundary>
+      );
+    }
+
     return (
       <ErrorBoundary fallbackTitle="Portal Access Recovery">
         <LoginPage
@@ -808,13 +831,18 @@ export function App() {
             setCurrentUser(user);
             setActiveBranch(branch);
             setIsAuthenticated(true);
+            setIsLoginViewOpen(false);
             localStorage.setItem('pslims_is_authenticated', 'true');
             localStorage.setItem('pslims_auth_user_id', user.id);
             localStorage.setItem('pslims_auth_branch', branch);
             setCurrentTab('DASHBOARD');
           }}
-          onRegisterUser={(newUser, branch) => handleRegisterUser(newUser, branch)}
+          onRegisterUser={(newUser, branch) => {
+            handleRegisterUser(newUser, branch);
+            setIsLoginViewOpen(false);
+          }}
           onUpdateUser={handleUpdateUser}
+          onBackToOpac={() => setIsLoginViewOpen(false)}
         />
       </ErrorBoundary>
     );
@@ -862,6 +890,7 @@ export function App() {
           localStorage.removeItem('pslims_auth_branch');
           localStorage.removeItem('pslims_google_auth_payload');
           setIsAuthenticated(false);
+          setIsLoginViewOpen(false);
         }}
       />
 
@@ -996,13 +1025,14 @@ export function App() {
             )}
 
             {currentTab === 'OPAC' && (
-              <OpacModule
+              <PublicOpacPage
                 books={books}
+                copies={copies}
+                settings={settings}
                 currentUser={currentUser}
-                onReserveBook={handleReserveBook}
-                onOpenCitationModal={b => setCurrentTab('AI_ASSISTANT')}
-                onDeleteBook={handleDeleteBook}
-                onAddBook={handleAddBook}
+                isAuthenticated={true}
+                onOpenLogin={() => {}}
+                onReturnToDashboard={() => setCurrentTab('DASHBOARD')}
               />
             )}
 

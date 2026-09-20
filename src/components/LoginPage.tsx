@@ -28,7 +28,8 @@ import {
   BarChart3,
   Cloud,
   Check,
-  ArrowLeft
+  ArrowLeft,
+  X
 } from 'lucide-react';
 import { UserProfile, UserRole, BookRecord } from '../types/alims';
 import { MemberPhotoUploader } from './MemberPhotoUploader';
@@ -51,6 +52,7 @@ interface LoginPageProps {
   onLoginSuccess: (user: UserProfile, branch: string, auditAction?: any) => void;
   onRegisterUser: (newUser: UserProfile, branch: string) => void;
   onUpdateUser?: (id: string, updated: Partial<UserProfile>) => void;
+  onBackToOpac?: () => void;
 }
 
 export const LoginPage: React.FC<LoginPageProps> = ({
@@ -60,15 +62,26 @@ export const LoginPage: React.FC<LoginPageProps> = ({
   onLoginSuccess,
   onRegisterUser,
   onUpdateUser,
+  onBackToOpac,
 }) => {
   // Authentication View Modes:
-  // 'PORTAL': The primary landing portal (Continue with Google / Register New User)
+  // 'PORTAL': The primary landing portal (Continue with Google / Username + Password Login)
   // 'REGISTER': Academic membership registration workflow
   // 'OPAC': Public catalog and MARC21 book search
   const [authMode, setAuthMode] = useState<'PORTAL' | 'REGISTER' | 'OPAC'>('PORTAL');
 
   // Selected Branch (Default: Central Academic Library)
   const [selectedBranch, setSelectedBranch] = useState<string>(() => branches[0] || 'Central Academic Library');
+
+  // Username & Password Authentication State
+  const [loginIdentifier, setLoginIdentifier] = useState<string>('');
+  const [loginPassword, setLoginPassword] = useState<string>('');
+  const [showLoginPassword, setShowLoginPassword] = useState<boolean>(false);
+
+  // Forgot Password Modal State
+  const [showForgotPasswordModal, setShowForgotPasswordModal] = useState<boolean>(false);
+  const [forgotIdentifier, setForgotIdentifier] = useState<string>('');
+  const [forgotFeedback, setForgotFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
   // Registration Form State (Strictly empty, user chooses their own secure password)
   const [regName, setRegName] = useState<string>('');
@@ -242,6 +255,113 @@ export const LoginPage: React.FC<LoginPageProps> = ({
     }
   };
 
+  /**
+   * LOGIN METHOD 2: USERNAME + PASSWORD LOGIN
+   * Authenticates user using their Username, Email, or Member Code against the existing PLiMS user directory.
+   * Loads real role, designation, and permissions, then opens the Authenticated PLiMS Home/Dashboard.
+   */
+  const handleUsernamePasswordLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    setErrorMessage(null);
+    setSuccessMessage(null);
+
+    const inputId = loginIdentifier.trim();
+    const inputPass = loginPassword;
+
+    if (!inputId) {
+      setErrorMessage('Please enter your Username, Member Code, or Email address.');
+      return;
+    }
+
+    if (!inputPass) {
+      setErrorMessage('Please enter your account password.');
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    const normalizedInput = inputId.toLowerCase();
+    const matchedUser = users.find(u => {
+      const emailMatch = u.email && u.email.trim().toLowerCase() === normalizedInput;
+      const codeMatch = u.memberCode && u.memberCode.trim().toLowerCase() === normalizedInput;
+      const idMatch = u.id && u.id.trim().toLowerCase() === normalizedInput;
+      const nameMatch = u.name && u.name.trim().toLowerCase() === normalizedInput;
+      return emailMatch || codeMatch || idMatch || nameMatch;
+    });
+
+    if (!matchedUser) {
+      setIsSubmitting(false);
+      setErrorMessage(`No account found matching '${inputId}'. Please check your credentials or click 'Create New Account'.`);
+      return;
+    }
+
+    // Password validation
+    if (matchedUser.password && matchedUser.password !== inputPass) {
+      setIsSubmitting(false);
+      setErrorMessage('Incorrect password. Please verify your password or use "Forgot Password?" for guidance.');
+      return;
+    }
+
+    // Check account status
+    if (matchedUser.status === 'SUSPENDED') {
+      setIsSubmitting(false);
+      setErrorMessage('This library account is currently suspended. Please contact the Library Administration.');
+      return;
+    }
+
+    if (matchedUser.status === 'EXPIRED') {
+      setIsSubmitting(false);
+      setErrorMessage('Your library membership has expired. Please contact circulation staff for renewal.');
+      return;
+    }
+
+    setSuccessMessage(`Welcome back, ${matchedUser.name}! Loading ${matchedUser.role} dashboard...`);
+
+    setTimeout(() => {
+      setIsSubmitting(false);
+      onLoginSuccess(matchedUser, selectedBranch, {
+        action: 'USERNAME_PASSWORD_LOGIN',
+        details: `Authenticated via Username/Password as ${matchedUser.role} (${matchedUser.memberCode})`,
+        timestamp: new Date().toISOString()
+      });
+    }, 350);
+  };
+
+  /**
+   * Password Recovery / Forgot Password Assistant
+   */
+  const handleForgotLookup = (e: React.FormEvent) => {
+    e.preventDefault();
+    setForgotFeedback(null);
+
+    const query = forgotIdentifier.trim().toLowerCase();
+    if (!query) {
+      setForgotFeedback({
+        type: 'error',
+        message: 'Please enter your registered email address or member ID.'
+      });
+      return;
+    }
+
+    const matched = users.find(u =>
+      (u.email && u.email.toLowerCase() === query) ||
+      (u.memberCode && u.memberCode.toLowerCase() === query)
+    );
+
+    if (!matched) {
+      setForgotFeedback({
+        type: 'error',
+        message: `No active member account found for "${forgotIdentifier}". Please register a new account or verify your details with the library helpdesk.`
+      });
+      return;
+    }
+
+    setForgotFeedback({
+      type: 'success',
+      message: `Account located: ${matched.name} (${matched.memberCode}, Role: ${matched.role}). Since credentials are institutionally governed, please log in using linked "Continue with Google", or contact Chief Librarian at central.library@pslims.edu.pk / +92 51 92654321 for a temporary security reset token.`
+    });
+  };
+
   // Filter OPAC Books for Public Search
   const filteredOpacBooks = books.filter(b => {
     const query = opacSearchQuery.toLowerCase().trim();
@@ -291,6 +411,18 @@ export const LoginPage: React.FC<LoginPageProps> = ({
 
         {/* Header Action Buttons */}
         <div className="flex items-center space-x-2">
+          {onBackToOpac && (
+            <button
+              id="btn-back-to-opac-header"
+              type="button"
+              onClick={onBackToOpac}
+              className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-[#121413] hover:bg-zinc-800 border border-emerald-500/40 text-emerald-300 hover:text-white transition-all cursor-pointer shadow-sm"
+            >
+              <ArrowLeft className="h-3.5 w-3.5 text-emerald-400" />
+              <span>Public OPAC</span>
+            </button>
+          )}
+
           {authMode === 'OPAC' ? (
             <button
               type="button"
@@ -303,7 +435,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
               <ArrowLeft className="h-3.5 w-3.5 text-emerald-400" />
               <span>Back to Login Portal</span>
             </button>
-          ) : (
+          ) : !onBackToOpac ? (
             <button
               type="button"
               onClick={() => {
@@ -315,7 +447,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
               <Search className="h-3.5 w-3.5 text-emerald-400" />
               <span>Public OPAC Catalog</span>
             </button>
-          )}
+          ) : null}
 
           {/* Active Branch Indicator / Selector */}
           <div className="relative">
@@ -454,59 +586,158 @@ export const LoginPage: React.FC<LoginPageProps> = ({
               </div>
             </div>
 
-            {/* RIGHT COLUMN: Clean White Portal Card */}
-            <div className="md:col-span-6 bg-white p-8 sm:p-10 flex flex-col justify-between items-center text-center">
+            {/* RIGHT COLUMN: Clean White Portal Card with Dual Authentication Methods */}
+            <div className="md:col-span-6 bg-white p-6 sm:p-8 flex flex-col justify-between items-center text-center">
               
-              <div className="w-full max-w-sm mx-auto my-auto space-y-6">
+              <div className="w-full max-w-sm mx-auto my-auto space-y-4">
                 
                 {/* Shield Check Circular Badge */}
-                <div className="w-16 h-16 rounded-full bg-emerald-50 border border-emerald-100 flex items-center justify-center mx-auto text-[#095733] shadow-xs">
-                  <ShieldCheck className="w-8 h-8 stroke-[2.2]" />
+                <div className="w-12 h-12 rounded-full bg-emerald-50 border border-emerald-100 flex items-center justify-center mx-auto text-[#095733] shadow-xs">
+                  <ShieldCheck className="w-6 h-6 stroke-[2.2]" />
                 </div>
 
                 {/* Heading & Subtitle */}
-                <div className="space-y-1">
-                  <h2 className="text-2xl sm:text-3xl font-bold text-zinc-900 tracking-tight">
+                <div className="space-y-0.5">
+                  <h2 className="text-xl sm:text-2xl font-bold text-zinc-900 tracking-tight">
                     Welcome to PLiMS
                   </h2>
-                  <p className="text-xs sm:text-sm text-zinc-500 font-medium">
-                    Secure Library Access Portal
+                  <p className="text-xs text-zinc-500 font-medium">
+                    Pakistan Library Management System
                   </p>
-                  <div className="w-12 h-1 bg-[#095733] rounded-full mx-auto mt-3" />
+                  <div className="w-10 h-0.5 bg-[#095733] rounded-full mx-auto mt-2" />
                 </div>
 
-                {/* Primary Actions: Google OAuth & Register */}
-                <div className="space-y-3.5 pt-2">
-                  
-                  {/* Primary Method 1: Continue with Google (Powered by Firebase Authentication) */}
-                  <div className="w-full space-y-1.5">
-                    <div className="flex items-center justify-between text-[11px] text-emerald-800 bg-emerald-50/90 border border-emerald-200/80 px-2.5 py-1 rounded-lg">
-                      <div className="flex items-center space-x-1.5 font-medium">
-                        <span className="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                        <span>Firebase Authentication</span>
-                      </div>
-                      <span className="font-mono text-[10px] text-emerald-700 bg-emerald-100/60 px-1.5 py-0.5 rounded">Google Account</span>
+                {/* ========================================================= */}
+                {/* AUTHENTICATION METHOD 1: GOOGLE ACCOUNT LOGIN             */}
+                {/* ========================================================= */}
+                <div className="w-full space-y-1.5 pt-1">
+                  <div className="flex items-center justify-between text-[11px] text-emerald-800 bg-emerald-50/90 border border-emerald-200/80 px-2.5 py-1 rounded-lg">
+                    <div className="flex items-center space-x-1.5 font-medium">
+                      <span className="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                      <span>Google Account Login</span>
                     </div>
-                    <GoogleLoginButton
-                      variant="emerald"
-                      text="Continue with Google"
-                      activeBranch={selectedBranch}
-                      onSuccess={handleGoogleSuccess}
-                      onError={msg => setErrorMessage(msg)}
-                      className="w-full py-3.5"
-                    />
+                    <span className="font-mono text-[10px] text-emerald-700 bg-emerald-100/60 px-1.5 py-0.5 rounded">Fast 1-Click</span>
+                  </div>
+                  <GoogleLoginButton
+                    variant="emerald"
+                    text="Continue with Google"
+                    activeBranch={selectedBranch}
+                    onSuccess={handleGoogleSuccess}
+                    onError={msg => setErrorMessage(msg)}
+                    className="w-full py-2.5"
+                  />
+                </div>
+
+                {/* Divider */}
+                <div className="flex items-center my-2 w-full">
+                  <div className="flex-1 border-t border-zinc-200" />
+                  <span className="px-3 text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
+                    OR
+                  </span>
+                  <div className="flex-1 border-t border-zinc-200" />
+                </div>
+
+                {/* ========================================================= */}
+                {/* AUTHENTICATION METHOD 2: USERNAME + PASSWORD LOGIN        */}
+                {/* ========================================================= */}
+                <form onSubmit={handleUsernamePasswordLogin} className="w-full space-y-3 text-left">
+                  <div className="space-y-1">
+                    <label htmlFor="login-identifier" className="text-xs font-semibold text-zinc-700 flex items-center justify-between">
+                      <span>Username / Member ID / Email</span>
+                    </label>
+                    <div className="relative">
+                      <User className="w-4 h-4 text-zinc-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                      <input
+                        id="login-identifier"
+                        type="text"
+                        required
+                        value={loginIdentifier}
+                        onChange={e => setLoginIdentifier(e.target.value)}
+                        placeholder="e.g. admin@aijaz-edu.org or ADM-001"
+                        className="w-full rounded-xl border border-zinc-200 bg-zinc-50 pl-9 pr-3 py-2 text-xs text-zinc-900 placeholder-zinc-400 focus:outline-none focus:border-emerald-600 focus:bg-white font-medium"
+                      />
+                    </div>
                   </div>
 
-                  {/* Divider */}
-                  <div className="flex items-center my-3 w-full">
-                    <div className="flex-1 border-t border-zinc-200" />
-                    <span className="px-3 text-[11px] font-bold text-zinc-400 uppercase tracking-widest">
-                      OR
-                    </span>
-                    <div className="flex-1 border-t border-zinc-200" />
+                  <div className="space-y-1">
+                    <div className="flex items-center justify-between">
+                      <label htmlFor="login-password" text-xs font-semibold text-zinc-700 className="text-xs font-semibold text-zinc-700">
+                        Password
+                      </label>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setShowForgotPasswordModal(true);
+                          setForgotFeedback(null);
+                        }}
+                        className="text-[11px] font-medium text-emerald-700 hover:text-emerald-800 hover:underline cursor-pointer"
+                      >
+                        Forgot Password?
+                      </button>
+                    </div>
+                    <div className="relative">
+                      <Lock className="w-4 h-4 text-zinc-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                      <input
+                        id="login-password"
+                        type={showLoginPassword ? 'text' : 'password'}
+                        required
+                        value={loginPassword}
+                        onChange={e => setLoginPassword(e.target.value)}
+                        placeholder="Enter your password"
+                        className="w-full rounded-xl border border-zinc-200 bg-zinc-50 pl-9 pr-9 py-2 text-xs text-zinc-900 placeholder-zinc-400 focus:outline-none focus:border-emerald-600 focus:bg-white font-medium"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowLoginPassword(!showLoginPassword)}
+                        className="absolute right-2.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600 p-1 cursor-pointer"
+                      >
+                        {showLoginPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                      </button>
+                    </div>
                   </div>
 
-                  {/* Primary Method 2: Register New User */}
+                  {/* Quick Test Accounts Hint Pill */}
+                  <div className="p-2 rounded-xl bg-zinc-50 border border-zinc-200 text-[10px] text-zinc-500 space-y-1">
+                    <div className="font-semibold text-zinc-600 flex items-center justify-between">
+                      <span>Quick Test Accounts:</span>
+                      <span className="text-emerald-700 font-bold">1-Click Fill</span>
+                    </div>
+                    <div className="flex gap-1.5 flex-wrap">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setLoginIdentifier('admin@aijaz-edu.org');
+                          setLoginPassword('admin123');
+                        }}
+                        className="px-2 py-0.5 rounded bg-white hover:bg-emerald-50 hover:text-emerald-800 border border-zinc-200 font-mono text-[10px] text-zinc-700 cursor-pointer"
+                      >
+                        Admin (admin@aijaz-edu.org / admin123)
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setLoginIdentifier('sarah.jenkins@aijaz-edu.org');
+                          setLoginPassword('lib123');
+                        }}
+                        className="px-2 py-0.5 rounded bg-white hover:bg-emerald-50 hover:text-emerald-800 border border-zinc-200 font-mono text-[10px] text-zinc-700 cursor-pointer"
+                      >
+                        Librarian (sarah.jenkins / lib123)
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Login Button */}
+                  <button
+                    id="btn-login-submit"
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="w-full flex items-center justify-center space-x-2 px-5 py-2.5 rounded-xl bg-[#095733] hover:bg-[#074729] active:scale-[0.99] text-white font-bold text-xs transition-all shadow-md cursor-pointer disabled:opacity-50"
+                  >
+                    <LogIn className="w-3.5 h-3.5" />
+                    <span>{isSubmitting ? 'Verifying Credentials...' : 'Login'}</span>
+                  </button>
+
+                  {/* Create New Account Button */}
                   <button
                     id="btn-portal-register"
                     type="button"
@@ -515,22 +746,36 @@ export const LoginPage: React.FC<LoginPageProps> = ({
                       setSuccessMessage(null);
                       setAuthMode('REGISTER');
                     }}
-                    className="w-full flex items-center justify-center space-x-2.5 px-5 py-3.5 rounded-xl border border-zinc-300 bg-white hover:bg-zinc-50 text-zinc-800 font-semibold text-sm transition-all shadow-xs active:scale-[0.99] cursor-pointer"
+                    className="w-full flex items-center justify-center space-x-2 px-5 py-2.5 rounded-xl border border-zinc-200 bg-white hover:bg-zinc-50 text-zinc-800 font-semibold text-xs transition-all shadow-2xs active:scale-[0.99] cursor-pointer"
                   >
-                    <UserPlus className="w-4 h-4 text-zinc-600" />
-                    <span>Register New User</span>
+                    <UserPlus className="w-3.5 h-3.5 text-zinc-600" />
+                    <span>Create New Account</span>
                   </button>
-                </div>
+                </form>
+
+                {/* Back to Public OPAC link */}
+                {onBackToOpac && (
+                  <div className="pt-1">
+                    <button
+                      type="button"
+                      onClick={onBackToOpac}
+                      className="text-xs font-semibold text-emerald-800 hover:text-emerald-900 hover:underline flex items-center justify-center space-x-1 mx-auto cursor-pointer"
+                    >
+                      <ArrowLeft className="w-3.5 h-3.5" />
+                      <span>Back to Public OPAC Discovery</span>
+                    </button>
+                  </div>
+                )}
 
                 {/* Security Trust Indicator */}
-                <div className="pt-2 flex items-center justify-center space-x-1.5 text-xs text-zinc-500">
-                  <Shield className="w-4 h-4 text-[#095733] shrink-0" />
+                <div className="pt-1 flex items-center justify-center space-x-1.5 text-[11px] text-zinc-500">
+                  <Shield className="w-3.5 h-3.5 text-[#095733] shrink-0" />
                   <span>Your data is safe and secure with PLiMS</span>
                 </div>
               </div>
 
               {/* Card Footer */}
-              <div className="w-full pt-6 text-center text-[11px] text-zinc-400 space-y-0.5">
+              <div className="w-full pt-4 text-center text-[11px] text-zinc-400 space-y-0.5">
                 <p className="font-semibold text-zinc-600">PLiMS V4.1.1 PK edition</p>
                 <p>Pakistan Library Management System</p>
               </div>
@@ -1004,6 +1249,92 @@ export const LoginPage: React.FC<LoginPageProps> = ({
 
       {/* Software License Modal */}
       <LicenseModal isOpen={showLicenseModal} onClose={() => setShowLicenseModal(false)} />
+
+      {/* Forgot Password / Account Recovery Modal */}
+      {showForgotPasswordModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-xs">
+          <div className="bg-zinc-900 border border-zinc-700 rounded-2xl max-w-md w-full p-6 text-white shadow-2xl relative space-y-4">
+            <button
+              type="button"
+              onClick={() => {
+                setShowForgotPasswordModal(false);
+                setForgotFeedback(null);
+                setForgotIdentifier('');
+              }}
+              className="absolute top-4 right-4 text-zinc-400 hover:text-white p-1 rounded-lg hover:bg-zinc-800 cursor-pointer"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <div className="flex items-center space-x-3">
+              <div className="w-10 h-10 rounded-xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
+                <KeyRound className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="text-base font-bold text-white">PLiMS Account Recovery</h3>
+                <p className="text-xs text-zinc-400">Verify your registered institutional account</p>
+              </div>
+            </div>
+
+            <p className="text-xs text-zinc-300 leading-relaxed">
+              Institutional security policies govern PLiMS accounts. Enter your registered email address or Member Code to check your status or receive recovery instructions.
+            </p>
+
+            <form onSubmit={handleForgotLookup} className="space-y-3">
+              <div className="space-y-1">
+                <label className="text-xs font-semibold text-zinc-300">
+                  Registered Email or Member Code
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={forgotIdentifier}
+                  onChange={e => setForgotIdentifier(e.target.value)}
+                  placeholder="e.g. admin@aijaz-edu.org or LIB-101"
+                  className="w-full rounded-xl border border-zinc-700 bg-zinc-800/80 px-3.5 py-2.5 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-emerald-500 font-medium"
+                />
+              </div>
+
+              {forgotFeedback && (
+                <div
+                  className={`p-3 rounded-xl text-xs flex items-start space-x-2 ${
+                    forgotFeedback.type === 'success'
+                      ? 'bg-emerald-500/15 border border-emerald-500/30 text-emerald-300'
+                      : 'bg-red-500/15 border border-red-500/30 text-red-300'
+                  }`}
+                >
+                  {forgotFeedback.type === 'success' ? (
+                    <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5 text-emerald-400" />
+                  ) : (
+                    <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-red-400" />
+                  )}
+                  <span className="leading-relaxed">{forgotFeedback.message}</span>
+                </div>
+              )}
+
+              <div className="pt-2 flex items-center justify-end space-x-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowForgotPasswordModal(false);
+                    setForgotFeedback(null);
+                    setForgotIdentifier('');
+                  }}
+                  className="px-4 py-2 rounded-xl border border-zinc-700 text-xs font-semibold text-zinc-300 hover:bg-zinc-800 cursor-pointer"
+                >
+                  Close
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 rounded-xl bg-[#095733] hover:bg-[#074729] text-xs font-bold text-white transition-all shadow-md cursor-pointer"
+                >
+                  Verify Account
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* Floating Digital Librarian Chatbot Assistant */}
       <DigitalLibrarianChatbot

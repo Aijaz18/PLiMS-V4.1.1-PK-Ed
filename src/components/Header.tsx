@@ -229,6 +229,17 @@ export const Header: React.FC<HeaderProps> = ({
 
       {/* 3. RIGHT CONTROLS */}
       <div className="flex items-center space-x-2.5 shrink-0">
+        {/* Public OPAC Quick Nav */}
+        <button
+          type="button"
+          onClick={() => onNavigateTab && onNavigateTab('OPAC')}
+          className="hidden md:flex items-center space-x-1.5 px-2.5 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100/80 border border-emerald-200 text-xs font-semibold text-emerald-800 transition-colors cursor-pointer"
+          title="Open Public OPAC Discovery Portal"
+        >
+          <Search className="h-3.5 w-3.5 text-emerald-600" />
+          <span className="text-[11px]">Public OPAC</span>
+        </button>
+
         {/* Branch Selector Pill */}
         <div className="relative" ref={branchRef}>
           <button
@@ -490,6 +501,17 @@ export const Header: React.FC<HeaderProps> = ({
               >
                 <User className="h-3.5 w-3.5 text-slate-500" />
                 <span>My Profile & Card</span>
+              </button>
+
+              <button
+                onClick={() => {
+                  setShowUserDropdown(false);
+                  onNavigateTab && onNavigateTab('OPAC');
+                }}
+                className="w-full text-left px-3 py-2 rounded-xl text-slate-700 hover:bg-slate-50 transition-colors cursor-pointer flex items-center space-x-2"
+              >
+                <Search className="h-3.5 w-3.5 text-emerald-600" />
+                <span>Public OPAC Portal</span>
               </button>
 
               <button
