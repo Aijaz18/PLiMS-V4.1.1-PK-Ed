@@ -28,6 +28,12 @@ import { BackupLogsModule } from './components/modules/BackupLogsModule';
 import { DocumentationModule } from './components/modules/DocumentationModule';
 import { ErrorBoundary } from './components/ErrorBoundary';
 
+import {
+  logCirculationActivity,
+  logSystemConfigActivity,
+  logUserAdminActivity
+} from './services/activityLogger';
+
 import { OfflineSyncBar } from './components/OfflineSyncBar';
 import {
   loadLocalData,
@@ -326,6 +332,13 @@ export function App() {
 
   // Handle persona role change from Header
   const handleRoleChange = (role: UserRole) => {
+    logUserAdminActivity(
+      'ROLE_CHANGE',
+      currentUser.name,
+      currentUser.role,
+      `Role: ${role}`,
+      `Active persona role switched from ${currentUser.role} to ${role}.`
+    );
     const matchingUser = users.find(u => u.role === role);
     if (matchingUser) {
       setCurrentUser(matchingUser);
@@ -355,6 +368,13 @@ export function App() {
   // Handlers for Data Mutations
   const handleSaveSettings = (newSettings: LibrarySettings) => {
     setSettings(newSettings);
+    logSystemConfigActivity(
+      'SETTINGS_UPDATE',
+      currentUser.name,
+      currentUser.role,
+      newSettings.libraryName,
+      `Updated system settings: Daily fine PKR ${newSettings.finePerDay}, ${newSettings.branches.length} active branches.`
+    );
   };
 
   const handleAddUser = (user: Partial<UserProfile>) => {
@@ -376,6 +396,13 @@ export function App() {
       avatarUrl: user.avatarUrl || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=200'
     };
     setUsers(prev => [created, ...prev]);
+    logUserAdminActivity(
+      'USER_CREATE',
+      currentUser.name,
+      currentUser.role,
+      `${created.name} (${created.memberCode})`,
+      `Created new ${created.role} user profile in department ${created.department}.`
+    );
   };
 
   const handleUpdateUser = (id: string, updated: Partial<UserProfile>) => {
@@ -387,10 +414,25 @@ export function App() {
     if (currentUser.id === id) {
       setCurrentUser(prev => ({ ...prev, ...updated }));
     }
+    logUserAdminActivity(
+      'USER_UPDATE',
+      currentUser.name,
+      currentUser.role,
+      `User ID: ${id}`,
+      `Updated user profile fields: ${Object.keys(updated).join(', ')}.`
+    );
   };
 
   const handleDeleteUser = (id: string) => {
+    const toDelete = users.find(u => u.id === id);
     setUsers(prev => prev.filter(u => u.id !== id));
+    logUserAdminActivity(
+      'USER_DELETE',
+      currentUser.name,
+      currentUser.role,
+      toDelete ? `${toDelete.name} (${toDelete.memberCode})` : `User ${id}`,
+      `Deleted user account record from database directory.`
+    );
   };
 
   const handleAddBranch = (branchName: string) => {
@@ -399,6 +441,13 @@ export function App() {
       ...prev,
       branches: [...prev.branches, branchName]
     }));
+    logSystemConfigActivity(
+      'BRANCH_ADD',
+      currentUser.name,
+      currentUser.role,
+      branchName,
+      `Registered new library branch location "${branchName}".`
+    );
   };
 
   const handleDeleteBranch = (branchName: string) => {
@@ -406,6 +455,13 @@ export function App() {
       ...prev,
       branches: prev.branches.filter(b => b !== branchName)
     }));
+    logSystemConfigActivity(
+      'BRANCH_DELETE',
+      currentUser.name,
+      currentUser.role,
+      branchName,
+      `Removed branch location "${branchName}" from system registry.`
+    );
   };
 
   const handleAddBook = (book: BookRecord) => {
@@ -596,6 +652,14 @@ export function App() {
       });
     }
 
+    logCirculationActivity(
+      'BOOK_ISSUE',
+      currentUser.name,
+      currentUser.role,
+      `${book.title} (${barcodeNo})`,
+      `Issued copy to ${member.name} (${member.memberCode}). Due date: ${newTx.dueDate}.`
+    );
+
     return { success: true, transaction: newTx, isOffline: isOfflineMode };
   };
 
@@ -703,6 +767,18 @@ export function App() {
       });
     }
 
+    logCirculationActivity(
+      'BOOK_RETURN',
+      currentUser.name,
+      currentUser.role,
+      `${tx.bookTitle} (${tx.copyBarcode || tx.accessionNumber || 'N/A'})`,
+      `Returned by patron ${tx.memberName || tx.memberId}. ${
+        fineCalculated > 0
+          ? `Overdue fine calculated: PKR ${fineCalculated}.`
+          : 'Returned on time without fines.'
+      }`
+    );
+
     return { success: true, transaction: tx, fineCalculated, isOffline: isOfflineMode };
   };
 
@@ -738,6 +814,15 @@ export function App() {
 
     const updatedTx = { ...tx, dueDate: newDueDate, renewCount: (tx.renewCount || 0) + 1 };
     setTransactions(prev => prev.map(t => (t.id === txId ? updatedTx : t)));
+
+    logCirculationActivity(
+      'BOOK_RENEW',
+      currentUser.name,
+      currentUser.role,
+      `${tx.bookTitle} (${tx.copyBarcode || 'N/A'})`,
+      `Renewed loan for member ${tx.memberName || tx.memberId}. Extended due date to ${newDueDate}.`
+    );
+
     return { transaction: updatedTx };
   };
 
@@ -752,10 +837,25 @@ export function App() {
     setUsers(prev =>
       prev.map(u => (u.id === memberId || u.id === currentUser.id ? { ...u, finePending: 0 } : u))
     );
+
+    logCirculationActivity(
+      'FINE_PAYMENT',
+      currentUser.name,
+      currentUser.role,
+      `Member ID: ${memberId}`,
+      `Cleared fine payment of PKR ${amount}. Outstanding balance settled.`
+    );
   };
 
   const handleCancelReservation = (reservationId: string) => {
     setReservations(prev => prev.filter(r => r.id !== reservationId));
+    logCirculationActivity(
+      'CANCEL_RESERVE',
+      currentUser.name,
+      currentUser.role,
+      `Reservation ${reservationId}`,
+      `Cancelled reservation hold request ${reservationId}.`
+    );
   };
 
   const handleReserveBook = (bookId: string) => {
@@ -772,6 +872,13 @@ export function App() {
       priorityQueue: reservations.length + 1
     };
     setReservations(prev => [newRes, ...prev]);
+    logCirculationActivity(
+      'BOOK_RESERVE',
+      currentUser.name,
+      currentUser.role,
+      book?.title || 'Reserved Book',
+      `Placed reservation hold for ${currentUser.name}. Queue priority #${newRes.priorityQueue}.`
+    );
     alert(`Book hold reserved successfully for ${currentUser.name}. Queue position #${newRes.priorityQueue}.`);
   };
 
@@ -788,6 +895,13 @@ export function App() {
     localStorage.setItem('pslims_auth_user_id', newUser.id);
     localStorage.setItem('pslims_auth_branch', branch);
     setCurrentTab('DASHBOARD');
+    logUserAdminActivity(
+      'USER_CREATE',
+      newUser.name,
+      newUser.role,
+      `${newUser.name} (${newUser.memberCode})`,
+      `Registered new user account at branch "${branch}".`
+    );
   };
 
   if (isCompletingGoogleAuth) {
@@ -1052,6 +1166,7 @@ export function App() {
                 users={users}
                 transactions={transactions}
                 settings={settings}
+                currentUser={currentUser}
               />
             )}
 

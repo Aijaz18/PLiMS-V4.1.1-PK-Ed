@@ -496,7 +496,7 @@ CREATE TABLE IF NOT EXISTS \`digital_assets\` (
               { name: 'AcquisitionModule.tsx', desc: 'Vendors, purchase orders, budgets, invoice tracking' },
               { name: 'SerialsModule.tsx', desc: 'Periodicals, issue prediction patterns, routing lists' },
               { name: 'UserMemberModule.tsx', desc: 'Patron registration, RFID tag assignment, loan rules' },
-              { name: 'ReportsModule.tsx', desc: 'Analytical charts, customizable report generator, PDF/Excel export' },
+              { name: 'ReportsModule.tsx', desc: 'Analytical charts, customizable report generator, activity log audit trail, CSV/PDF export' },
               { name: 'AiAssistantModule.tsx', desc: 'Gemini GenAI copilot, research assistant, policy Q&A' },
               { name: 'BarcodeGeneratorModule.tsx', desc: 'Accession barcode generator, RFID tag writer, spine label sheet' },
               { name: 'OfflineSyncBar.tsx', desc: 'Offline queue indicator, PWA sync button, local cache stats' }

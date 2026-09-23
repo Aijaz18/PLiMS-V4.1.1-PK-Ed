@@ -33,6 +33,14 @@ import { PurgeCatalogModal } from '../catalog/PurgeCatalogModal';
 import { LibrarianHoldingsBuilderModal } from '../catalog/LibrarianHoldingsBuilderModal';
 import { isReferenceCatalogActive, setReferenceCatalogActive } from '../../services/catalog300kEngine';
 import { idbClearAll } from '../../services/offlineStorage';
+import {
+  parseUniversalMarcFile,
+  convertMarcRecordToBook,
+  parseRawMarcText,
+  SAMPLE_MARC21_DEMO_TEXT,
+  serializeToMarc21Binary
+} from '../../services/marc21Parser';
+import { ImportMarcModal } from '../catalog/ImportMarcModal';
 
 interface ImportExportModuleProps {
   books: BookRecord[];
@@ -53,7 +61,7 @@ interface AttachedFileInfo {
   type: string;
   lastModified: number;
   rowCount: number;
-  format: 'EXCEL' | 'CSV' | 'JSON' | 'MARCXML' | 'UNKNOWN';
+  format: 'EXCEL' | 'CSV' | 'JSON' | 'MARCXML' | 'MARC21' | 'UNKNOWN';
 }
 
 export const ImportExportModule: React.FC<ImportExportModuleProps> = ({
@@ -75,6 +83,7 @@ export const ImportExportModule: React.FC<ImportExportModuleProps> = ({
   // High-Capacity 300,000+ Titles / 660,000+ Holdings Modals
   const [isHighCapacityExportOpen, setIsHighCapacityExportOpen] = useState(false);
   const [isHighCapacityImportOpen, setIsHighCapacityImportOpen] = useState(false);
+  const [isImportMarcModalOpen, setIsImportMarcModalOpen] = useState(false);
 
   // Purge & Rapid Clean Slate and Holdings Provisioning Modals
   const [isPurgeModalOpen, setIsPurgeModalOpen] = useState(false);
@@ -358,15 +367,69 @@ export const ImportExportModule: React.FC<ImportExportModuleProps> = ({
           // If single object, wrap in array
           rawRows = [parsed];
         }
+      } else if (['mrc', 'marc', 'marc21', 'dat', 'mrk', 'xml', 'marcxml'].includes(fileExt)) {
+        detectedFormat = (fileExt === 'xml' || fileExt === 'marcxml') ? 'MARCXML' : 'MARC21';
+        const marcRecords = await parseUniversalMarcFile(file);
+        rawRows = marcRecords.map((m, idx) => ({
+          id: `bk_marc_${Date.now()}_${idx + 1}`,
+          title: m.title,
+          subtitle: m.subtitle || '',
+          authors: m.authors.join('; '),
+          author: m.authors[0] || 'Unknown Author',
+          isbn: m.isbn || `978-${Math.floor(1000000000 + Math.random() * 9000000000)}`,
+          ddcClassification: m.ddc || '000',
+          ddc: m.ddc || '000',
+          callNumber: m.callNumber || '000 LIB',
+          publisherName: m.publisher || 'Academic Press',
+          publisherLocation: m.publisherLocation || 'Islamabad, PK',
+          publisherYear: m.publisherYear || 2024,
+          pageCount: m.pageCount || 280,
+          shelfLocation: m.shelfLocation || 'Main Stacks',
+          subjects: m.subjects.join(', '),
+          accessionNumber: m.accessionNumber || `ACC-MARC-${(350000 + idx).toString()}`,
+          description: m.summary || `MARC21 record for ${m.title}. Leader: ${m.leader}`,
+          edition: m.edition || '1st Edition',
+          totalCopies: 2,
+          availableCopies: 2
+        }));
       } else if (fileExt === 'csv' || fileExt === 'tsv' || fileExt === 'txt') {
         detectedFormat = 'CSV';
         const buffer = await file.arrayBuffer();
-        // Use SheetJS to accurately parse CSV with comma, semicolon, quotes, or tabs
-        const workbook = XLSX.read(buffer, { type: 'array' });
-        const sheetName = workbook.SheetNames[0];
-        if (sheetName) {
-          const worksheet = workbook.Sheets[sheetName];
-          rawRows = XLSX.utils.sheet_to_json(worksheet, { defval: '' });
+        // Check if text file contains MARC mnemonic or XML
+        const preview = new TextDecoder('utf-8').decode(buffer.slice(0, 100));
+        if (preview.startsWith('=LDR') || preview.startsWith('=')) {
+          detectedFormat = 'MARC21';
+          const marcRecords = await parseUniversalMarcFile(file);
+          rawRows = marcRecords.map((m, idx) => ({
+            id: `bk_marc_${Date.now()}_${idx + 1}`,
+            title: m.title,
+            subtitle: m.subtitle || '',
+            authors: m.authors.join('; '),
+            author: m.authors[0] || 'Unknown Author',
+            isbn: m.isbn || `978-${Math.floor(1000000000 + Math.random() * 9000000000)}`,
+            ddcClassification: m.ddc || '000',
+            ddc: m.ddc || '000',
+            callNumber: m.callNumber || '000 LIB',
+            publisherName: m.publisher || 'Academic Press',
+            publisherLocation: m.publisherLocation || 'Islamabad, PK',
+            publisherYear: m.publisherYear || 2024,
+            pageCount: m.pageCount || 280,
+            shelfLocation: m.shelfLocation || 'Main Stacks',
+            subjects: m.subjects.join(', '),
+            accessionNumber: m.accessionNumber || `ACC-MARC-${(350000 + idx).toString()}`,
+            description: m.summary || `MARC21 record for ${m.title}. Leader: ${m.leader}`,
+            edition: m.edition || '1st Edition',
+            totalCopies: 2,
+            availableCopies: 2
+          }));
+        } else {
+          // Use SheetJS to accurately parse CSV with comma, semicolon, quotes, or tabs
+          const workbook = XLSX.read(buffer, { type: 'array' });
+          const sheetName = workbook.SheetNames[0];
+          if (sheetName) {
+            const worksheet = workbook.Sheets[sheetName];
+            rawRows = XLSX.utils.sheet_to_json(worksheet, { defval: '' });
+          }
         }
       } else {
         // Generic fallback attempt via SheetJS
@@ -379,7 +442,7 @@ export const ImportExportModule: React.FC<ImportExportModuleProps> = ({
             detectedFormat = 'CSV';
           }
         } catch {
-          throw new Error(`Unsupported file type (.${fileExt}). Please upload a CSV, Excel (.xlsx/.xls), or JSON file.`);
+          throw new Error(`Unsupported file type (.${fileExt}). Please upload a MARC21 (.mrc), MarcEdit (.mrk), CSV, Excel (.xlsx/.xls), or JSON file.`);
         }
       }
 
@@ -815,6 +878,16 @@ export const ImportExportModule: React.FC<ImportExportModuleProps> = ({
 
               <button
                 type="button"
+                onClick={() => setIsImportMarcModalOpen(true)}
+                className="px-4 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs flex items-center space-x-1.5 shrink-0 transition-all cursor-pointer shadow-md"
+                title="Import single or batch MARC21 records (.mrc, .mrk, .xml, or raw text)"
+              >
+                <FileCode className="h-4 w-4" />
+                <span>📥 Import MARC21 Record</span>
+              </button>
+
+              <button
+                type="button"
                 onClick={() => setIsHoldingsBuilderOpen(true)}
                 className="px-4 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-white font-bold text-xs flex items-center space-x-1.5 shrink-0 transition-all cursor-pointer shadow-md"
                 title="Add holding books on institutional needs up to 3 Lakhs"
@@ -873,7 +946,7 @@ export const ImportExportModule: React.FC<ImportExportModuleProps> = ({
               type="file"
               ref={fileInputRef}
               onChange={handleFileInputChange}
-              accept=".csv,.xlsx,.xls,.tsv,.txt,.json,.xml"
+              accept=".csv,.xlsx,.xls,.tsv,.txt,.json,.xml,.marcxml,.mrc,.marc,.marc21,.dat,.mrk"
               className="hidden"
             />
 
@@ -896,10 +969,10 @@ export const ImportExportModule: React.FC<ImportExportModuleProps> = ({
 
               <div>
                 <h4 className="font-bold text-base text-slate-900">
-                  Drag & Drop your CSV or Excel (.xlsx) file here
+                  Drag & Drop your MARC21, CSV, or Excel (.xlsx) file here
                 </h4>
                 <p className="text-xs text-slate-500 mt-1 max-w-md mx-auto leading-relaxed">
-                  Supports <strong className="text-emerald-400">Excel (.xlsx, .xls)</strong>, <strong className="text-blue-400">CSV</strong>, TSV, JSON, and MARCXML records. Or click anywhere in this box to browse from your device.
+                  Supports <strong className="text-purple-400">MARC21 (.mrc, .mrk)</strong>, <strong className="text-emerald-400">Excel (.xlsx, .xls)</strong>, <strong className="text-blue-400">CSV</strong>, TSV, JSON, and MARCXML records. Or click anywhere in this box to browse from your device.
                 </p>
               </div>
 
@@ -931,10 +1004,11 @@ export const ImportExportModule: React.FC<ImportExportModuleProps> = ({
 
               {/* Supported Formats Pills */}
               <div className="flex flex-wrap items-center justify-center gap-2 pt-2 text-[10px] font-mono text-slate-400">
+                <span className="px-2 py-0.5 rounded bg-purple-500/20 text-purple-300 border border-purple-500/30">.MRC (ISO-2709)</span>
+                <span className="px-2 py-0.5 rounded bg-purple-500/20 text-purple-300 border border-purple-500/30">.MRK (MarcEdit)</span>
+                <span className="px-2 py-0.5 rounded bg-slate-100 border border-slate-200/90">.XML (MARCXML)</span>
                 <span className="px-2 py-0.5 rounded bg-slate-100 border border-slate-200/90">.XLSX</span>
-                <span className="px-2 py-0.5 rounded bg-slate-100 border border-slate-200/90">.XLS</span>
                 <span className="px-2 py-0.5 rounded bg-slate-100 border border-slate-200/90">.CSV</span>
-                <span className="px-2 py-0.5 rounded bg-slate-100 border border-slate-200/90">.TSV</span>
                 <span className="px-2 py-0.5 rounded bg-slate-100 border border-slate-200/90">.JSON</span>
               </div>
             </div>
@@ -1600,6 +1674,30 @@ All MARC21 records, library catalog scans, member lists, and overdue notices ope
             onAddCopies(newCopies);
           }
           setIsHighCapacityImportOpen(false);
+        }}
+      />
+
+      {/* Universal MARC21 (.mrc, .mrk, .xml, raw) Record Import Modal */}
+      <ImportMarcModal
+        isOpen={isImportMarcModalOpen}
+        onClose={() => setIsImportMarcModalOpen(false)}
+        onSaveDirectly={(book, newCopies) => {
+          if (onImportBooks) {
+            onImportBooks([book], newCopies);
+          }
+          if (onAddCopies && newCopies.length > 0) {
+            onAddCopies(newCopies);
+          }
+          setIsImportMarcModalOpen(false);
+        }}
+        onBulkSaveDirectly={(newBooks, newCopies) => {
+          if (onImportBooks) {
+            onImportBooks(newBooks, newCopies);
+          }
+          if (onAddCopies && newCopies.length > 0) {
+            onAddCopies(newCopies);
+          }
+          setIsImportMarcModalOpen(false);
         }}
       />
 

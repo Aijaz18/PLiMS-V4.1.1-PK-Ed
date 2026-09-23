@@ -48,6 +48,24 @@ export type StaffPower =
   | 'CAN_DIGITAL_ASSETS'
   | 'CAN_INTER_LIBRARY_TRANSFER';
 
+export type ActivityCategory = 'CIRCULATION' | 'SYSTEM_CONFIG' | 'USER_ADMIN' | 'CATALOG';
+
+export interface ActivityLogEntry {
+  id: string;
+  timestamp: string;
+  category: ActivityCategory;
+  action: string;
+  actionLabel?: string;
+  performedBy: string;
+  performedByRole?: string;
+  performedById?: string;
+  target?: string;
+  details: string;
+  status: 'SUCCESS' | 'WARNING' | 'INFO' | 'ERROR';
+  ipAddress?: string;
+  metadata?: Record<string, any>;
+}
+
 export interface PowerAssignmentLog {
   id: string;
   timestamp: string;

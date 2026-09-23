@@ -222,7 +222,7 @@ export const HighCapacityImportModal: React.FC<HighCapacityImportModalProps> = (
             <input
               ref={fileInputRef}
               type="file"
-              accept=".csv,.xlsx,.xls,.json,.xml,.mrc"
+              accept=".csv,.xlsx,.xls,.json,.xml,.marcxml,.mrc,.marc,.marc21,.dat,.mrk"
               className="hidden"
               onChange={e => {
                 if (e.target.files && e.target.files[0]) {
@@ -416,6 +416,20 @@ export const HighCapacityImportModal: React.FC<HighCapacityImportModalProps> = (
                 className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] font-medium cursor-pointer"
               >
                 Download Holdings Ledger CSV
+              </button>
+              <button
+                type="button"
+                onClick={() => downloadSampleHoldingsTemplate('MARC21')}
+                className="px-2.5 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-300 text-[11px] font-bold cursor-pointer"
+              >
+                Sample MARC21 (.mrc)
+              </button>
+              <button
+                type="button"
+                onClick={() => downloadSampleHoldingsTemplate('MARCXML')}
+                className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] font-medium cursor-pointer"
+              >
+                Sample MARCXML (.xml)
               </button>
               <button
                 type="button"

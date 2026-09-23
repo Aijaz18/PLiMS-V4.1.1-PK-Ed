@@ -77,6 +77,8 @@ import {
 import { idbClearAll } from '../../services/offlineStorage';
 import { HighCapacityExportModal } from '../catalog/HighCapacityExportModal';
 import { HighCapacityImportModal } from '../catalog/HighCapacityImportModal';
+import { ImportMarcModal } from '../catalog/ImportMarcModal';
+import { ParsedMarcRecord } from '../../services/marc21Parser';
 import { PurgeCatalogModal } from '../catalog/PurgeCatalogModal';
 import { LibrarianHoldingsBuilderModal } from '../catalog/LibrarianHoldingsBuilderModal';
 import { MarcSubjectEntryDesk } from '../catalog/MarcSubjectEntryDesk';
@@ -140,6 +142,7 @@ export const CataloguingModule: React.FC<CataloguingModuleProps> = ({
   // High-Capacity 300k & Holdings Export/Import Modals
   const [isExportModalOpen, setIsExportModalOpen] = useState<boolean>(false);
   const [isImportModalOpen, setIsImportModalOpen] = useState<boolean>(false);
+  const [isImportMarcModalOpen, setIsImportMarcModalOpen] = useState<boolean>(false);
 
   // Purge & Reset Catalog and Institutional Holdings Builder
   const [isPurgeModalOpen, setIsPurgeModalOpen] = useState<boolean>(false);
@@ -1804,6 +1807,57 @@ export const CataloguingModule: React.FC<CataloguingModuleProps> = ({
     setAiMarcPreview(null);
   };
 
+  // Open Parsed MARC21 Record into the active Editor
+  const handleOpenParsedMarcInEditor = (marc: ParsedMarcRecord) => {
+    setEditingBookId(null);
+    setMarcForm({
+      ...defaultMarcForm,
+      isbn: marc.isbn || defaultMarcForm.isbn,
+      title: marc.title || defaultMarcForm.title,
+      authors: marc.authors.join(', ') || defaultMarcForm.authors,
+      callNumber: marc.callNumber || defaultMarcForm.callNumber,
+      edition: marc.edition || '1st Edition',
+      publisherName: marc.publisher || 'Academic Press',
+      publisherLocation: marc.publisherLocation || 'Islamabad, PK',
+      publisherYear: marc.publisherYear || 2024,
+      pageCount: marc.pageCount || 280,
+      shelfLocation: marc.shelfLocation || 'Main Stacks',
+      accessionNumber: marc.accessionNumber || `ACC-MARC-${Date.now().toString().slice(-4)}`,
+      subjects: marc.subjects.join(', ') || 'Academic Research',
+      description: marc.summary || `Standard MARC21 bibliographic record for "${marc.title}". Leader: ${marc.leader}`,
+      format: 'HARDCOVER'
+    });
+    setEntryMode('MANUAL_ENTRY');
+    setActiveTab('NEW_MARC');
+    setIsImportMarcModalOpen(false);
+  };
+
+  // Save parsed MARC record directly to catalog
+  const handleSaveImportedMarcBook = (book: BookRecord, newCopies: BookCopy[]) => {
+    if (onAddBook) {
+      onAddBook(book);
+    }
+    if (onAddCopies && newCopies.length > 0) {
+      onAddCopies(newCopies);
+    }
+    setCatalogRefreshTrigger(prev => prev + 1);
+    setIsImportMarcModalOpen(false);
+  };
+
+  // Bulk save parsed MARC records directly to catalog
+  const handleBulkSaveImportedMarcBooks = (newBooks: BookRecord[], newCopies: BookCopy[]) => {
+    if (onImportBooks) {
+      onImportBooks(newBooks, newCopies);
+    } else {
+      newBooks.forEach(b => onAddBook && onAddBook(b));
+      if (onAddCopies && newCopies.length > 0) {
+        onAddCopies(newCopies);
+      }
+    }
+    setCatalogRefreshTrigger(prev => prev + 1);
+    setIsImportMarcModalOpen(false);
+  };
+
   // 1-Minute Fast Purge to Clean Slate (0 Books / 0 Copies)
   const handlePurgeAllToCleanSlate = () => {
     setReferenceCatalogActive(false);
@@ -2612,6 +2666,16 @@ export const CataloguingModule: React.FC<CataloguingModuleProps> = ({
 
               <button
                 type="button"
+                onClick={() => setIsImportMarcModalOpen(true)}
+                className="px-3.5 py-2.5 rounded-xl bg-purple-50 border border-purple-200 text-purple-700 hover:bg-purple-600 hover:text-white font-bold text-xs flex items-center justify-center space-x-1.5 transition-all cursor-pointer shadow-sm shrink-0"
+                title="Import single or batch standard MARC21 records (.mrc, .mrk, .xml, or raw text)"
+              >
+                <FileCode className="h-4 w-4" />
+                <span>📥 Import MARC21 Record</span>
+              </button>
+
+              <button
+                type="button"
                 onClick={() => setIsHoldingsBuilderOpen(true)}
                 className="px-3.5 py-2.5 rounded-xl bg-indigo-50 border border-indigo-200 text-indigo-700 hover:bg-indigo-600 hover:text-white font-bold text-xs flex items-center justify-center space-x-1.5 transition-all cursor-pointer shadow-sm shrink-0"
                 title="Add & Provision Holding Books on Institutional Needs (Up to 3 Lakhs)"
@@ -3074,6 +3138,16 @@ export const CataloguingModule: React.FC<CataloguingModuleProps> = ({
                   >
                     <Pencil className="h-3.5 w-3.5" />
                     <span>Manual Entry</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setIsImportMarcModalOpen(true)}
+                    className="px-3 py-1.5 rounded-lg text-xs font-bold flex items-center space-x-1.5 cursor-pointer transition-all bg-purple-50 text-purple-700 hover:bg-purple-100 border border-purple-200"
+                    title="Import MARC21 (.mrc, .mrk, .xml) record directly into this editor"
+                  >
+                    <FileCode className="h-3.5 w-3.5 text-purple-600" />
+                    <span>📥 Import MARC21</span>
                   </button>
                 </div>
               )}
@@ -5997,6 +6071,15 @@ export const CataloguingModule: React.FC<CataloguingModuleProps> = ({
           setCatalogRefreshTrigger(prev => prev + 1);
           setIsImportModalOpen(false);
         }}
+      />
+
+      {/* Universal MARC21 (.mrc, .mrk, .xml, raw) Record Import Modal */}
+      <ImportMarcModal
+        isOpen={isImportMarcModalOpen}
+        onClose={() => setIsImportMarcModalOpen(false)}
+        onOpenInEditor={handleOpenParsedMarcInEditor}
+        onSaveDirectly={handleSaveImportedMarcBook}
+        onBulkSaveDirectly={handleBulkSaveImportedMarcBooks}
       />
 
       {/* 1-Minute Rapid Catalog Purge & Clean Slate Modal */}

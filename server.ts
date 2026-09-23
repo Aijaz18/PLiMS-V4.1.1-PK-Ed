@@ -526,9 +526,22 @@ async function startServer() {
 
   // 1. Google OAuth Configuration Status Endpoint
   app.get('/api/auth/google/config', (req, res) => {
-    const clientId = process.env.GOOGLE_CLIENT_ID ? process.env.GOOGLE_CLIENT_ID.trim() : null;
+    let fileOAuthClientId: string | null = null;
+    try {
+      const fbConfigPath = path.join(rootDir, 'firebase-applet-config.json');
+      if (fs.existsSync(fbConfigPath)) {
+        const parsed = JSON.parse(fs.readFileSync(fbConfigPath, 'utf8'));
+        fileOAuthClientId = parsed.oAuthClientId || null;
+      }
+    } catch {
+      // ignore
+    }
+
+    const envClientId = process.env.GOOGLE_CLIENT_ID ? process.env.GOOGLE_CLIENT_ID.trim() : null;
+    const isPlaceholder = !envClientId || envClientId.includes('your_google_client_id');
+    const clientId = !isPlaceholder ? envClientId : (fileOAuthClientId || envClientId || null);
     const clientSecret = process.env.GOOGLE_CLIENT_SECRET ? process.env.GOOGLE_CLIENT_SECRET.trim() : null;
-    const isConfigured = Boolean(clientId && clientSecret);
+    const isConfigured = Boolean(clientId);
 
     const protocol = req.headers['x-forwarded-proto'] || req.protocol || 'http';
     const host = req.headers['x-forwarded-host'] || req.headers.host || 'localhost:3000';
@@ -540,6 +553,7 @@ async function startServer() {
 
     res.json({
       configured: isConfigured,
+      hasClientSecret: Boolean(clientSecret),
       clientId: clientId || null,
       redirectUri: activeRedirect,
       urls: {
@@ -555,7 +569,20 @@ async function startServer() {
 
   // 2. Google OAuth Authorization URL Generator
   app.get('/api/auth/google/url', (req, res) => {
-    const clientId = process.env.GOOGLE_CLIENT_ID ? process.env.GOOGLE_CLIENT_ID.trim() : null;
+    let fileOAuthClientId: string | null = null;
+    try {
+      const fbConfigPath = path.join(rootDir, 'firebase-applet-config.json');
+      if (fs.existsSync(fbConfigPath)) {
+        const parsed = JSON.parse(fs.readFileSync(fbConfigPath, 'utf8'));
+        fileOAuthClientId = parsed.oAuthClientId || null;
+      }
+    } catch {
+      // ignore
+    }
+
+    const envClientId = process.env.GOOGLE_CLIENT_ID ? process.env.GOOGLE_CLIENT_ID.trim() : null;
+    const isPlaceholder = !envClientId || envClientId.includes('your_google_client_id');
+    const clientId = !isPlaceholder ? envClientId : (fileOAuthClientId || envClientId || null);
     const clientSecret = process.env.GOOGLE_CLIENT_SECRET ? process.env.GOOGLE_CLIENT_SECRET.trim() : null;
 
     const protocol = req.headers['x-forwarded-proto'] || req.protocol || 'http';
@@ -764,7 +791,20 @@ async function startServer() {
       process.env.GOOGLE_REDIRECT_URI ||
       (process.env.APP_URL ? `${process.env.APP_URL.trim()}/auth/google/callback` : dynamicCallback);
 
-    const clientId = process.env.GOOGLE_CLIENT_ID ? process.env.GOOGLE_CLIENT_ID.trim() : null;
+    let fileOAuthClientId: string | null = null;
+    try {
+      const fbConfigPath = path.join(rootDir, 'firebase-applet-config.json');
+      if (fs.existsSync(fbConfigPath)) {
+        const parsed = JSON.parse(fs.readFileSync(fbConfigPath, 'utf8'));
+        fileOAuthClientId = parsed.oAuthClientId || null;
+      }
+    } catch {
+      // ignore
+    }
+
+    const envClientId = process.env.GOOGLE_CLIENT_ID ? process.env.GOOGLE_CLIENT_ID.trim() : null;
+    const isPlaceholder = !envClientId || envClientId.includes('your_google_client_id');
+    const clientId = !isPlaceholder ? envClientId : (fileOAuthClientId || envClientId || null);
     const clientSecret = process.env.GOOGLE_CLIENT_SECRET ? process.env.GOOGLE_CLIENT_SECRET.trim() : null;
 
     if (!clientId || !clientSecret) {

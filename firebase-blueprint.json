@@ -47,6 +47,22 @@
         "type": { "type": "string", "description": "ISSUE, RETURN, or RENEW" },
         "status": { "type": "string", "description": "Transaction status" }
       }
+    },
+    "activityLogs": {
+      "title": "System Activity Logs",
+      "description": "Audit records tracking circulation transactions, system configurations, and user administrative actions with timestamps",
+      "fields": {
+        "id": { "type": "string", "description": "Unique log entry ID" },
+        "timestamp": { "type": "string", "description": "ISO timestamp" },
+        "category": { "type": "string", "description": "CIRCULATION, SYSTEM_CONFIG, or USER_ADMIN" },
+        "action": { "type": "string", "description": "Action machine identifier" },
+        "actionLabel": { "type": "string", "description": "Human friendly action title" },
+        "performedBy": { "type": "string", "description": "Actor name" },
+        "performedByRole": { "type": "string", "description": "Actor role" },
+        "target": { "type": "string", "description": "Target entity" },
+        "details": { "type": "string", "description": "Detailed log narrative" },
+        "status": { "type": "string", "description": "SUCCESS, INFO, WARNING, or ERROR" }
+      }
     }
   }
 }

@@ -608,16 +608,9 @@ export const LoginPage: React.FC<LoginPageProps> = ({
                 </div>
 
                 {/* ========================================================= */}
-                {/* AUTHENTICATION METHOD 1: GOOGLE ACCOUNT LOGIN             */}
+                {/* GOOGLE ACCOUNT ONE-CLICK SIGN IN                          */}
                 {/* ========================================================= */}
-                <div className="w-full space-y-1.5 pt-1">
-                  <div className="flex items-center justify-between text-[11px] text-emerald-800 bg-emerald-50/90 border border-emerald-200/80 px-2.5 py-1 rounded-lg">
-                    <div className="flex items-center space-x-1.5 font-medium">
-                      <span className="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                      <span>Google Account Login</span>
-                    </div>
-                    <span className="font-mono text-[10px] text-emerald-700 bg-emerald-100/60 px-1.5 py-0.5 rounded">Fast 1-Click</span>
-                  </div>
+                <div className="w-full pt-1">
                   <GoogleLoginButton
                     variant="emerald"
                     text="Continue with Google"
@@ -661,7 +654,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
 
                   <div className="space-y-1">
                     <div className="flex items-center justify-between">
-                      <label htmlFor="login-password" text-xs font-semibold text-zinc-700 className="text-xs font-semibold text-zinc-700">
+                      <label htmlFor="login-password" className="text-xs font-semibold text-zinc-700">
                         Password
                       </label>
                       <button
@@ -692,36 +685,6 @@ export const LoginPage: React.FC<LoginPageProps> = ({
                         className="absolute right-2.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600 p-1 cursor-pointer"
                       >
                         {showLoginPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Quick Test Accounts Hint Pill */}
-                  <div className="p-2 rounded-xl bg-zinc-50 border border-zinc-200 text-[10px] text-zinc-500 space-y-1">
-                    <div className="font-semibold text-zinc-600 flex items-center justify-between">
-                      <span>Quick Test Accounts:</span>
-                      <span className="text-emerald-700 font-bold">1-Click Fill</span>
-                    </div>
-                    <div className="flex gap-1.5 flex-wrap">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setLoginIdentifier('admin@aijaz-edu.org');
-                          setLoginPassword('admin123');
-                        }}
-                        className="px-2 py-0.5 rounded bg-white hover:bg-emerald-50 hover:text-emerald-800 border border-zinc-200 font-mono text-[10px] text-zinc-700 cursor-pointer"
-                      >
-                        Admin (admin@aijaz-edu.org / admin123)
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setLoginIdentifier('sarah.jenkins@aijaz-edu.org');
-                          setLoginPassword('lib123');
-                        }}
-                        className="px-2 py-0.5 rounded bg-white hover:bg-emerald-50 hover:text-emerald-800 border border-zinc-200 font-mono text-[10px] text-zinc-700 cursor-pointer"
-                      >
-                        Librarian (sarah.jenkins / lib123)
                       </button>
                     </div>
                   </div>

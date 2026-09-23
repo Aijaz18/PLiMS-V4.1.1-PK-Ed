@@ -7,6 +7,13 @@ import {
   getCustomCatalogBooks
 } from './catalog300kEngine';
 import { idbSaveUnlimited } from './offlineStorage';
+import {
+  parseUniversalMarcFile,
+  convertMarcRecordToBook,
+  SAMPLE_MARC21_DEMO_TEXT,
+  parseMarc21Mnemonic,
+  serializeToMarc21Binary
+} from './marc21Parser';
 
 export type ExportFormat = 'CSV' | 'EXCEL' | 'JSON' | 'MARCXML' | 'MARC21' | 'HOLDINGS_LEDGER_CSV';
 
@@ -625,80 +632,38 @@ export async function parseAndIngestHoldingsFile(
       }
     }
   }
-  // C. MARCXML File Ingestion
-  else if (fileExt === 'xml' || fileExt === 'marcxml') {
-    const text = await file.text();
-    const parser = new DOMParser();
-    const xmlDoc = parser.parseFromString(text, 'text/xml');
-    const records = Array.from(xmlDoc.getElementsByTagName('record'));
+  // C. MARC21 / ISO-2709 / MARCXML / MarcEdit (.mrk) File Ingestion
+  else if (
+    ['mrc', 'marc', 'marc21', 'dat', 'mrk', 'xml', 'marcxml'].includes(fileExt)
+  ) {
+    onProgress?.({
+      processed: 0,
+      total: 100,
+      percentage: 20,
+      currentAction: `Parsing MARC21 ISO-2709 / MARCXML bibliographic records from ${file.name}...`
+    });
 
-    const total = records.length;
+    const marcRecords = await parseUniversalMarcFile(file);
+    const total = marcRecords.length;
+
+    if (total === 0) {
+      throw new Error(`No valid MARC21 or MARCXML bibliographic records could be identified in "${file.name}".`);
+    }
+
     for (let i = 0; i < total; i++) {
-      const rec = records[i];
-
-      const getSubfield = (tag: string, code: string): string => {
-        const fields = Array.from(rec.getElementsByTagName('datafield'));
-        for (const f of fields) {
-          if (f.getAttribute('tag') === tag) {
-            const subs = Array.from(f.getElementsByTagName('subfield'));
-            for (const s of subs) {
-              if (s.getAttribute('code') === code) {
-                return s.textContent || '';
-              }
-            }
-          }
-        }
-        return '';
-      };
-
-      const title = getSubfield('245', 'a') || `Imported MARC Record ${i + 1}`;
-      const author = getSubfield('100', 'a') || 'Unknown Author';
-      const isbn = getSubfield('020', 'a') || `978-${Math.floor(1000000000 + Math.random() * 9000000000)}`;
-      const ddc = getSubfield('082', 'a') || '000';
-      const callNum = getSubfield('090', 'a') || `${ddc} ${author.substring(0, 3).toUpperCase()}`;
-      const publisher = getSubfield('260', 'b') || 'Library Foundation';
-      const year = parseInt(getSubfield('260', 'c') || '2024', 10) || 2024;
-      const accNum = getSubfield('090', 'b') || `ACC-${(300000 + i).toString()}`;
-      const shelf = getSubfield('852', 'c') || 'Stack Central';
-
-      const bookId = `bk_marc_${Date.now()}_${i}`;
-      const book: BookRecord = {
-        id: bookId,
-        isbn,
-        title,
-        authors: [author],
-        department: 'Academic Holdings',
-        callNumber: callNum,
-        edition: '1st Edition',
-        publisherName: publisher,
-        publisherYear: year,
-        pageCount: 300,
-        totalCopies: copiesPerTitle,
-        availableCopies: copiesPerTitle,
-        shelfLocation: shelf,
-        subjects: ['Academic Research'],
-        coverUrl: 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=300&q=80',
-        ddcClassification: ddc,
-        accessionNumber: accNum,
-        isCustomAdded: true,
-        cataloguedDate: new Date().toISOString().split('T')[0]
-      };
+      const marc = marcRecords[i];
+      const { book, copies } = convertMarcRecordToBook(marc, i, {
+        defaultBranch,
+        copiesCount: copiesPerTitle,
+        generateCopies: autoCreatePhysicalCopies
+      });
 
       newBooks.push(book);
-      const ddcLead = ddc.charAt(0) + '00';
+      const ddcLead = (book.ddcClassification || '000').charAt(0) + '00';
       disciplineCounts[ddcLead] = (disciplineCounts[ddcLead] || 0) + 1;
 
-      if (autoCreatePhysicalCopies) {
-        for (let c = 1; c <= copiesPerTitle; c++) {
-          newCopies.push({
-            id: `copy_${bookId}_${c}`,
-            bookId,
-            accessionNumber: `${accNum}-C${c}`,
-            barcode: `BC-${(500000 + newCopies.length + 1).toString()}`,
-            branchLocation: defaultBranch,
-            status: 'AVAILABLE'
-          });
-        }
+      if (autoCreatePhysicalCopies && copies) {
+        newCopies.push(...copies);
       }
 
       if (i % 250 === 0 || i === total - 1) {
@@ -706,7 +671,7 @@ export async function parseAndIngestHoldingsFile(
           processed: i + 1,
           total,
           percentage: Math.round(((i + 1) / total) * 100),
-          currentAction: `Parsed ${i + 1} / ${total} MARCXML records...`
+          currentAction: `Ingested ${i + 1} / ${total} MARC21 bibliographic records...`
         });
         await new Promise(r => setTimeout(r, 0));
       }
@@ -739,7 +704,7 @@ export async function parseAndIngestHoldingsFile(
 
 // Download ready-to-use sample templates
 export function downloadSampleHoldingsTemplate(
-  format: 'CSV' | 'HOLDINGS_LEDGER' | 'MARCXML' | 'JSON'
+  format: 'CSV' | 'HOLDINGS_LEDGER' | 'MARCXML' | 'JSON' | 'MARC21' | 'MRK'
 ) {
   const sampleBooks: BookRecord[] = [
     {
@@ -875,5 +840,11 @@ export function downloadSampleHoldingsTemplate(
     });
     xml += `</collection>\n`;
     triggerBrowserDownload('PLiMS_Sample_MARCXML_Collection.xml', xml, 'application/xml;charset=utf-8;');
+  } else if (format === 'MARC21') {
+    const parsed = parseMarc21Mnemonic(SAMPLE_MARC21_DEMO_TEXT);
+    const binaryBytes = serializeToMarc21Binary(parsed);
+    triggerBrowserDownload('PLiMS_Sample_MARC21_Record.mrc', binaryBytes, 'application/marc');
+  } else if (format === 'MRK') {
+    triggerBrowserDownload('PLiMS_Sample_MARC21_Mnemonic.mrk', SAMPLE_MARC21_DEMO_TEXT, 'text/plain;charset=utf-8;');
   }
 }
