@@ -10,8 +10,7 @@
         "role": { "type": "string", "description": "Role in the library system" },
         "memberCode": { "type": "string", "description": "Institutional membership code" },
         "status": { "type": "string", "description": "Active or suspended status" },
-        "authProvider": { "type": "string", "description": "Authentication provider (GOOGLE or LOCAL)" },
-        "googleSub": { "type": "string", "description": "Google Subject identifier" },
+        "authProvider": { "type": "string", "description": "Authentication provider (LOCAL)" },
         "createdAt": { "type": "string", "description": "Timestamp ISO" }
       }
     },

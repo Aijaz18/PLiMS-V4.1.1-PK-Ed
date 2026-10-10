@@ -90,30 +90,9 @@ export const OfflineSyncBar: React.FC<OfflineSyncBarProps> = ({
 
   return (
     <div className="w-full bg-white border-b border-slate-200/90 px-6 py-2 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
-      {/* Network Status Badge */}
       <div className="flex items-center space-x-3">
-        <div className={`flex items-center space-x-2 px-3 py-1 rounded-full border font-mono font-bold text-[11px] ${
-          effectiveOnline
-            ? 'bg-emerald-50 border-emerald-200 text-emerald-700'
-            : 'bg-amber-50 border-amber-200 text-amber-700 animate-pulse'
-        }`}>
-          {effectiveOnline ? (
-            <>
-              <Wifi className="h-3.5 w-3.5 text-emerald-600" />
-              <span>Online • Cloud Sync Active</span>
-            </>
-          ) : (
-            <>
-              <WifiOff className="h-3.5 w-3.5 text-amber-600" />
-              <span>Offline Mode Active • Scans Saved to LocalStorage</span>
-            </>
-          )}
-        </div>
-
-        {/* Local Storage Database Pill */}
-        <div className="hidden md:flex items-center space-x-1.5 text-slate-500 font-mono text-[11px]">
-          <HardDrive className="h-3.5 w-3.5 text-emerald-600" />
-          <span>Local Storage Persistence: <strong className="text-slate-800 font-semibold">Active (Indexed Cache)</strong></span>
+        <div className="flex items-center space-x-2 text-slate-600 font-medium text-xs">
+          <span>Circulation Scan Synchronizer</span>
         </div>
       </div>
 

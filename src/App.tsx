@@ -1,32 +1,49 @@
 import React, { useState, useEffect } from 'react';
+import { Bot, Sparkles } from 'lucide-react';
 import { Sidebar, ModuleTab } from './components/Sidebar';
 import { Header } from './components/Header';
-import { CommandPalette } from './components/CommandPalette';
-import { AddBranchAndStaffModal } from './components/AddBranchAndStaffModal';
 import { LoginPage } from './components/LoginPage';
 import { PublicOpacPage } from './components/PublicOpacPage';
-import { DigitalLibrarianChatbot } from './components/DigitalLibrarianChatbot';
-
-// Import Feature Modules
-import { DashboardModule } from './components/modules/DashboardModule';
-import { SettingsModule } from './components/modules/SettingsModule';
-import { UserMemberModule } from './components/modules/UserMemberModule';
-import { CataloguingModule } from './components/modules/CataloguingModule';
-import { AuthorityControlModule } from './components/modules/AuthorityControlModule';
-import { CirculationModule } from './components/modules/CirculationModule';
-import { OpacModule } from './components/modules/OpacModule';
-import { DigitalLibraryModule } from './components/modules/DigitalLibraryModule';
-import { AcquisitionModule } from './components/modules/AcquisitionModule';
-import { SerialsModule } from './components/modules/SerialsModule';
-import { StockVerificationModule } from './components/modules/StockVerificationModule';
-import { ReportsModule } from './components/modules/ReportsModule';
-import { BarcodeGeneratorModule } from './components/modules/BarcodeGeneratorModule';
-import { AiAssistantModule } from './components/modules/AiAssistantModule';
-import { MyLibraryModule } from './components/modules/MyLibraryModule';
-import { ImportExportModule } from './components/modules/ImportExportModule';
-import { BackupLogsModule } from './components/modules/BackupLogsModule';
-import { DocumentationModule } from './components/modules/DocumentationModule';
 import { ErrorBoundary } from './components/ErrorBoundary';
+
+// Lazy-loaded Feature Modules (dramatically accelerates application startup and navigation)
+const DashboardModule = React.lazy(() => import('./components/modules/DashboardModule').then(m => ({ default: m.DashboardModule })));
+const SettingsModule = React.lazy(() => import('./components/modules/SettingsModule').then(m => ({ default: m.SettingsModule })));
+const UserMemberModule = React.lazy(() => import('./components/modules/UserMemberModule').then(m => ({ default: m.UserMemberModule })));
+const CataloguingModule = React.lazy(() => import('./components/modules/CataloguingModule').then(m => ({ default: m.CataloguingModule })));
+const AuthorityControlModule = React.lazy(() => import('./components/modules/AuthorityControlModule').then(m => ({ default: m.AuthorityControlModule })));
+const CirculationModule = React.lazy(() => import('./components/modules/CirculationModule').then(m => ({ default: m.CirculationModule })));
+const DigitalLibraryModule = React.lazy(() => import('./components/modules/DigitalLibraryModule').then(m => ({ default: m.DigitalLibraryModule })));
+const AcquisitionModule = React.lazy(() => import('./components/modules/AcquisitionModule').then(m => ({ default: m.AcquisitionModule })));
+const SerialsModule = React.lazy(() => import('./components/modules/SerialsModule').then(m => ({ default: m.SerialsModule })));
+const StockVerificationModule = React.lazy(() => import('./components/modules/StockVerificationModule').then(m => ({ default: m.StockVerificationModule })));
+const ReportsModule = React.lazy(() => import('./components/modules/ReportsModule').then(m => ({ default: m.ReportsModule })));
+const BarcodeGeneratorModule = React.lazy(() => import('./components/modules/BarcodeGeneratorModule').then(m => ({ default: m.BarcodeGeneratorModule })));
+const AiAssistantModule = React.lazy(() => import('./components/modules/AiAssistantModule').then(m => ({ default: m.AiAssistantModule })));
+const MyLibraryModule = React.lazy(() => import('./components/modules/MyLibraryModule').then(m => ({ default: m.MyLibraryModule })));
+const ImportExportModule = React.lazy(() => import('./components/modules/ImportExportModule').then(m => ({ default: m.ImportExportModule })));
+const BackupLogsModule = React.lazy(() => import('./components/modules/BackupLogsModule').then(m => ({ default: m.BackupLogsModule })));
+const DocumentationModule = React.lazy(() => import('./components/modules/DocumentationModule').then(m => ({ default: m.DocumentationModule })));
+
+// Lazy-loaded Modals
+const CommandPalette = React.lazy(() => import('./components/CommandPalette').then(m => ({ default: m.CommandPalette })));
+const AddBranchAndStaffModal = React.lazy(() => import('./components/AddBranchAndStaffModal').then(m => ({ default: m.AddBranchAndStaffModal })));
+const LibrarianBot = React.lazy(() => import('./components/LibrarianBot/LibrarianBot').then(m => ({ default: m.LibrarianBot })));
+
+function ModuleLoadingFallback() {
+  return (
+    <div className="flex h-full min-h-[350px] w-full flex-col items-center justify-center p-8 text-center select-none animate-in fade-in duration-150">
+      <div className="relative mb-3">
+        <div className="w-10 h-10 rounded-full border-2 border-emerald-500/20 border-t-emerald-600 animate-spin" />
+        <div className="absolute inset-0 flex items-center justify-center">
+          <span className="text-[10px] font-bold text-emerald-700 font-mono">P</span>
+        </div>
+      </div>
+      <p className="text-xs font-semibold text-slate-700">Loading PLiMS Workspace Module...</p>
+      <p className="text-[10px] text-slate-400 mt-0.5">Pakistan Library Management System</p>
+    </div>
+  );
+}
 
 import {
   logCirculationActivity,
@@ -34,7 +51,6 @@ import {
   logUserAdminActivity
 } from './services/activityLogger';
 
-import { OfflineSyncBar } from './components/OfflineSyncBar';
 import {
   loadLocalData,
   saveLocalData,
@@ -61,8 +77,6 @@ import {
 import { BookRecord, BookCopy, UserProfile, CirculationTransaction, DigitalAsset, LibrarySettings, UserRole, BookReservation, AppTheme } from './types/alims';
 import { AppLanguage } from './utils/i18n';
 import { getThemeConfig, applyThemeToDocument } from './utils/themeConfig';
-import { subscribeToFirebaseAuth, logOutOfFirebase } from './services/firebase';
-import { processGoogleUserAuth, GoogleOAuthPayload } from './services/googleAuth';
 import {
   BackgroundLayer,
   loadSavedBgConfig,
@@ -71,6 +85,12 @@ import {
 
 export function App() {
   const [currentTab, setCurrentTab] = useState<ModuleTab>('DASHBOARD');
+
+  const handleNavigateTab = (tab: ModuleTab) => {
+    React.startTransition(() => {
+      setCurrentTab(tab);
+    });
+  };
   const [currentTheme, setCurrentTheme] = useState<AppTheme>(() => {
     return (localStorage.getItem('pslims_theme') as AppTheme) || 'pakistan-flag';
   });
@@ -108,12 +128,9 @@ export function App() {
     }
   });
 
-  // Flag indicating we are actively exchanging or finishing a Google Sign-In redirect
-  const [isCompletingGoogleAuth, setIsCompletingGoogleAuth] = useState<boolean>(() => {
-    if (typeof window === 'undefined') return false;
-    const urlParams = new URLSearchParams(window.location.search);
-    return Boolean(urlParams.get('code')) || window.location.pathname.startsWith('/auth/google/callback');
-  });
+  // Dedicated portal mode requested: 'STAFF' (Librarian & Staff) vs 'MEMBER' (Student & Faculty Member)
+  const [loginPortalMode, setLoginPortalMode] = useState<'STAFF' | 'MEMBER'>('STAFF');
+  const [isLibrarianBotOpen, setIsLibrarianBotOpen] = useState<boolean>(false);
 
   // Public OPAC Home Page vs. Login Portal display state for unauthenticated visitors
   const [isLoginViewOpen, setIsLoginViewOpen] = useState<boolean>(() => {
@@ -129,6 +146,16 @@ export function App() {
     const existingIds = new Set((loaded || []).map(u => u.id));
     const missing = initialUsers.filter(u => !existingIds.has(u.id));
     return [...(loaded || []), ...missing].map(u => {
+      if (u.id === 'usr_admin' || u.memberCode === 'ADM-001') {
+        return {
+          ...u,
+          name: 'Dr. Aijaz Akhter',
+          email: 'ahmedaniaijazakhter@gmail.com',
+          secondaryEmail: 'admin@aijaz-edu.org',
+          role: 'SUPER_ADMIN' as UserRole,
+          maxBorrowLimit: 99999,
+        };
+      }
       const isStaff = ['SUPER_ADMIN', 'SYSTEM_ADMIN', 'PRINCIPAL', 'CHIEF_LIBRARIAN', 'LIBRARIAN', 'ASSISTANT_LIBRARIAN', 'ACCOUNTS_OFFICER'].includes(u.role);
       if (isStaff && (!u.maxBorrowLimit || u.maxBorrowLimit < 9999)) {
         return { ...u, maxBorrowLimit: 99999 };
@@ -156,7 +183,6 @@ export function App() {
   });
   const [digitalAssets, setDigitalAssets] = useState<DigitalAsset[]>(() => loadLocalData('pslims_db_digital_assets', initialDigitalAssets));
   const [reservations, setReservations] = useState<BookReservation[]>(() => loadLocalData('pslims_db_reservations', initialReservations));
-  const [lastSyncTime, setLastSyncTime] = useState<string | null>(null);
 
   // Active logged in user profile (dynamically synced with persisted users state and saved session)
   const [currentUser, setCurrentUser] = useState<UserProfile>(() => {
@@ -173,137 +199,84 @@ export function App() {
     return loadedUsers[0] || initialUsers[0];
   });
 
-  // Auto-detect and process Google OAuth callback from URL parameters or redirect storage
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-
-    // A. Check for pre-stored payload (from server redirect)
+  /**
+   * Restores user's previous workspace state after re-login or page refresh:
+   * Last active module, last selected library branch, user filters.
+   * Enforces role security: patron roles cannot restore staff modules.
+   */
+  const restoreUserWorkspace = (user: UserProfile) => {
     try {
-      const storedPayloadStr = localStorage.getItem('pslims_google_auth_payload');
-      if (storedPayloadStr) {
-        localStorage.removeItem('pslims_google_auth_payload');
-        const payload: GoogleOAuthPayload = JSON.parse(storedPayloadStr);
-        const result = processGoogleUserAuth(payload, users, activeBranch);
+      const raw = localStorage.getItem(`pslims_workspace_${user.id}`);
+      if (raw) {
+        const ws = JSON.parse(raw);
+        const isMember = ['STUDENT', 'FACULTY', 'RESEARCH_SCHOLAR', 'GUEST'].includes(user.role);
+        const isStaffTab = [
+          'DASHBOARD', 'SETTINGS', 'MEMBERS', 'CATALOGUING', 'AUTHORITY',
+          'CIRCULATION', 'ACQUISITION', 'SERIALS', 'STOCK', 'INVENTORY',
+          'REPORTS', 'IMPORT_EXPORT', 'BACKUP_LOGS', 'BARCODES', 'AI_ASSISTANT'
+        ].includes(ws.tab);
 
-        if (result.isNewUser) {
-          setUsers(prev => {
-            const nextList = [result.user, ...prev];
-            saveLocalData('pslims_db_users', nextList);
-            return nextList;
-          });
-        } else {
-          setUsers(prev => {
-            const nextList = prev.map(u => (u.id === result.user.id ? result.user : u));
-            saveLocalData('pslims_db_users', nextList);
-            return nextList;
-          });
+        React.startTransition(() => {
+          if (isMember && isStaffTab) {
+            setCurrentTab('MY_LIBRARY');
+          } else if (ws.tab) {
+            setCurrentTab(ws.tab as ModuleTab);
+          } else {
+            setCurrentTab(isMember ? 'MY_LIBRARY' : 'DASHBOARD');
+          }
+        });
+
+        if (ws.branch && settings.branches.includes(ws.branch)) {
+          setActiveBranch(ws.branch);
+          localStorage.setItem('pslims_auth_branch', ws.branch);
         }
-
-        setCurrentUser(result.user);
-        setIsAuthenticated(true);
-        localStorage.setItem('pslims_is_authenticated', 'true');
-        localStorage.setItem('pslims_auth_user_id', result.user.id);
-        localStorage.setItem('pslims_auth_branch', activeBranch);
-        setCurrentTab('DASHBOARD');
-
-        if (window.location.search || window.location.pathname.startsWith('/auth/google/callback')) {
-          window.history.replaceState({}, document.title, '/');
-        }
-        setIsCompletingGoogleAuth(false);
         return;
       }
-    } catch (storageErr) {
-      console.warn('Error reading cached Google OAuth payload:', storageErr);
+    } catch {
+      // ignore
     }
+    const isMember = ['STUDENT', 'FACULTY', 'RESEARCH_SCHOLAR', 'GUEST'].includes(user.role);
+    React.startTransition(() => {
+      setCurrentTab(isMember ? 'MY_LIBRARY' : 'DASHBOARD');
+    });
+  };
 
-    // B. Check for direct query parameters (direct window redirect from Google to /auth/google/callback?code=...)
-    const urlParams = new URLSearchParams(window.location.search);
-    const code = urlParams.get('code');
-    const state = urlParams.get('state');
-
-    if (code) {
-      setIsCompletingGoogleAuth(true);
-      fetch(`/api/auth/google/exchange?code=${encodeURIComponent(code)}&state=${encodeURIComponent(state || '')}`)
-        .then(res => res.json())
-        .then(data => {
-          if (data.success && data.payload) {
-            const result = processGoogleUserAuth(data.payload, users, activeBranch);
-
-            if (result.isNewUser) {
-              setUsers(prev => {
-                const nextList = [result.user, ...prev];
-                saveLocalData('pslims_db_users', nextList);
-                return nextList;
-              });
-            } else {
-              setUsers(prev => {
-                const nextList = prev.map(u => (u.id === result.user.id ? result.user : u));
-                saveLocalData('pslims_db_users', nextList);
-                return nextList;
-              });
-            }
-
-            setCurrentUser(result.user);
-            setIsAuthenticated(true);
-            localStorage.setItem('pslims_is_authenticated', 'true');
-            localStorage.setItem('pslims_auth_user_id', result.user.id);
-            localStorage.setItem('pslims_auth_branch', activeBranch);
-            setCurrentTab('DASHBOARD');
-          } else {
-            console.warn('[Google OAuth]: Exchange notice, completing session for verified Google user.');
-            const fallbackGooglePayload: GoogleOAuthPayload = {
-              sub: 'google_user_chief_' + Date.now(),
-              email: 'ritelibrarian@gmail.com',
-              name: 'Chief Librarian',
-              emailVerified: true,
-            };
-            const result = processGoogleUserAuth(fallbackGooglePayload, users, activeBranch);
-            setCurrentUser(result.user);
-            setIsAuthenticated(true);
-            localStorage.setItem('pslims_is_authenticated', 'true');
-            localStorage.setItem('pslims_auth_user_id', result.user.id);
-            localStorage.setItem('pslims_auth_branch', activeBranch);
-            setCurrentTab('DASHBOARD');
-          }
-        })
-        .catch(exchangeErr => {
-          console.error('[Google OAuth]: Exchange notice:', exchangeErr);
-          const fallbackGooglePayload: GoogleOAuthPayload = {
-            sub: 'google_user_chief_' + Date.now(),
-            email: 'ritelibrarian@gmail.com',
-            name: 'Chief Librarian',
-            emailVerified: true,
-          };
-          const result = processGoogleUserAuth(fallbackGooglePayload, users, activeBranch);
-          setCurrentUser(result.user);
-          setIsAuthenticated(true);
-          localStorage.setItem('pslims_is_authenticated', 'true');
-          localStorage.setItem('pslims_auth_user_id', result.user.id);
-          localStorage.setItem('pslims_auth_branch', activeBranch);
-          setCurrentTab('DASHBOARD');
-        })
-        .finally(() => {
-          window.history.replaceState({}, document.title, '/');
-          setIsCompletingGoogleAuth(false);
-        });
-    } else if (window.location.pathname.startsWith('/auth/google/callback')) {
-      const fallbackGooglePayload: GoogleOAuthPayload = {
-        sub: 'google_user_chief_' + Date.now(),
-        email: 'ritelibrarian@gmail.com',
-        name: 'Chief Librarian',
-        emailVerified: true,
-      };
-      const result = processGoogleUserAuth(fallbackGooglePayload, users, activeBranch);
-      setCurrentUser(result.user);
-      setIsAuthenticated(true);
-      localStorage.setItem('pslims_is_authenticated', 'true');
-      localStorage.setItem('pslims_auth_user_id', result.user.id);
-      localStorage.setItem('pslims_auth_branch', activeBranch);
-      setCurrentTab('DASHBOARD');
-      window.history.replaceState({}, document.title, '/');
-      setIsCompletingGoogleAuth(false);
+  // Restore workspace on initial application boot if already authenticated
+  useEffect(() => {
+    if (isAuthenticated && currentUser) {
+      restoreUserWorkspace(currentUser);
     }
   }, []);
+
+  // Persist user workspace state whenever active module or branch changes
+  useEffect(() => {
+    if (isAuthenticated && currentUser?.id) {
+      try {
+        localStorage.setItem(
+          `pslims_workspace_${currentUser.id}`,
+          JSON.stringify({ tab: currentTab, branch: activeBranch, timestamp: Date.now() })
+        );
+      } catch {
+        // ignore
+      }
+    }
+  }, [currentTab, activeBranch, isAuthenticated, currentUser?.id]);
+
+  // Strict Role-Based Access Guard: Redirect patron roles away from staff modules
+  useEffect(() => {
+    if (isAuthenticated && currentUser) {
+      const isMember = ['STUDENT', 'FACULTY', 'RESEARCH_SCHOLAR', 'GUEST'].includes(currentUser.role);
+      const isStaffTab = [
+        'DASHBOARD', 'SETTINGS', 'MEMBERS', 'CATALOGUING', 'AUTHORITY',
+        'CIRCULATION', 'ACQUISITION', 'SERIALS', 'STOCK', 'INVENTORY',
+        'REPORTS', 'IMPORT_EXPORT', 'BACKUP_LOGS', 'BARCODES', 'AI_ASSISTANT'
+      ].includes(currentTab);
+
+      if (isMember && isStaffTab) {
+        setCurrentTab('MY_LIBRARY');
+      }
+    }
+  }, [currentTab, isAuthenticated, currentUser]);
 
   // Register PWA Service Worker & Save Local Storage Effects
   useEffect(() => {
@@ -782,28 +755,6 @@ export function App() {
     return { success: true, transaction: tx, fineCalculated, isOffline: isOfflineMode };
   };
 
-  // Process and Sync Offline Queue
-  const handleSyncOfflineQueue = () => {
-    const currentQueue = getOfflineQueue();
-    const pending = currentQueue.filter(q => q.status === 'QUEUED');
-
-    if (pending.length === 0) {
-      alert('No pending offline scans or updates to sync.');
-      return;
-    }
-
-    // Mark all pending queued items as SYNCED
-    const updatedQueue = currentQueue.map(item => ({
-      ...item,
-      status: 'SYNCED' as const
-    }));
-
-    saveOfflineQueue(updatedQueue);
-    const timeStr = new Date().toLocaleTimeString();
-    setLastSyncTime(timeStr);
-    alert(`[Cloud Sync Success] Successfully synchronized ${pending.length} offline circulation scan(s) with the central database!`);
-  };
-
   const handleRenewBook = async (txId: string) => {
     const tx = transactions.find(t => t.id === txId);
     if (!tx) return { error: 'Transaction not found.' };
@@ -894,7 +845,7 @@ export function App() {
     localStorage.setItem('pslims_is_authenticated', 'true');
     localStorage.setItem('pslims_auth_user_id', newUser.id);
     localStorage.setItem('pslims_auth_branch', branch);
-    setCurrentTab('DASHBOARD');
+    restoreUserWorkspace(newUser);
     logUserAdminActivity(
       'USER_CREATE',
       newUser.name,
@@ -904,21 +855,6 @@ export function App() {
     );
   };
 
-  if (isCompletingGoogleAuth) {
-    return (
-      <div className="flex h-screen w-screen flex-col items-center justify-center bg-[#09090b] text-[#fafafa] p-6 text-center select-none">
-        <div className="relative mb-6">
-          <div className="w-16 h-16 rounded-full border-4 border-emerald-500/20 border-t-emerald-500 animate-spin" />
-          <div className="absolute inset-0 flex items-center justify-center">
-            <span className="text-[11px] font-bold text-emerald-400 font-mono tracking-wider">PLiMS</span>
-          </div>
-        </div>
-        <h2 className="text-xl font-bold tracking-tight text-white mb-2">Authenticating with Google</h2>
-        <p className="text-xs text-zinc-400 max-w-sm">Establishing verified session and loading the Pakistan Library Management System dashboard...</p>
-      </div>
-    );
-  }
-
   if (!isAuthenticated) {
     if (!isLoginViewOpen) {
       return (
@@ -927,9 +863,12 @@ export function App() {
             books={books}
             copies={copies}
             settings={settings}
-            currentUser={currentUser}
+            currentUser={null}
             isAuthenticated={false}
-            onOpenLogin={() => setIsLoginViewOpen(true)}
+            onOpenLogin={(portal) => {
+              if (portal) setLoginPortalMode(portal);
+              setIsLoginViewOpen(true);
+            }}
           />
         </ErrorBoundary>
       );
@@ -941,15 +880,29 @@ export function App() {
           users={users}
           branches={settings.branches}
           books={books}
+          initialPortal={loginPortalMode}
           onLoginSuccess={(user, branch) => {
             setCurrentUser(user);
             setActiveBranch(branch);
             setIsAuthenticated(true);
             setIsLoginViewOpen(false);
+            if (user.authProvider === 'WHATSAPP_WEB') {
+              setIsLibrarianBotOpen(true);
+            }
+            handleUpdateUser(user.id, user);
             localStorage.setItem('pslims_is_authenticated', 'true');
             localStorage.setItem('pslims_auth_user_id', user.id);
             localStorage.setItem('pslims_auth_branch', branch);
-            setCurrentTab('DASHBOARD');
+            restoreUserWorkspace(user);
+            try {
+              fetch('/api/auth/session', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ user }),
+              }).catch(() => {});
+            } catch {
+              // ignore
+            }
           }}
           onRegisterUser={(newUser, branch) => {
             handleRegisterUser(newUser, branch);
@@ -987,13 +940,9 @@ export function App() {
           setIsAddBranchModalOpen(true);
         }}
         onUpdateUser={handleUpdateUser}
-        onNavigateTab={setCurrentTab}
+        onNavigateTab={handleNavigateTab}
+        onOpenLibrarianBot={() => setIsLibrarianBotOpen(true)}
         onLogout={async () => {
-          try {
-            await logOutOfFirebase();
-          } catch {
-            // ignore
-          }
           try {
             await fetch('/api/auth/logout', { method: 'POST' });
           } catch {
@@ -1002,7 +951,6 @@ export function App() {
           localStorage.removeItem('pslims_is_authenticated');
           localStorage.removeItem('pslims_auth_user_id');
           localStorage.removeItem('pslims_auth_branch');
-          localStorage.removeItem('pslims_google_auth_payload');
           setIsAuthenticated(false);
           setIsLoginViewOpen(false);
         }}
@@ -1013,7 +961,7 @@ export function App() {
         {/* Sidebar Navigation */}
         <Sidebar
           activeTab={currentTab}
-          onSelectTab={setCurrentTab}
+          onSelectTab={handleNavigateTab}
           userRole={currentUser.role}
           currentLanguage={currentLanguage}
           currentTheme={currentTheme}
@@ -1021,29 +969,24 @@ export function App() {
 
         {/* Main Content Area */}
         <div className={`flex-1 flex flex-col min-w-0 overflow-hidden ${activeThemeDef.canvasBg} transition-colors duration-300`}>
-          {/* Persistent Offline Sync & Connection Bar */}
-          <OfflineSyncBar
-            onSyncTriggered={handleSyncOfflineQueue}
-            lastSyncTime={lastSyncTime}
-          />
-
           {/* Viewport Scrollable Area */}
           <main className="flex-1 overflow-y-auto p-4 md:p-5 lg:p-6 space-y-5 scrollbar-thin scrollbar-thumb-slate-300">
-            <ErrorBoundary>
-            {currentTab === 'MY_LIBRARY' && (
-              <MyLibraryModule
-                currentUser={currentUser}
-                transactions={transactions}
-                books={books}
-                reservations={reservations}
-                settings={settings}
-                activeBranch={activeBranch}
-                onRenewLoan={txId => handleRenewBook(txId)}
-                onPayFine={(memberId, amount) => handlePayFine(memberId, amount)}
-                onCancelReservation={resId => handleCancelReservation(resId)}
-                onNavigateTab={setCurrentTab}
-              />
-            )}
+            <ErrorBoundary fallbackTitle="Module Render Recovery">
+              <React.Suspense fallback={<ModuleLoadingFallback />}>
+              {currentTab === 'MY_LIBRARY' && (
+                <MyLibraryModule
+                  currentUser={currentUser}
+                  transactions={transactions}
+                  books={books}
+                  reservations={reservations}
+                  settings={settings}
+                  activeBranch={activeBranch}
+                  onRenewLoan={txId => handleRenewBook(txId)}
+                  onPayFine={(memberId, amount) => handlePayFine(memberId, amount)}
+                  onCancelReservation={resId => handleCancelReservation(resId)}
+                  onNavigateTab={handleNavigateTab}
+                />
+              )}
 
             {currentTab === 'DASHBOARD' && (
               <DashboardModule
@@ -1209,64 +1152,101 @@ export function App() {
               />
             )}
 
-            {currentTab === 'AI_ASSISTANT' && <AiAssistantModule books={books} />}
+            {currentTab === 'AI_ASSISTANT' && (
+              <AiAssistantModule
+                books={books}
+                users={users}
+                currentUser={currentUser}
+                activeBranch={activeBranch}
+                transactions={transactions}
+              />
+            )}
 
             {currentTab === 'HELP_DOCS' && (
               <DocumentationModule currentLanguage={currentLanguage} />
             )}
-          </ErrorBoundary>
+              </React.Suspense>
+            </ErrorBoundary>
         </main>
 
         {/* Bottom Status Bar */}
         <footer className="h-8 bg-white border-t border-slate-200/90 px-4 sm:px-6 flex items-center justify-between text-[11px] text-slate-500 font-medium shrink-0">
           <div>PLiMS V4.1.1 | Pakistan Library Management System</div>
-          <div className="flex items-center space-x-3">
-            <span className="flex items-center space-x-1.5 text-emerald-600 font-semibold">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block animate-pulse"></span>
-              <span>System Online</span>
-            </span>
-            <span className="text-slate-300">|</span>
-            <span>Last Sync: {lastSyncTime ? `Sep 15, 2026 ${lastSyncTime}` : 'Sep 15, 2026 08:58:45 PM'}</span>
-          </div>
+          <div className="text-slate-400">National Library Automation &amp; Academic Information System</div>
         </footer>
       </div>
     </div>
 
       {/* Keyboard Command Palette Modal */}
-      <CommandPalette
-        isOpen={isCommandPaletteOpen}
-        onClose={() => setIsCommandPaletteOpen(false)}
-        books={books}
-        users={users}
-        onSelectBook={b => {
-          setCurrentTab('OPAC');
-        }}
-        onSelectModule={tab => setCurrentTab(tab)}
-      />
+      <React.Suspense fallback={null}>
+        {isCommandPaletteOpen && (
+          <CommandPalette
+            isOpen={isCommandPaletteOpen}
+            onClose={() => setIsCommandPaletteOpen(false)}
+            books={books}
+            users={users}
+            onSelectBook={b => {
+              handleNavigateTab('OPAC');
+            }}
+            onSelectModule={tab => handleNavigateTab(tab)}
+          />
+        )}
+      </React.Suspense>
 
       {/* Add Branch & Staff Modal */}
-      <AddBranchAndStaffModal
-        isOpen={isAddBranchModalOpen}
-        onClose={() => setIsAddBranchModalOpen(false)}
-        branches={settings.branches}
-        onAddBranch={handleAddBranch}
-        onDeleteBranch={handleDeleteBranch}
-        onAddStaff={handleAddUser}
-        initialMode={branchModalInitialMode}
-      />
+      <React.Suspense fallback={null}>
+        {isAddBranchModalOpen && (
+          <AddBranchAndStaffModal
+            isOpen={isAddBranchModalOpen}
+            onClose={() => setIsAddBranchModalOpen(false)}
+            branches={settings.branches}
+            onAddBranch={handleAddBranch}
+            onDeleteBranch={handleDeleteBranch}
+            onAddStaff={handleAddUser}
+            initialMode={branchModalInitialMode}
+          />
+        )}
+      </React.Suspense>
 
-      {/* Persistent Floating Digital Librarian Assistant Chatbot */}
-      <DigitalLibrarianChatbot
-        mode="FLOATING"
-        books={books}
-        users={users}
-        transactions={transactions}
-        branches={settings.branches}
-        currentUser={currentUser}
-        onIssueBook={handleIssueBook}
-        onReturnBook={handleReturnBook}
-        onNavigateTab={tab => setCurrentTab(tab as ModuleTab)}
-      />
+      {/* PLiMS AI Librarian Bot (Full Circulation, Renewals, OPAC & Reference Services) */}
+      <React.Suspense fallback={null}>
+        {isLibrarianBotOpen && currentUser && (
+          <LibrarianBot
+            currentUser={currentUser}
+            activeBranch={activeBranch}
+            branches={settings.branches}
+            books={books}
+            transactions={transactions}
+            isOpen={isLibrarianBotOpen}
+            onClose={() => setIsLibrarianBotOpen(false)}
+            onRenewTransaction={handleRenewBook}
+            onNavigateTab={handleNavigateTab}
+            onUpdateUser={handleUpdateUser}
+          />
+        )}
+      </React.Suspense>
+
+      {/* Floating AI Librarian Bot Launcher */}
+      {currentUser && (
+        <button
+          type="button"
+          onClick={() => setIsLibrarianBotOpen(true)}
+          className="fixed bottom-5 right-5 z-40 px-4 py-2.5 bg-gradient-to-r from-emerald-700 via-emerald-600 to-teal-700 hover:from-emerald-800 hover:to-teal-800 text-white rounded-full shadow-2xl border-2 border-emerald-300/40 flex items-center space-x-2.5 transition-all hover:scale-105 active:scale-95 cursor-pointer group"
+          title="Open PLiMS AI Librarian Bot - 24/7 Loans, Renewals, Catalog & Reference Services"
+        >
+          <div className="relative">
+            <Bot className="h-5 w-5 text-emerald-200" />
+            <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-emerald-400 border-2 border-slate-900 animate-pulse"></span>
+          </div>
+          <div className="flex flex-col text-left">
+            <span className="text-xs font-bold tracking-tight text-white flex items-center space-x-1">
+              <span>Librarian Bot</span>
+              <Sparkles className="h-3 w-3 text-emerald-300" />
+            </span>
+            <span className="text-[9px] text-emerald-100 font-medium leading-none">24/7 Services</span>
+          </div>
+        </button>
+      )}
     </div>
   );
 }

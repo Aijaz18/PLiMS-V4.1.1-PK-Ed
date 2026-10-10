@@ -56,7 +56,7 @@ interface PublicOpacPageProps {
   settings: SystemSettings;
   currentUser?: UserProfile | null;
   isAuthenticated?: boolean;
-  onOpenLogin: () => void;
+  onOpenLogin: (portal?: 'STAFF' | 'MEMBER') => void;
   onReturnToDashboard?: () => void;
 }
 
@@ -276,13 +276,24 @@ export const PublicOpacPage: React.FC<PublicOpacPageProps> = ({
                   <Clock className="w-3.5 h-3.5 text-emerald-400" />
                   <span>{settings.openingHours || 'Mon - Sat: 08:00 AM - 08:00 PM'}</span>
                 </div>
-                <button
-                  onClick={onOpenLogin}
-                  className="px-3 py-1 rounded-md bg-emerald-600 hover:bg-emerald-500 text-white font-bold transition-all shadow-xs flex items-center space-x-1 cursor-pointer"
-                >
-                  <LogIn className="w-3.5 h-3.5" />
-                  <span>Staff / Member Login</span>
-                </button>
+                <div className="flex items-center space-x-2">
+                  <button
+                    onClick={() => onOpenLogin('STAFF')}
+                    className="px-2.5 py-1 rounded-md bg-emerald-800/90 hover:bg-emerald-700 text-white font-bold transition-all shadow-xs flex items-center space-x-1 cursor-pointer border border-emerald-500/40 text-[11px]"
+                    title="Open Dedicated Librarian & Staff Management Portal"
+                  >
+                    <ShieldCheck className="w-3.5 h-3.5 text-emerald-300" />
+                    <span>Librarian Portal</span>
+                  </button>
+                  <button
+                    onClick={() => onOpenLogin('MEMBER')}
+                    className="px-2.5 py-1 rounded-md bg-emerald-600 hover:bg-emerald-500 text-white font-bold transition-all shadow-xs flex items-center space-x-1 cursor-pointer text-[11px]"
+                    title="Open Student & Faculty Member Portal"
+                  >
+                    <GraduationCap className="w-3.5 h-3.5 text-white" />
+                    <span>Member Login</span>
+                  </button>
+                </div>
               </>
             )}
           </div>
@@ -404,14 +415,27 @@ export const PublicOpacPage: React.FC<PublicOpacPageProps> = ({
                 <span className="sm:hidden">Dashboard</span>
               </button>
             ) : (
-              <button
-                id="btn-public-login"
-                onClick={onOpenLogin}
-                className="px-3 sm:px-4 py-2 rounded-xl bg-[#095733] hover:bg-[#074729] text-white font-bold text-xs transition-all shadow-md active:scale-95 flex items-center space-x-1.5 cursor-pointer"
-              >
-                <LogIn className="w-3.5 h-3.5" />
-                <span>Login</span>
-              </button>
+              <div className="flex items-center space-x-2">
+                <button
+                  id="btn-public-staff-login"
+                  onClick={() => onOpenLogin('STAFF')}
+                  className="px-2.5 sm:px-3 py-1.5 rounded-xl border border-emerald-700/60 bg-emerald-50 hover:bg-emerald-100/80 text-emerald-900 font-bold text-xs transition-all shadow-2xs active:scale-95 flex items-center space-x-1.5 cursor-pointer"
+                  title="Staff Portal (Librarian & Admin Login)"
+                >
+                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-700" />
+                  <span className="hidden md:inline">Staff Portal</span>
+                  <span className="md:hidden">Staff</span>
+                </button>
+                <button
+                  id="btn-public-member-login"
+                  onClick={() => onOpenLogin('MEMBER')}
+                  className="px-3 sm:px-4 py-1.5 rounded-xl bg-[#095733] hover:bg-[#074729] text-white font-bold text-xs transition-all shadow-md active:scale-95 flex items-center space-x-1.5 cursor-pointer"
+                  title="Library Member Login (Students & Faculty)"
+                >
+                  <GraduationCap className="w-3.5 h-3.5" />
+                  <span>Member Login</span>
+                </button>
+              </div>
             )}
 
             {/* Mobile Nav Button */}
@@ -963,7 +987,7 @@ export const PublicOpacPage: React.FC<PublicOpacPageProps> = ({
                     View All Branches & Hours
                   </button>
                   <button
-                    onClick={onOpenLogin}
+                    onClick={() => onOpenLogin('STAFF')}
                     className="px-4 py-2 rounded-xl bg-[#095733] hover:bg-[#074729] text-white text-xs font-bold transition-all shadow-xs cursor-pointer flex items-center space-x-1.5"
                   >
                     <LogIn className="w-3.5 h-3.5" />
@@ -1261,7 +1285,7 @@ export const PublicOpacPage: React.FC<PublicOpacPageProps> = ({
 
                       <button
                         type="button"
-                        onClick={onOpenLogin}
+                        onClick={() => onOpenLogin('MEMBER')}
                         title="Login to place hold or borrow"
                         className="py-2 px-3 rounded-xl bg-[#095733] hover:bg-[#074729] text-white text-xs font-bold transition-all shadow-xs cursor-pointer flex items-center justify-center space-x-1"
                       >
@@ -1332,7 +1356,7 @@ export const PublicOpacPage: React.FC<PublicOpacPageProps> = ({
                               Details
                             </button>
                             <button
-                              onClick={onOpenLogin}
+                              onClick={() => onOpenLogin('MEMBER')}
                               className="px-2.5 py-1 rounded-lg bg-[#095733] text-white text-[11px] font-bold cursor-pointer"
                             >
                               Request
@@ -2003,7 +2027,7 @@ export const PublicOpacPage: React.FC<PublicOpacPageProps> = ({
                     Designed for academic librarians, researchers, and students to simplify cataloguing, circulation, and OPAC discovery.
                   </p>
                   <button
-                    onClick={onOpenLogin}
+                    onClick={() => onOpenLogin('STAFF')}
                     className="w-full py-2.5 rounded-xl bg-white hover:bg-emerald-50 text-[#095733] font-bold text-xs transition-all cursor-pointer shadow-sm"
                   >
                     Access Staff Portal
@@ -2598,7 +2622,7 @@ export const PublicOpacPage: React.FC<PublicOpacPageProps> = ({
                   type="button"
                   onClick={() => {
                     setSelectedBook(null);
-                    onOpenLogin();
+                    onOpenLogin('MEMBER');
                   }}
                   className="px-4 py-2 rounded-xl bg-[#095733] hover:bg-[#074729] text-white font-bold text-xs shadow-xs cursor-pointer flex items-center space-x-1.5"
                 >
@@ -2689,15 +2713,24 @@ export const PublicOpacPage: React.FC<PublicOpacPageProps> = ({
               <p className="text-[11px] text-zinc-400">
                 Authorized librarians, cataloguers, circulation officers, and academic members:
               </p>
-              <button
-                onClick={onOpenLogin}
-                className="w-full py-2.5 px-4 rounded-xl bg-emerald-700 hover:bg-emerald-600 text-white font-bold text-xs transition-all shadow-md cursor-pointer flex items-center justify-center space-x-1.5"
-              >
-                <LogIn className="w-3.5 h-3.5" />
-                <span>Staff & Member Portal Login</span>
-              </button>
+              <div className="space-y-2">
+                <button
+                  onClick={() => onOpenLogin('STAFF')}
+                  className="w-full py-2 px-3 rounded-xl bg-emerald-700 hover:bg-emerald-600 text-white font-bold text-xs transition-all shadow-md cursor-pointer flex items-center justify-center space-x-1.5"
+                >
+                  <ShieldCheck className="w-3.5 h-3.5" />
+                  <span>Librarian & Staff Portal</span>
+                </button>
+                <button
+                  onClick={() => onOpenLogin('MEMBER')}
+                  className="w-full py-2 px-3 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-200 font-bold text-xs transition-all border border-zinc-700 cursor-pointer flex items-center justify-center space-x-1.5"
+                >
+                  <GraduationCap className="w-3.5 h-3.5" />
+                  <span>Student & Member Login</span>
+                </button>
+              </div>
               <p className="text-[10px] text-zinc-500 text-center">
-                Supports Google Account & Username+Password
+                Authorized Staff ID & Student Member Credentials
               </p>
             </div>
 

@@ -46,11 +46,11 @@ export const AdminConfigModal: React.FC<AdminConfigModalProps> = ({
         {/* Header */}
         <div className="p-4 bg-[#18181b] border-b border-[#27272a] flex items-center justify-between">
           <div className="flex items-center space-x-2">
-            <div className="w-8 h-8 rounded-lg bg-purple-600/20 border border-purple-500/30 flex items-center justify-center">
-              <Settings className="h-4 w-4 text-purple-400" />
+            <div className="w-8 h-8 rounded-lg bg-blue-600/20 border border-blue-500/30 flex items-center justify-center">
+              <Settings className="h-4 w-4 text-blue-400" />
             </div>
             <div>
-              <h3 className="text-sm font-bold text-[#fafafa]">PLiMS AI Assistant Administrator Desk</h3>
+              <h3 className="text-sm font-bold text-[#fafafa]">Library Assistant Configuration Desk</h3>
               <p className="text-[11px] text-[#a1a1aa]">Librarian Copilot & Knowledge Engine Controls</p>
             </div>
           </div>

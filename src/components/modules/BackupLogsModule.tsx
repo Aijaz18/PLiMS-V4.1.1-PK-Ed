@@ -22,7 +22,7 @@ interface AuditActivityLog {
   timestamp: string;
   user: string;
   role: string;
-  action: 'LOGIN' | 'LOGOUT' | 'ISSUE_BOOK' | 'RETURN_BOOK' | 'ADD_MARC' | 'ROLE_CHANGE' | 'SETTINGS_UPDATE' | 'BACKUP_CREATED' | 'SYSTEM_RESTORE' | 'GOOGLE_AUTH_SUCCESS' | 'GOOGLE_ACCOUNT_LINKED';
+  action: 'LOGIN' | 'LOGOUT' | 'ISSUE_BOOK' | 'RETURN_BOOK' | 'ADD_MARC' | 'ROLE_CHANGE' | 'SETTINGS_UPDATE' | 'BACKUP_CREATED' | 'SYSTEM_RESTORE';
   details: string;
   ipAddress: string;
 }
@@ -280,8 +280,6 @@ export const BackupLogsModule: React.FC<BackupLogsModuleProps> = ({
             >
               <option value="ALL">All Actions</option>
               <option value="LOGIN">Logins / Logouts</option>
-              <option value="GOOGLE_AUTH_SUCCESS">Google OAuth Authentications</option>
-              <option value="GOOGLE_ACCOUNT_LINKED">Google Account Linked</option>
               <option value="ISSUE_BOOK">Book Issues</option>
               <option value="ADD_MARC">MARC Record Additions</option>
               <option value="ROLE_CHANGE">Super Admin Rights Changes</option>
@@ -308,11 +306,7 @@ export const BackupLogsModule: React.FC<BackupLogsModuleProps> = ({
                     <td className="p-3.5 font-bold text-slate-900">{l.user}</td>
                     <td className="p-3.5 font-mono text-amber-400 text-[11px]">{l.role}</td>
                     <td className="p-3.5">
-                      <span className={`px-2 py-0.5 rounded text-[10px] font-mono font-semibold border ${
-                        l.action.startsWith('GOOGLE')
-                          ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-400'
-                          : 'bg-blue-500/10 border-blue-500/30 text-blue-400'
-                      }`}>
+                      <span className="px-2 py-0.5 rounded text-[10px] font-mono font-semibold border bg-blue-500/10 border-blue-500/30 text-blue-500">
                         {l.action}
                       </span>
                     </td>

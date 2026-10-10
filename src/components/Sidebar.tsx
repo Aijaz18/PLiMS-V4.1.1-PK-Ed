@@ -76,112 +76,142 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const selected = activeTab || currentTab || 'DASHBOARD';
   const theme = getThemeConfig(currentTheme);
 
-  const sections: NavSectionDef[] = [
-    {
-      items: [
+  const isPatronRole = ['STUDENT', 'FACULTY', 'RESEARCH_SCHOLAR', 'GUEST'].includes(userRole);
+
+  const sections: NavSectionDef[] = isPatronRole
+    ? [
         {
-          id: 'DASHBOARD',
-          label: 'Dashboard',
-          icon: LayoutDashboard
+          title: 'MY LIBRARY SERVICES',
+          items: [
+            {
+              id: 'MY_LIBRARY',
+              label: 'My Account & Borrowings',
+              icon: BookMarked
+            },
+            {
+              id: 'OPAC',
+              label: 'OPAC / Online Catalog',
+              icon: Search
+            },
+            {
+              id: 'DIGITAL_LIBRARY',
+              label: 'Digital Library & Papers',
+              icon: BookOpen
+            }
+          ]
         },
         {
-          id: 'OPAC',
-          label: 'OPAC / Online Catalog',
-          icon: Search
-        },
-        {
-          id: 'CIRCULATION',
-          label: 'Circulation & Fines',
-          icon: Repeat
-        },
-        {
-          id: 'CATALOGUING',
-          label: 'Catalogue (MARC21/RDA)',
-          icon: FileCode
-        },
-        {
-          id: 'AUTHORITY',
-          label: 'Authority Control (LCSH)',
-          icon: ShieldCheck
-        },
-        {
-          id: 'MEMBERS',
-          label: 'User & Member Control',
-          icon: Users
+          title: 'INFORMATION & SUPPORT',
+          items: [
+            {
+              id: 'HELP_DOCS',
+              label: 'Library Rules & Guide',
+              icon: HelpCircle
+            }
+          ]
         }
       ]
-    },
-    {
-      title: 'COLLECTIONS & DIGITAL',
-      items: [
+    : [
         {
-          id: 'DIGITAL_LIBRARY',
-          label: 'Digital & Thesis Repository',
-          icon: BookOpen
+          items: [
+            {
+              id: 'DASHBOARD',
+              label: 'Dashboard',
+              icon: LayoutDashboard
+            },
+            {
+              id: 'OPAC',
+              label: 'OPAC / Online Catalog',
+              icon: Search
+            },
+            {
+              id: 'CIRCULATION',
+              label: 'Circulation & Fines',
+              icon: Repeat
+            },
+            {
+              id: 'CATALOGUING',
+              label: 'Catalogue (MARC21/RDA)',
+              icon: FileCode
+            },
+            {
+              id: 'AUTHORITY',
+              label: 'Authority Control (LCSH)',
+              icon: ShieldCheck
+            },
+            {
+              id: 'MEMBERS',
+              label: 'User & Member Control',
+              icon: Users
+            }
+          ]
         },
         {
-          id: 'ACQUISITIONS',
-          label: 'Acquisition & Vendors',
-          icon: ShoppingCart
+          title: 'COLLECTIONS & DIGITAL',
+          items: [
+            {
+              id: 'DIGITAL_LIBRARY',
+              label: 'Digital & Thesis Repository',
+              icon: BookOpen
+            },
+            {
+              id: 'ACQUISITIONS',
+              label: 'Acquisition & Vendors',
+              icon: ShoppingCart
+            },
+            {
+              id: 'SERIALS',
+              label: 'Serials & Periodicals',
+              icon: Newspaper
+            }
+          ]
         },
         {
-          id: 'SERIALS',
-          label: 'Serials & Periodicals',
-          icon: Newspaper
+          title: 'TOOLS & ANALYTICS',
+          items: [
+            {
+              id: 'INVENTORY',
+              label: 'Stock Verification',
+              icon: FolderKanban
+            },
+            {
+              id: 'BARCODES',
+              label: 'Barcode & RFID Labels',
+              icon: QrCode
+            },
+            {
+              id: 'REPORTS',
+              label: 'Reports & Analytics',
+              icon: BarChart3
+            },
+            {
+              id: 'IMPORT_EXPORT',
+              label: 'Import / Export & Migration',
+              icon: Database
+            },
+            {
+              id: 'BACKUP_LOGS',
+              label: 'Backup & Security Logs',
+              icon: HardDrive
+            }
+          ]
+        },
+        {
+          title: 'SYSTEM & SETTINGS',
+          items: [
+            {
+              id: 'SETTINGS',
+              label: 'Settings & Profile',
+              icon: Settings
+            },
+            {
+              id: 'HELP_DOCS',
+              label: 'Architecture Specs & Manual',
+              icon: HelpCircle
+            }
+          ]
         }
-      ]
-    },
-    {
-      title: 'TOOLS & ANALYTICS',
-      items: [
-        {
-          id: 'INVENTORY',
-          label: 'Stock Verification',
-          icon: FolderKanban
-        },
-        {
-          id: 'BARCODES',
-          label: 'Barcode & RFID Labels',
-          icon: QrCode
-        },
-        {
-          id: 'REPORTS',
-          label: 'Reports & Analytics',
-          icon: BarChart3
-        },
-        {
-          id: 'IMPORT_EXPORT',
-          label: 'Import / Export & Migration',
-          icon: Database
-        },
-        {
-          id: 'BACKUP_LOGS',
-          label: 'Backup & Security Logs',
-          icon: HardDrive
-        }
-      ]
-    },
-    {
-      title: 'AI & SYSTEM',
-      items: [
-        {
-          id: 'AI_ASSISTANT',
-          label: 'Gemini Library Copilot',
-          icon: Sparkles
-        },
-        {
-          id: 'SETTINGS',
-          label: 'Settings & Profile',
-          icon: Settings
-        },
-        {
-          id: 'HELP_DOCS',
-          label: 'Architecture Specs & Manual',
-          icon: HelpCircle
-        }
-      ]
-    }
-  ];
+      ];
 
   return (
     <aside className={`w-64 ${theme.sidebarGradient} text-slate-300 flex flex-col justify-between shrink-0 h-full border-r ${theme.sidebarBorder} select-none z-30 transition-colors duration-300`}>

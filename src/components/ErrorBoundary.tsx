@@ -18,6 +18,10 @@ export class ErrorBoundary extends Component<Props, State> {
   };
 
   public static getDerivedStateFromError(error: Error): State {
+    // If a Promise was thrown (component suspension), rethrow so Suspense boundary handles it
+    if (error && typeof (error as any).then === 'function') {
+      throw error;
+    }
     return { hasError: true, error };
   }
 

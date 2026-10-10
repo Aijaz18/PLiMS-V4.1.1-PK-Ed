@@ -17,7 +17,10 @@ import {
   ShieldCheck,
   User,
   ExternalLink,
-  Palette
+  Palette,
+  MessageSquare,
+  Bot,
+  Sparkles
 } from 'lucide-react';
 import { UserProfile, AppTheme, SystemSettings } from '../types/alims';
 import { AppLanguage, LANGUAGES } from '../utils/i18n';
@@ -46,6 +49,8 @@ interface HeaderProps {
   onOpenAddBranchModal?: () => void;
   onUpdateUser?: (id: string, updated: Partial<UserProfile>) => void;
   onNavigateTab?: (tab: any) => void;
+  onOpenLibrarianBot?: () => void;
+  onOpenWhatsAppWebAgent?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -63,7 +68,9 @@ export const Header: React.FC<HeaderProps> = ({
   onLogout,
   onOpenAddBranchModal,
   onUpdateUser,
-  onNavigateTab
+  onNavigateTab,
+  onOpenLibrarianBot,
+  onOpenWhatsAppWebAgent
 }) => {
   const [showBranchDropdown, setShowBranchDropdown] = useState(false);
   const [showStaffDropdown, setShowStaffDropdown] = useState(false);
@@ -79,6 +86,10 @@ export const Header: React.FC<HeaderProps> = ({
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
 
   const activeThemeDef = getThemeConfig(currentTheme);
+
+  const isStaff = currentUser
+    ? ['CHIEF_LIBRARIAN', 'LIBRARIAN', 'ASSISTANT_LIBRARIAN', 'CATALOGER', 'CIRCULATION_STAFF', 'SYSTEM_ADMIN'].includes(currentUser.role)
+    : false;
 
   const branchRef = useRef<HTMLDivElement>(null);
   const staffRef = useRef<HTMLDivElement>(null);
@@ -141,7 +152,7 @@ export const Header: React.FC<HeaderProps> = ({
     },
     {
       id: 3,
-      title: 'Z39.50 Telemetry Synced',
+      title: 'Z39.50 Union Gateway',
       msg: 'HEC central union database records refreshed.',
       time: '1h ago',
       type: 'info'
@@ -240,6 +251,20 @@ export const Header: React.FC<HeaderProps> = ({
           <span className="text-[11px]">Public OPAC</span>
         </button>
 
+        {/* PLiMS AI Librarian Bot Button */}
+        {(onOpenLibrarianBot || onOpenWhatsAppWebAgent) && (
+          <button
+            type="button"
+            onClick={onOpenLibrarianBot || onOpenWhatsAppWebAgent}
+            className="flex items-center space-x-1.5 px-3 py-1.5 rounded-xl border border-emerald-300/80 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 text-xs font-bold transition-all cursor-pointer shadow-2xs hover:scale-102 active:scale-98"
+            title="Open PLiMS AI Librarian Bot (24/7 Loans, Renewals, OPAC & Reference Services)"
+          >
+            <Bot className="h-4 w-4 text-emerald-700" />
+            <span className="text-[11px] hidden sm:inline">Librarian Bot</span>
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+          </button>
+        )}
+
         {/* Branch Selector Pill */}
         <div className="relative" ref={branchRef}>
           <button
@@ -291,54 +316,56 @@ export const Header: React.FC<HeaderProps> = ({
           )}
         </div>
 
-        {/* Branch / Staff Pill */}
-        <div className="relative hidden xl:block" ref={staffRef}>
-          <button
-            onClick={() => setShowStaffDropdown(!showStaffDropdown)}
-            className="flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-[#f1f5f9] hover:bg-slate-200/70 border border-slate-200 text-xs font-semibold text-slate-700 transition-colors cursor-pointer"
-          >
-            <Users className="h-3.5 w-3.5 text-purple-600 shrink-0" />
-            <span className="text-[11px]">Branch / Staff</span>
-            <ChevronDown className="h-3 w-3 text-slate-400 shrink-0" />
-          </button>
+        {/* Branch / Staff Pill (Only for authorized library staff) */}
+        {isStaff && (
+          <div className="relative hidden xl:block" ref={staffRef}>
+            <button
+              onClick={() => setShowStaffDropdown(!showStaffDropdown)}
+              className="flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-[#f1f5f9] hover:bg-slate-200/70 border border-slate-200 text-xs font-semibold text-slate-700 transition-colors cursor-pointer"
+            >
+              <Users className="h-3.5 w-3.5 text-purple-600 shrink-0" />
+              <span className="text-[11px]">Branch / Staff</span>
+              <ChevronDown className="h-3 w-3 text-slate-400 shrink-0" />
+            </button>
 
-          {showStaffDropdown && (
-            <div className="absolute right-0 mt-1.5 w-56 rounded-2xl bg-white border border-slate-200 shadow-xl p-2 z-50 animate-in fade-in slide-in-from-top-1 duration-150 text-xs">
-              <div className="px-2 py-1 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                Staff Desk Actions
-              </div>
-              <button
-                onClick={() => {
-                  setShowStaffDropdown(false);
-                  onNavigateTab && onNavigateTab('CIRCULATION');
-                }}
-                className="w-full text-left px-2.5 py-1.5 rounded-lg text-slate-700 hover:bg-slate-50 transition-colors cursor-pointer"
-              >
-                Circulation Desk
-              </button>
-              <button
-                onClick={() => {
-                  setShowStaffDropdown(false);
-                  onNavigateTab && onNavigateTab('MEMBERS');
-                }}
-                className="w-full text-left px-2.5 py-1.5 rounded-lg text-slate-700 hover:bg-slate-50 transition-colors cursor-pointer"
-              >
-                Manage Staff & Patrons
-              </button>
-              {onOpenAddBranchModal && (
+            {showStaffDropdown && (
+              <div className="absolute right-0 mt-1.5 w-56 rounded-2xl bg-white border border-slate-200 shadow-xl p-2 z-50 animate-in fade-in slide-in-from-top-1 duration-150 text-xs">
+                <div className="px-2 py-1 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                  Staff Desk Actions
+                </div>
                 <button
                   onClick={() => {
                     setShowStaffDropdown(false);
-                    onOpenAddBranchModal();
+                    onNavigateTab && onNavigateTab('CIRCULATION');
                   }}
-                  className="w-full text-left px-2.5 py-1.5 rounded-lg text-blue-600 hover:bg-blue-50 font-semibold transition-colors cursor-pointer"
+                  className="w-full text-left px-2.5 py-1.5 rounded-lg text-slate-700 hover:bg-slate-50 transition-colors cursor-pointer"
                 >
-                  + Add Staff / Branch
+                  Circulation Desk
                 </button>
-              )}
-            </div>
-          )}
-        </div>
+                <button
+                  onClick={() => {
+                    setShowStaffDropdown(false);
+                    onNavigateTab && onNavigateTab('MEMBERS');
+                  }}
+                  className="w-full text-left px-2.5 py-1.5 rounded-lg text-slate-700 hover:bg-slate-50 transition-colors cursor-pointer"
+                >
+                  Manage Staff & Patrons
+                </button>
+                {onOpenAddBranchModal && (
+                  <button
+                    onClick={() => {
+                      setShowStaffDropdown(false);
+                      onOpenAddBranchModal();
+                    }}
+                    className="w-full text-left px-2.5 py-1.5 rounded-lg text-blue-600 hover:bg-blue-50 font-semibold transition-colors cursor-pointer"
+                  >
+                    + Add Staff / Branch
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Language Pill */}
         <div className="relative hidden sm:block" ref={langRef}>
@@ -411,7 +438,7 @@ export const Header: React.FC<HeaderProps> = ({
               if (unreadCount > 0) setUnreadCount(0);
             }}
             className="w-8 h-8 rounded-full bg-[#f1f5f9] hover:bg-slate-200/70 border border-slate-200 text-slate-600 flex items-center justify-center transition-colors cursor-pointer relative shrink-0"
-            title="System Telemetry Notifications"
+            title="Notifications"
           >
             <Bell className="h-4 w-4" />
             {unreadCount > 0 && (
@@ -426,11 +453,8 @@ export const Header: React.FC<HeaderProps> = ({
               <div className="flex items-center justify-between border-b border-slate-100 pb-2">
                 <div className="font-bold text-xs text-slate-800 flex items-center space-x-2">
                   <Bell className="h-4 w-4 text-blue-600" />
-                  <span>PLiMS Live Telemetry</span>
+                  <span>Library Notifications</span>
                 </div>
-                <span className="text-[10px] text-emerald-600 font-mono bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200 font-semibold">
-                  System Online
-                </span>
               </div>
               <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
                 {notifications.map((n) => (
@@ -472,10 +496,10 @@ export const Header: React.FC<HeaderProps> = ({
 
             <div className="hidden lg:block leading-tight">
               <div className="font-bold text-xs text-slate-800 truncate max-w-[130px]">
-                Hi, {currentUser.name || 'Aijaz Akhter'}
+                Hi, {currentUser.name || 'User'}
               </div>
               <div className="text-[10px] text-slate-500 font-medium truncate max-w-[130px]">
-                {currentUser.designation || 'Librarian (Admin)'}
+                {currentUser.designation || currentUser.role?.replace(/_/g, ' ') || 'Authorized User'}
               </div>
             </div>
 
@@ -486,9 +510,9 @@ export const Header: React.FC<HeaderProps> = ({
             <div className="absolute right-0 mt-1.5 w-56 rounded-2xl bg-white border border-slate-200 shadow-2xl p-2 z-50 animate-in fade-in slide-in-from-top-1 duration-150 text-xs">
               <div className="px-3 py-2 border-b border-slate-100 mb-1">
                 <div className="font-bold text-slate-800">{currentUser.name}</div>
-                <div className="text-[11px] text-slate-500">{currentUser.email || 'ahmedaniaijazakhter@gmail.com'}</div>
+                <div className="text-[11px] text-slate-500">{currentUser.email || currentUser.memberCode || currentUser.id}</div>
                 <span className="inline-block mt-1 text-[10px] font-mono font-bold bg-blue-50 text-blue-700 px-2 py-0.5 rounded-md">
-                  {currentUser.role || 'CHIEF_LIBRARIAN'}
+                  {currentUser.role?.replace(/_/g, ' ')}
                 </span>
               </div>
 

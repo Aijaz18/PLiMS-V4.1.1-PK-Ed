@@ -29,12 +29,16 @@ import {
   Cloud,
   Check,
   ArrowLeft,
-  X
+  X,
+  MessageSquare,
+  QrCode,
+  Bot,
+  RotateCw
 } from 'lucide-react';
 import { UserProfile, UserRole, BookRecord } from '../types/alims';
 import { MemberPhotoUploader } from './MemberPhotoUploader';
-import { DigitalLibrarianChatbot } from './DigitalLibrarianChatbot';
 import { LicenseModal } from './LicenseModal';
+import { WhatsAppWebLoginCard } from './WhatsAppWeb/WhatsAppWebLoginCard';
 import {
   MainPageBgConfig,
   loadSavedBgConfig,
@@ -42,13 +46,12 @@ import {
 } from './MainThemeBgSelector';
 import pslimsLogo from '../assets/images/plims_emblem_logo_1788759356534.jpg';
 import { PakistanFlyingFlag } from './PakistanFlyingFlag';
-import { GoogleLoginButton } from './GoogleLoginButton';
-import { processGoogleUserAuth, GoogleOAuthPayload } from '../services/googleAuth';
 
 interface LoginPageProps {
   users: UserProfile[];
   branches: string[];
   books?: BookRecord[];
+  initialPortal?: 'STAFF' | 'MEMBER';
   onLoginSuccess: (user: UserProfile, branch: string, auditAction?: any) => void;
   onRegisterUser: (newUser: UserProfile, branch: string) => void;
   onUpdateUser?: (id: string, updated: Partial<UserProfile>) => void;
@@ -59,16 +62,33 @@ export const LoginPage: React.FC<LoginPageProps> = ({
   users,
   branches,
   books = [],
+  initialPortal = 'STAFF',
   onLoginSuccess,
   onRegisterUser,
   onUpdateUser,
   onBackToOpac,
 }) => {
   // Authentication View Modes:
-  // 'PORTAL': The primary landing portal (Continue with Google / Username + Password Login)
+  // 'PORTAL': The primary landing portal (Username + Password Login)
   // 'REGISTER': Academic membership registration workflow
   // 'OPAC': Public catalog and MARC21 book search
   const [authMode, setAuthMode] = useState<'PORTAL' | 'REGISTER' | 'OPAC'>('PORTAL');
+
+  // Dedicated Portal Type: 'STAFF' (Librarian & Staff), 'MEMBER' (Student & Faculty), 'LIBRARIAN_BOT' (AI Librarian Bot)
+  const [portalType, setPortalType] = useState<'STAFF' | 'MEMBER' | 'LIBRARIAN_BOT'>(() => {
+    if (initialPortal === 'MEMBER') return 'MEMBER';
+    return 'STAFF';
+  });
+
+  const studentUser = users.find(u => u.role === 'STUDENT') || users[0];
+  const facultyUser = users.find(u => u.role === 'FACULTY' || u.role === 'RESEARCH_SCHOLAR') || users[1] || users[0];
+  const staffUser = users.find(u => ['SUPER_ADMIN', 'CHIEF_LIBRARIAN', 'LIBRARIAN'].includes(u.role)) || users[0];
+
+  useEffect(() => {
+    if (initialPortal) {
+      setPortalType(initialPortal as any);
+    }
+  }, [initialPortal]);
 
   // Selected Branch (Default: Central Academic Library)
   const [selectedBranch, setSelectedBranch] = useState<string>(() => branches[0] || 'Central Academic Library');
@@ -157,7 +177,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
     // Check for existing account by email
     const existingUser = users.find(u => u.email && u.email.trim().toLowerCase() === email);
     if (existingUser) {
-      setErrorMessage(`An account with email '${email}' already exists. Please sign in or use 'Continue with Google'.`);
+      setErrorMessage(`An account with email '${email}' already exists. Please sign in with your Username/ID and Password.`);
       return;
     }
 
@@ -219,44 +239,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
   };
 
   /**
-   * Google OAuth Callback Handler
-   * Uses real OpenID Connect payload to link or log in user.
-   */
-  const handleGoogleSuccess = (payload: GoogleOAuthPayload) => {
-    setErrorMessage(null);
-    setSuccessMessage('Verifying Google credentials with PLiMS directory...');
-
-    try {
-      const result = processGoogleUserAuth(payload, users, selectedBranch);
-
-      if (result.isNewUser) {
-        setSuccessMessage(`Welcome to PLiMS, ${result.user.name}! Your verified Google account is now active.`);
-        setTimeout(() => {
-          onRegisterUser(result.user, selectedBranch);
-        }, 250);
-      } else {
-        if (result.isLinked && onUpdateUser) {
-          onUpdateUser(result.user.id, {
-            authProvider: 'GOOGLE',
-            googleSub: result.user.googleSub,
-            googleEmailVerified: result.user.googleEmailVerified,
-            googleAccountLinkedAt: result.user.googleAccountLinkedAt,
-            avatarUrl: result.user.avatarUrl || payload.picture,
-          });
-        }
-        setSuccessMessage(`Welcome back, ${result.user.name}! Accessing library services...`);
-        setTimeout(() => {
-          onLoginSuccess(result.user, selectedBranch, result.auditAction);
-        }, 250);
-      }
-    } catch (err: any) {
-      console.error('Error in Google authentication:', err);
-      setErrorMessage(err.message || 'Failed to authenticate with Google. Please try again.');
-    }
-  };
-
-  /**
-   * LOGIN METHOD 2: USERNAME + PASSWORD LOGIN
+   * USERNAME + PASSWORD LOGIN
    * Authenticates user using their Username, Email, or Member Code against the existing PLiMS user directory.
    * Loads real role, designation, and permissions, then opens the Authenticated PLiMS Home/Dashboard.
    */
@@ -269,7 +252,11 @@ export const LoginPage: React.FC<LoginPageProps> = ({
     const inputPass = loginPassword;
 
     if (!inputId) {
-      setErrorMessage('Please enter your Username, Member Code, or Email address.');
+      setErrorMessage(
+        portalType === 'STAFF'
+          ? 'Please enter your Staff Username, Member ID, or Email address.'
+          : 'Please enter your Student ID, Member Code, or Email address.'
+      );
       return;
     }
 
@@ -283,15 +270,40 @@ export const LoginPage: React.FC<LoginPageProps> = ({
     const normalizedInput = inputId.toLowerCase();
     const matchedUser = users.find(u => {
       const emailMatch = u.email && u.email.trim().toLowerCase() === normalizedInput;
+      const secondaryEmailMatch = (u as any).secondaryEmail && (u as any).secondaryEmail.trim().toLowerCase() === normalizedInput;
       const codeMatch = u.memberCode && u.memberCode.trim().toLowerCase() === normalizedInput;
       const idMatch = u.id && u.id.trim().toLowerCase() === normalizedInput;
       const nameMatch = u.name && u.name.trim().toLowerCase() === normalizedInput;
-      return emailMatch || codeMatch || idMatch || nameMatch;
+      return emailMatch || secondaryEmailMatch || codeMatch || idMatch || nameMatch;
     });
 
     if (!matchedUser) {
       setIsSubmitting(false);
-      setErrorMessage(`No account found matching '${inputId}'. Please check your credentials or click 'Create New Account'.`);
+      setErrorMessage(
+        portalType === 'STAFF'
+          ? `No staff account found matching '${inputId}'. Please verify your staff credentials or contact the Chief Librarian.`
+          : `No member account found matching '${inputId}'. Please check your credentials or click 'Create New Account'.`
+      );
+      return;
+    }
+
+    // Role-based portal validation
+    const isStaffRole = [
+      'SUPER_ADMIN',
+      'SYSTEM_ADMIN',
+      'PRINCIPAL',
+      'CHIEF_LIBRARIAN',
+      'LIBRARIAN',
+      'ASSISTANT_LIBRARIAN',
+      'ACCOUNTS_OFFICER'
+    ].includes(matchedUser.role);
+
+    // If attempting to login via Librarian / Staff portal with a member role:
+    if (portalType === 'STAFF' && !isStaffRole) {
+      setIsSubmitting(false);
+      setErrorMessage(
+        `Access Notice: '${matchedUser.name}' is registered as a library patron (${matchedUser.role}), not a library staff member. Please sign in through the Student & Faculty / Member Portal.`
+      );
       return;
     }
 
@@ -321,7 +333,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
       setIsSubmitting(false);
       onLoginSuccess(matchedUser, selectedBranch, {
         action: 'USERNAME_PASSWORD_LOGIN',
-        details: `Authenticated via Username/Password as ${matchedUser.role} (${matchedUser.memberCode})`,
+        details: `Authenticated via Username/Password as ${matchedUser.role} (${matchedUser.memberCode}) in ${portalType} portal`,
         timestamp: new Date().toISOString()
       });
     }, 350);
@@ -358,7 +370,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
 
     setForgotFeedback({
       type: 'success',
-      message: `Account located: ${matched.name} (${matched.memberCode}, Role: ${matched.role}). Since credentials are institutionally governed, please log in using linked "Continue with Google", or contact Chief Librarian at central.library@pslims.edu.pk / +92 51 92654321 for a temporary security reset token.`
+      message: `Account located: ${matched.name} (${matched.memberCode}, Role: ${matched.role}). Since credentials are institutionally governed, please contact the Chief Librarian at central.library@pslims.edu.pk / +92 51 92654321 for a temporary security reset token or use your registered password.`
     });
   };
 
@@ -587,56 +599,200 @@ export const LoginPage: React.FC<LoginPageProps> = ({
             </div>
 
             {/* RIGHT COLUMN: Clean White Portal Card with Dual Authentication Methods */}
-            <div className="md:col-span-6 bg-white p-6 sm:p-8 flex flex-col justify-between items-center text-center">
+            <div className={`md:col-span-6 bg-white flex flex-col justify-between items-center text-center transition-all ${portalType === 'LIBRARIAN_BOT' ? 'p-4 sm:p-6' : 'p-6 sm:p-8'}`}>
               
-              <div className="w-full max-w-sm mx-auto my-auto space-y-4">
+              <div className={`w-full ${portalType === 'LIBRARIAN_BOT' ? 'max-w-md' : 'max-w-sm'} mx-auto my-auto space-y-4`}>
+
+                {/* DEDICATED PORTAL TYPE SELECTOR TABS */}
+                <div className="grid grid-cols-3 p-1 bg-zinc-100 rounded-2xl w-full border border-zinc-200 shadow-2xs">
+                  <button
+                    id="tab-librarian-portal"
+                    type="button"
+                    onClick={() => {
+                      setPortalType('STAFF');
+                      setErrorMessage(null);
+                      setSuccessMessage(null);
+                    }}
+                    className={`py-2 px-1.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center space-x-1 cursor-pointer ${
+                      portalType === 'STAFF'
+                        ? 'bg-[#095733] text-white shadow-xs'
+                        : 'text-zinc-600 hover:text-zinc-900 hover:bg-zinc-200/60'
+                    }`}
+                  >
+                    <ShieldCheck className="w-3.5 h-3.5 shrink-0" />
+                    <span className="truncate">Staff</span>
+                  </button>
+
+                  <button
+                    id="tab-member-portal"
+                    type="button"
+                    onClick={() => {
+                      setPortalType('MEMBER');
+                      setErrorMessage(null);
+                      setSuccessMessage(null);
+                    }}
+                    className={`py-2 px-1.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center space-x-1 cursor-pointer ${
+                      portalType === 'MEMBER'
+                        ? 'bg-[#095733] text-white shadow-xs'
+                        : 'text-zinc-600 hover:text-zinc-900 hover:bg-zinc-200/60'
+                    }`}
+                  >
+                    <GraduationCap className="w-3.5 h-3.5 shrink-0" />
+                    <span className="truncate">Member</span>
+                  </button>
+
+                  <button
+                    id="tab-librarian-bot-portal"
+                    type="button"
+                    onClick={() => {
+                      setPortalType('LIBRARIAN_BOT');
+                      setErrorMessage(null);
+                      setSuccessMessage(null);
+                    }}
+                    className={`py-2 px-1.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center space-x-1 cursor-pointer ${
+                      portalType === 'LIBRARIAN_BOT'
+                        ? 'bg-emerald-700 text-white shadow-xs'
+                        : 'text-emerald-800 hover:text-emerald-950 hover:bg-emerald-50'
+                    }`}
+                  >
+                    <Bot className="w-3.5 h-3.5 shrink-0" />
+                    <span className="truncate">Librarian Bot</span>
+                  </button>
+                </div>
                 
-                {/* Shield Check Circular Badge */}
-                <div className="w-12 h-12 rounded-full bg-emerald-50 border border-emerald-100 flex items-center justify-center mx-auto text-[#095733] shadow-xs">
-                  <ShieldCheck className="w-6 h-6 stroke-[2.2]" />
+                {portalType === 'LIBRARIAN_BOT' ? (
+                  <div className="w-full bg-slate-900 rounded-3xl border border-slate-700/80 shadow-2xl p-5 space-y-4 text-left text-slate-100 animate-in fade-in duration-200">
+                    <div className="flex items-center space-x-3 pb-3 border-b border-slate-800">
+                      <div className="w-11 h-11 rounded-2xl bg-emerald-600 text-white flex items-center justify-center font-bold shadow-md shrink-0">
+                        <Bot className="h-6 w-6" />
+                      </div>
+                      <div>
+                        <div className="flex items-center space-x-1.5">
+                          <h3 className="font-bold text-sm text-white">PLiMS AI Librarian Bot</h3>
+                          <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-[10px] font-bold border border-emerald-500/30">
+                            24/7 Online
+                          </span>
+                        </div>
+                        <p className="text-[11px] text-slate-400">
+                          Digital Reference, OPAC & Circulation Services
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Quick Services Overview */}
+                    <div className="space-y-1.5">
+                      <div className="text-[11px] font-bold text-slate-300">Services Available via Bot:</div>
+                      <div className="grid grid-cols-2 gap-2 text-[11px]">
+                        <div className="p-2 rounded-xl bg-slate-800/80 border border-slate-700 flex items-center space-x-1.5 text-slate-200">
+                          <BookOpen className="h-3.5 w-3.5 text-emerald-400 shrink-0" />
+                          <span>Active Loan Tracker</span>
+                        </div>
+                        <div className="p-2 rounded-xl bg-slate-800/80 border border-slate-700 flex items-center space-x-1.5 text-slate-200">
+                          <RotateCw className="h-3.5 w-3.5 text-emerald-400 shrink-0" />
+                          <span>Instant Renewals</span>
+                        </div>
+                        <div className="p-2 rounded-xl bg-slate-800/80 border border-slate-700 flex items-center space-x-1.5 text-slate-200">
+                          <Search className="h-3.5 w-3.5 text-emerald-400 shrink-0" />
+                          <span>Live OPAC Search</span>
+                        </div>
+                        <div className="p-2 rounded-xl bg-slate-800/80 border border-slate-700 flex items-center space-x-1.5 text-slate-200">
+                          <ShieldCheck className="h-3.5 w-3.5 text-emerald-400 shrink-0" />
+                          <span>Fines & Standing</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Fast Persona Login */}
+                    <div className="space-y-2 pt-2 border-t border-slate-800">
+                      <div className="text-[11px] font-bold text-slate-300">Quick Access by Persona:</div>
+                      <div className="grid grid-cols-3 gap-2">
+                        {studentUser && (
+                          <button
+                            type="button"
+                            onClick={() => onLoginSuccess(studentUser, selectedBranch)}
+                            className="p-2.5 rounded-xl border border-slate-700 bg-slate-800/80 hover:bg-emerald-950/40 hover:border-emerald-500 text-left transition-all cursor-pointer group"
+                          >
+                            <div className="font-bold text-[11px] text-white group-hover:text-emerald-400 truncate">🎓 Student</div>
+                            <div className="text-[10px] text-slate-400 truncate">{studentUser.name.split(' ')[0]}</div>
+                          </button>
+                        )}
+                        {facultyUser && (
+                          <button
+                            type="button"
+                            onClick={() => onLoginSuccess(facultyUser, selectedBranch)}
+                            className="p-2.5 rounded-xl border border-slate-700 bg-slate-800/80 hover:bg-emerald-950/40 hover:border-emerald-500 text-left transition-all cursor-pointer group"
+                          >
+                            <div className="font-bold text-[11px] text-white group-hover:text-emerald-400 truncate">👨‍🏫 Faculty</div>
+                            <div className="text-[10px] text-slate-400 truncate">{facultyUser.name.split(' ')[0]}</div>
+                          </button>
+                        )}
+                        {staffUser && (
+                          <button
+                            type="button"
+                            onClick={() => onLoginSuccess(staffUser, selectedBranch)}
+                            className="p-2.5 rounded-xl border border-slate-700 bg-slate-800/80 hover:bg-emerald-950/40 hover:border-emerald-500 text-left transition-all cursor-pointer group"
+                          >
+                            <div className="font-bold text-[11px] text-white group-hover:text-emerald-400 truncate">🛡️ Librarian</div>
+                            <div className="text-[10px] text-slate-400 truncate">{staffUser.name.split(' ')[0]}</div>
+                          </button>
+                        )}
+                      </div>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => setPortalType('MEMBER')}
+                      className="w-full py-2 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition-all cursor-pointer text-center"
+                    >
+                      ← Back to Member Login
+                    </button>
+                  </div>
+                ) : (
+                  <>
+                {/* Portal Icon & Badge */}
+                <div className="flex flex-col items-center space-y-1.5">
+                  <div className={`w-12 h-12 rounded-full border flex items-center justify-center mx-auto shadow-xs ${
+                    portalType === 'STAFF'
+                      ? 'bg-emerald-50 border-emerald-200 text-[#095733]'
+                      : 'bg-blue-50 border-blue-200 text-blue-700'
+                  }`}>
+                    {portalType === 'STAFF' ? (
+                      <ShieldCheck className="w-6 h-6 stroke-[2.2]" />
+                    ) : (
+                      <GraduationCap className="w-6 h-6 stroke-[2.2]" />
+                    )}
+                  </div>
+                  <span className={`text-[10px] font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border ${
+                    portalType === 'STAFF'
+                      ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                      : 'bg-blue-50 text-blue-800 border-blue-200'
+                  }`}>
+                    {portalType === 'STAFF' ? 'Librarian & Staff Portal' : 'Student & Faculty Portal'}
+                  </span>
                 </div>
 
                 {/* Heading & Subtitle */}
                 <div className="space-y-0.5">
                   <h2 className="text-xl sm:text-2xl font-bold text-zinc-900 tracking-tight">
-                    Welcome to PLiMS
+                    {portalType === 'STAFF' ? 'Librarian & Staff Login' : 'Student & Member Login'}
                   </h2>
                   <p className="text-xs text-zinc-500 font-medium">
-                    Pakistan Library Management System
+                    {portalType === 'STAFF'
+                      ? 'Restricted to Authorized Library Personnel & Administrators'
+                      : 'Sign in to access your loans, renewals, hold requests & library profile'}
                   </p>
-                  <div className="w-10 h-0.5 bg-[#095733] rounded-full mx-auto mt-2" />
+                  <div className={`w-10 h-0.5 rounded-full mx-auto mt-2 ${
+                    portalType === 'STAFF' ? 'bg-[#095733]' : 'bg-blue-600'
+                  }`} />
                 </div>
 
                 {/* ========================================================= */}
-                {/* GOOGLE ACCOUNT ONE-CLICK SIGN IN                          */}
+                {/* ACADEMIC CREDENTIALS LOGIN: USERNAME / ID + PASSWORD       */}
                 {/* ========================================================= */}
-                <div className="w-full pt-1">
-                  <GoogleLoginButton
-                    variant="emerald"
-                    text="Continue with Google"
-                    activeBranch={selectedBranch}
-                    onSuccess={handleGoogleSuccess}
-                    onError={msg => setErrorMessage(msg)}
-                    className="w-full py-2.5"
-                  />
-                </div>
-
-                {/* Divider */}
-                <div className="flex items-center my-2 w-full">
-                  <div className="flex-1 border-t border-zinc-200" />
-                  <span className="px-3 text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
-                    OR
-                  </span>
-                  <div className="flex-1 border-t border-zinc-200" />
-                </div>
-
-                {/* ========================================================= */}
-                {/* AUTHENTICATION METHOD 2: USERNAME + PASSWORD LOGIN        */}
-                {/* ========================================================= */}
-                <form onSubmit={handleUsernamePasswordLogin} className="w-full space-y-3 text-left">
+                <form onSubmit={handleUsernamePasswordLogin} className="w-full space-y-3.5 text-left pt-2">
                   <div className="space-y-1">
                     <label htmlFor="login-identifier" className="text-xs font-semibold text-zinc-700 flex items-center justify-between">
-                      <span>Username / Member ID / Email</span>
+                      <span>{portalType === 'STAFF' ? 'Staff ID / Username / Official Email' : 'Student ID / Member Code / Email'}</span>
                     </label>
                     <div className="relative">
                       <User className="w-4 h-4 text-zinc-400 absolute left-3 top-1/2 -translate-y-1/2" />
@@ -646,7 +802,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
                         required
                         value={loginIdentifier}
                         onChange={e => setLoginIdentifier(e.target.value)}
-                        placeholder="e.g. admin@aijaz-edu.org or ADM-001"
+                        placeholder={portalType === 'STAFF' ? 'e.g. ADM-001 or admin@aijaz-edu.org' : 'e.g. STU-2026-1001 or student@university.edu'}
                         className="w-full rounded-xl border border-zinc-200 bg-zinc-50 pl-9 pr-3 py-2 text-xs text-zinc-900 placeholder-zinc-400 focus:outline-none focus:border-emerald-600 focus:bg-white font-medium"
                       />
                     </div>
@@ -694,27 +850,55 @@ export const LoginPage: React.FC<LoginPageProps> = ({
                     id="btn-login-submit"
                     type="submit"
                     disabled={isSubmitting}
-                    className="w-full flex items-center justify-center space-x-2 px-5 py-2.5 rounded-xl bg-[#095733] hover:bg-[#074729] active:scale-[0.99] text-white font-bold text-xs transition-all shadow-md cursor-pointer disabled:opacity-50"
+                    className={`w-full flex items-center justify-center space-x-2 px-5 py-2.5 rounded-xl text-white font-bold text-xs transition-all shadow-md cursor-pointer disabled:opacity-50 active:scale-[0.99] ${
+                      portalType === 'STAFF'
+                        ? 'bg-[#095733] hover:bg-[#074729]'
+                        : 'bg-blue-600 hover:bg-blue-700'
+                    }`}
                   >
                     <LogIn className="w-3.5 h-3.5" />
-                    <span>{isSubmitting ? 'Verifying Credentials...' : 'Login'}</span>
+                    <span>{isSubmitting ? 'Verifying Credentials...' : portalType === 'STAFF' ? 'Enter Staff Portal' : 'Sign in as Member'}</span>
                   </button>
 
-                  {/* Create New Account Button */}
+                  {/* Student/Member portal allows self-registration */}
+                  {portalType === 'MEMBER' && (
+                    <button
+                      id="btn-portal-register"
+                      type="button"
+                      onClick={() => {
+                        setErrorMessage(null);
+                        setSuccessMessage(null);
+                        setAuthMode('REGISTER');
+                      }}
+                      className="w-full flex items-center justify-center space-x-2 px-5 py-2.5 rounded-xl border border-zinc-200 bg-white hover:bg-zinc-50 text-zinc-800 font-semibold text-xs transition-all shadow-2xs active:scale-[0.99] cursor-pointer"
+                    >
+                      <UserPlus className="w-3.5 h-3.5 text-zinc-600" />
+                      <span>Create New Member Account</span>
+                    </button>
+                  )}
+
+                  {/* Quick Shortcut to Librarian Bot */}
+                  <div className="relative flex py-1 items-center">
+                    <div className="flex-grow border-t border-zinc-200"></div>
+                    <span className="flex-shrink mx-2 text-[10px] text-zinc-400 font-semibold uppercase tracking-wider">or explore with</span>
+                    <div className="flex-grow border-t border-zinc-200"></div>
+                  </div>
+
                   <button
-                    id="btn-portal-register"
                     type="button"
                     onClick={() => {
+                      setPortalType('LIBRARIAN_BOT');
                       setErrorMessage(null);
                       setSuccessMessage(null);
-                      setAuthMode('REGISTER');
                     }}
-                    className="w-full flex items-center justify-center space-x-2 px-5 py-2.5 rounded-xl border border-zinc-200 bg-white hover:bg-zinc-50 text-zinc-800 font-semibold text-xs transition-all shadow-2xs active:scale-[0.99] cursor-pointer"
+                    className="w-full flex items-center justify-center space-x-2 px-4 py-2.5 rounded-xl border border-emerald-300 bg-emerald-50 hover:bg-emerald-100/80 text-emerald-800 font-bold text-xs transition-all shadow-2xs active:scale-[0.99] cursor-pointer"
                   >
-                    <UserPlus className="w-3.5 h-3.5 text-zinc-600" />
-                    <span>Create New Account</span>
+                    <Bot className="w-4 h-4 text-emerald-700" />
+                    <span>Ask AI Librarian Bot (24/7 Library Services)</span>
                   </button>
                 </form>
+                </>
+                )}
 
                 {/* Back to Public OPAC link */}
                 {onBackToOpac && (
@@ -725,7 +909,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
                       className="text-xs font-semibold text-emerald-800 hover:text-emerald-900 hover:underline flex items-center justify-center space-x-1 mx-auto cursor-pointer"
                     >
                       <ArrowLeft className="w-3.5 h-3.5" />
-                      <span>Back to Public OPAC Discovery</span>
+                      <span>Browse Public OPAC Discovery</span>
                     </button>
                   </div>
                 )}
@@ -733,7 +917,11 @@ export const LoginPage: React.FC<LoginPageProps> = ({
                 {/* Security Trust Indicator */}
                 <div className="pt-1 flex items-center justify-center space-x-1.5 text-[11px] text-zinc-500">
                   <Shield className="w-3.5 h-3.5 text-[#095733] shrink-0" />
-                  <span>Your data is safe and secure with PLiMS</span>
+                  <span>
+                    {portalType === 'STAFF'
+                      ? 'Role-based access enforced • Activity logged'
+                      : 'Your library patron data is safe and encrypted'}
+                  </span>
                 </div>
               </div>
 
@@ -780,29 +968,6 @@ export const LoginPage: React.FC<LoginPageProps> = ({
                 <ArrowLeft className="w-4 h-4" />
                 <span>Back</span>
               </button>
-            </div>
-
-            {/* Fast Registration via Google */}
-            <div className="mb-6 p-4 rounded-2xl bg-zinc-50 border border-zinc-200/80">
-              <p className="text-xs font-semibold text-zinc-700 mb-2.5 text-center">
-                Fast 1-Click Academic Registration with Google:
-              </p>
-              <GoogleLoginButton
-                variant="emerald"
-                text="Register with Google"
-                activeBranch={selectedBranch}
-                onSuccess={handleGoogleSuccess}
-                onError={msg => setErrorMessage(msg)}
-                className="w-full py-3"
-              />
-            </div>
-
-            <div className="flex items-center my-5 w-full">
-              <div className="flex-1 border-t border-zinc-200" />
-              <span className="px-3 text-[11px] font-bold text-zinc-400 uppercase tracking-wider">
-                Or fill the registration form
-              </span>
-              <div className="flex-1 border-t border-zinc-200" />
             </div>
 
             {/* Registration Form */}
@@ -1113,7 +1278,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
                     type="button"
                     onClick={() => {
                       setAuthMode('PORTAL');
-                      setSuccessMessage(`To reserve "${book.title}", please authenticate via Google or register!`);
+                      setSuccessMessage(`To reserve "${book.title}", please sign in to your library account or register!`);
                     }}
                     className="text-xs bg-zinc-800 hover:bg-zinc-700 text-zinc-200 px-2.5 py-1 rounded-lg transition-colors cursor-pointer"
                   >
@@ -1298,14 +1463,6 @@ export const LoginPage: React.FC<LoginPageProps> = ({
           </div>
         </div>
       )}
-
-      {/* Floating Digital Librarian Chatbot Assistant */}
-      <DigitalLibrarianChatbot
-        currentUser={users[0] || undefined}
-        books={books}
-        users={users}
-        branches={branches}
-      />
     </div>
   );
 };

@@ -93,6 +93,7 @@ export interface UserProfile {
   memberCode: string;
   name: string;
   email: string;
+  secondaryEmail?: string;
   role: UserRole;
   department?: string;
   designation?: string;
@@ -113,10 +114,9 @@ export interface UserProfile {
   staffPowers?: StaffPower[];
   assignedBranch?: string;
   password?: string;
-  authProvider?: 'LOCAL' | 'GOOGLE';
-  googleSub?: string;
-  googleEmailVerified?: boolean;
-  googleAccountLinkedAt?: string;
+  authProvider?: 'LOCAL' | 'WHATSAPP_WEB';
+  whatsappPhone?: string;
+  whatsappLinkedAt?: string;
 }
 
 export type MarcSubjectTag = '600' | '610' | '611' | '630' | '650' | '651' | '653' | '655';

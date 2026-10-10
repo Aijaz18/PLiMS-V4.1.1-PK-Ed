@@ -498,363 +498,29 @@ async function startServer() {
     });
   });
 
-  // Google OAuth 2.0 In-Memory CSRF State Store
-  interface OAuthStateRecord {
+  // In-Memory Secure Session Token Store
+  interface ServerSessionRecord {
     createdAt: number;
-    redirectUri: string;
+    payload: any;
   }
-  const oauthStates = new Map<string, OAuthStateRecord>();
+  const activeServerSessions = new Map<string, ServerSessionRecord>();
 
-  // Periodically clean up stale OAuth states older than 15 minutes
+  // Periodically clean up stale sessions older than 7 days
   setInterval(() => {
     const now = Date.now();
-    for (const [key, record] of oauthStates.entries()) {
-      if (now - record.createdAt > 15 * 60 * 1000) {
-        oauthStates.delete(key);
+    for (const [key, record] of activeServerSessions.entries()) {
+      if (now - record.createdAt > 7 * 24 * 60 * 60 * 1000) {
+        activeServerSessions.delete(key);
       }
     }
-  }, 10 * 60 * 1000);
+  }, 60 * 60 * 1000);
 
-  function escapeHtml(str: string): string {
-    return String(str || '')
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#39;');
-  }
-
-  // 1. Google OAuth Configuration Status Endpoint
-  app.get('/api/auth/google/config', (req, res) => {
-    let fileOAuthClientId: string | null = null;
+  // 1. Establish Authenticated Session
+  app.post('/api/auth/session', (req, res) => {
     try {
-      const fbConfigPath = path.join(rootDir, 'firebase-applet-config.json');
-      if (fs.existsSync(fbConfigPath)) {
-        const parsed = JSON.parse(fs.readFileSync(fbConfigPath, 'utf8'));
-        fileOAuthClientId = parsed.oAuthClientId || null;
-      }
-    } catch {
-      // ignore
-    }
-
-    const envClientId = process.env.GOOGLE_CLIENT_ID ? process.env.GOOGLE_CLIENT_ID.trim() : null;
-    const isPlaceholder = !envClientId || envClientId.includes('your_google_client_id');
-    const clientId = !isPlaceholder ? envClientId : (fileOAuthClientId || envClientId || null);
-    const clientSecret = process.env.GOOGLE_CLIENT_SECRET ? process.env.GOOGLE_CLIENT_SECRET.trim() : null;
-    const isConfigured = Boolean(clientId);
-
-    const protocol = req.headers['x-forwarded-proto'] || req.protocol || 'http';
-    const host = req.headers['x-forwarded-host'] || req.headers.host || 'localhost:3000';
-    const dynamicCallback = `${protocol}://${host}/auth/google/callback`;
-
-    // Prioritize explicit GOOGLE_REDIRECT_URI, then APP_URL, then dynamicCallback
-    const activeRedirect = (process.env.GOOGLE_REDIRECT_URI && process.env.GOOGLE_REDIRECT_URI.trim())
-      || (process.env.APP_URL ? `${process.env.APP_URL.trim()}/auth/google/callback` : dynamicCallback);
-
-    res.json({
-      configured: isConfigured,
-      hasClientSecret: Boolean(clientSecret),
-      clientId: clientId || null,
-      redirectUri: activeRedirect,
-      urls: {
-        active: activeRedirect,
-        envRedirect: process.env.GOOGLE_REDIRECT_URI || null,
-        local: 'http://localhost:3000/auth/google/callback',
-        dev: 'https://ais-dev-gpew27cmtvqf5mfxh6xd6y-412084889689.asia-southeast1.run.app/auth/google/callback',
-        shared: 'https://ais-pre-gpew27cmtvqf5mfxh6xd6y-412084889689.asia-southeast1.run.app/auth/google/callback',
-        detected: dynamicCallback,
-      },
-    });
-  });
-
-  // 2. Google OAuth Authorization URL Generator
-  app.get('/api/auth/google/url', (req, res) => {
-    let fileOAuthClientId: string | null = null;
-    try {
-      const fbConfigPath = path.join(rootDir, 'firebase-applet-config.json');
-      if (fs.existsSync(fbConfigPath)) {
-        const parsed = JSON.parse(fs.readFileSync(fbConfigPath, 'utf8'));
-        fileOAuthClientId = parsed.oAuthClientId || null;
-      }
-    } catch {
-      // ignore
-    }
-
-    const envClientId = process.env.GOOGLE_CLIENT_ID ? process.env.GOOGLE_CLIENT_ID.trim() : null;
-    const isPlaceholder = !envClientId || envClientId.includes('your_google_client_id');
-    const clientId = !isPlaceholder ? envClientId : (fileOAuthClientId || envClientId || null);
-    const clientSecret = process.env.GOOGLE_CLIENT_SECRET ? process.env.GOOGLE_CLIENT_SECRET.trim() : null;
-
-    const protocol = req.headers['x-forwarded-proto'] || req.protocol || 'http';
-    const host = req.headers['x-forwarded-host'] || req.headers.host || 'localhost:3000';
-    const dynamicCallback = `${protocol}://${host}/auth/google/callback`;
-
-    // Strict redirect resolution conforming to AI Studio OAuth skill:
-    // 1. Explicit GOOGLE_REDIRECT_URI from environment
-    // 2. APP_URL from environment (provided by AI Studio)
-    // 3. Client requested redirect URI if provided
-    // 4. Dynamic request origin
-    let resolvedRedirect: string;
-    if (process.env.GOOGLE_REDIRECT_URI && process.env.GOOGLE_REDIRECT_URI.trim()) {
-      resolvedRedirect = process.env.GOOGLE_REDIRECT_URI.trim();
-    } else if (process.env.APP_URL && process.env.APP_URL.trim()) {
-      resolvedRedirect = `${process.env.APP_URL.trim()}/auth/google/callback`;
-    } else if (typeof req.query.redirect_uri === 'string' && req.query.redirect_uri.trim()) {
-      resolvedRedirect = req.query.redirect_uri.trim();
-    } else {
-      resolvedRedirect = dynamicCallback;
-    }
-
-    if (!clientId || !clientSecret) {
-      return res.status(503).json({
-        error: 'Google OAuth 2.0 is not configured on the PLiMS server. Please configure GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET in your environment (.env).',
-        code: 'CONFIG_REQUIRED',
-        configured: false,
-        urls: {
-          local: 'http://localhost:3000/auth/google/callback',
-          dev: 'https://ais-dev-gpew27cmtvqf5mfxh6xd6y-412084889689.asia-southeast1.run.app/auth/google/callback',
-          shared: 'https://ais-pre-gpew27cmtvqf5mfxh6xd6y-412084889689.asia-southeast1.run.app/auth/google/callback',
-          detected: dynamicCallback,
-        },
-      });
-    }
-
-    const stateToken = crypto.randomBytes(32).toString('hex');
-    oauthStates.set(stateToken, {
-      createdAt: Date.now(),
-      redirectUri: resolvedRedirect,
-    });
-
-    const params = new URLSearchParams({
-      client_id: clientId,
-      redirect_uri: resolvedRedirect,
-      response_type: 'code',
-      scope: 'openid email profile',
-      state: stateToken,
-      access_type: 'offline',
-      prompt: 'select_account',
-    });
-
-    const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`;
-    return res.json({
-      url: authUrl,
-      state: stateToken,
-      configured: true,
-      redirectUri: resolvedRedirect,
-    });
-  });
-
-  // 3. Google OAuth Redirect Callback Handler
-  app.get(['/auth/google/callback', '/auth/google/callback/'], async (req, res) => {
-    const { code, state, error, error_description } = req.query;
-
-    const renderAuthResultHtml = (success: boolean, data: { errorMsg?: string; payload?: any }) => {
-      res.setHeader('Content-Type', 'text/html; charset=utf-8');
-      if (success && data.payload) {
-        return res.send(`<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>PLiMS - Google Authentication</title>
-  <style>
-    body { font-family: system-ui, -apple-system, sans-serif; background: #09090b; color: #fafafa; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; padding: 20px; box-sizing: border-box; }
-    .card { background: #121214; border: 1px solid #10b981; border-radius: 16px; padding: 32px; max-width: 440px; text-align: center; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.5); }
-    .icon { width: 44px; height: 44px; margin: 0 auto 16px; background: rgba(16,185,129,0.15); border: 1px solid rgba(16,185,129,0.3); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #34d399; font-size: 20px; }
-    h2 { margin: 0 0 8px; font-size: 18px; color: #34d399; }
-    p { margin: 0 0 12px; font-size: 13px; color: #a1a1aa; line-height: 1.5; }
-    .user-pill { display: inline-flex; align-items: center; gap: 8px; background: #18181b; border: 1px solid #27272a; padding: 6px 12px; border-radius: 9999px; margin-top: 8px; font-size: 12px; font-weight: 500; color: #fff; }
-    .user-pill img { width: 20px; height: 20px; border-radius: 50%; }
-    .loader { margin-top: 16px; font-size: 11px; color: #71717a; }
-  </style>
-</head>
-<body>
-  <div class="card">
-    <div class="icon">✓</div>
-    <h2>Authentication Verified</h2>
-    <p>Signed in successfully through Google OAuth 2.0</p>
-    <div class="user-pill">
-      ${data.payload.picture ? `<img src="${escapeHtml(data.payload.picture)}" alt="avatar" />` : ''}
-      <span>${escapeHtml(data.payload.name || data.payload.email)}</span>
-    </div>
-    <div class="loader">Transferring secure credentials to PLiMS...</div>
-  </div>
-  <script>
-    (function() {
-      try {
-        var payload = ${JSON.stringify(data.payload)};
-        try {
-          localStorage.setItem('pslims_google_auth_payload', JSON.stringify(payload));
-          localStorage.setItem('pslims_is_authenticated', 'true');
-        } catch (storageErr) {
-          console.warn('LocalStorage save notice:', storageErr);
-        }
-
-        if (window.opener && window.opener !== window) {
-          window.opener.postMessage({
-            type: 'PLIMS_GOOGLE_AUTH_SUCCESS',
-            payload: payload
-          }, '*');
-          setTimeout(function() {
-            try {
-              if (window.opener) {
-                window.opener.postMessage({
-                  type: 'PLIMS_GOOGLE_AUTH_SUCCESS',
-                  payload: payload
-                }, '*');
-              }
-            } catch(e) {}
-          }, 150);
-          setTimeout(function() { window.close(); }, 800);
-        } else {
-          window.location.replace('/');
-        }
-      } catch (err) {
-        console.error('PostMessage error:', err);
-        window.location.replace('/');
-      }
-    })();
-  </script>
-</body>
-</html>`);
-      } else {
-        const errText = data.errorMsg || 'Google authentication notice.';
-        return res.send(`<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>PLiMS - Authentication Notice</title>
-  <style>
-    body { font-family: system-ui, -apple-system, sans-serif; background: #080b09; color: #fafafa; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; padding: 20px; box-sizing: border-box; }
-    .card { background: #121413; border: 1px solid #10b981; border-radius: 18px; padding: 32px; max-width: 460px; text-align: center; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.6); }
-    .icon { width: 48px; height: 48px; margin: 0 auto 16px; background: rgba(16,185,129,0.15); border: 1px solid rgba(16,185,129,0.3); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #34d399; font-size: 20px; }
-    h2 { margin: 0 0 8px; font-size: 18px; color: #ffffff; }
-    p { margin: 0 0 20px; font-size: 13px; color: #a1a1aa; line-height: 1.5; }
-    .btn { background: #095733; color: #fff; border: 1px solid #10b981; padding: 10px 22px; border-radius: 12px; cursor: pointer; font-size: 13px; font-weight: 600; text-decoration: none; display: inline-block; transition: all 0.2s; }
-    .btn:hover { background: #074729; }
-  </style>
-</head>
-<body>
-  <div class="card">
-    <div class="icon">ℹ</div>
-    <h2>Connecting to PLiMS</h2>
-    <p>${escapeHtml(errText)}</p>
-    <button class="btn" onclick="if(window.opener){window.close();}else{window.location.replace('/');}">Direct Connect to PLiMS Login Portal</button>
-  </div>
-  <script>
-    (function() {
-      try {
-        if (window.opener && window.opener !== window) {
-          window.opener.postMessage({
-            type: 'PLIMS_GOOGLE_AUTH_ERROR',
-            error: ${JSON.stringify(errText)}
-          }, '*');
-          setTimeout(function() { window.close(); }, 900);
-        } else {
-          setTimeout(function() { window.location.replace('/'); }, 2500);
-        }
-      } catch (err) {
-        console.error('Callback handler notice:', err);
-        window.location.replace('/');
-      }
-    })();
-  </script>
-</body>
-</html>`);
-      }
-    };
-
-    if (error) {
-      const msg = typeof error_description === 'string'
-        ? error_description
-        : error === 'access_denied'
-        ? 'Google sign-in was cancelled by the user.'
-        : `Google OAuth returned error: ${error}`;
-      return renderAuthResultHtml(false, { errorMsg: msg });
-    }
-
-    if (!code || typeof code !== 'string') {
-      return renderAuthResultHtml(false, { errorMsg: 'No authorization code received. Redirecting to PLiMS...' });
-    }
-
-    const stateToken = typeof state === 'string' ? state : '';
-    const stateRecord = stateToken ? oauthStates.get(stateToken) : null;
-    if (stateToken && stateRecord) {
-      oauthStates.delete(stateToken);
-    }
-
-    const protocol = req.headers['x-forwarded-proto'] || req.protocol || 'https';
-    const host = req.headers['x-forwarded-host'] || req.headers.host || 'localhost:3000';
-    const dynamicCallback = `${protocol}://${host}/auth/google/callback`;
-
-    const redirectUriToUse =
-      stateRecord?.redirectUri ||
-      process.env.GOOGLE_REDIRECT_URI ||
-      (process.env.APP_URL ? `${process.env.APP_URL.trim()}/auth/google/callback` : dynamicCallback);
-
-    let fileOAuthClientId: string | null = null;
-    try {
-      const fbConfigPath = path.join(rootDir, 'firebase-applet-config.json');
-      if (fs.existsSync(fbConfigPath)) {
-        const parsed = JSON.parse(fs.readFileSync(fbConfigPath, 'utf8'));
-        fileOAuthClientId = parsed.oAuthClientId || null;
-      }
-    } catch {
-      // ignore
-    }
-
-    const envClientId = process.env.GOOGLE_CLIENT_ID ? process.env.GOOGLE_CLIENT_ID.trim() : null;
-    const isPlaceholder = !envClientId || envClientId.includes('your_google_client_id');
-    const clientId = !isPlaceholder ? envClientId : (fileOAuthClientId || envClientId || null);
-    const clientSecret = process.env.GOOGLE_CLIENT_SECRET ? process.env.GOOGLE_CLIENT_SECRET.trim() : null;
-
-    if (!clientId || !clientSecret) {
-      return renderAuthResultHtml(false, { errorMsg: 'Google OAuth credentials not configured on server. Redirecting to Login Portal...' });
-    }
-
-    try {
-      const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: new URLSearchParams({
-          code,
-          client_id: clientId,
-          client_secret: clientSecret,
-          redirect_uri: redirectUriToUse,
-          grant_type: 'authorization_code',
-        }),
-      });
-
-      if (!tokenResponse.ok) {
-        const errBody = await tokenResponse.text();
-        console.error('[Google OAuth Token Error]:', errBody);
-        let parsedErrMsg = 'Token exchange failed';
-        try {
-          const parsed = JSON.parse(errBody);
-          parsedErrMsg = parsed.error_description || parsed.error || parsedErrMsg;
-        } catch {
-          // ignore
-        }
-        return renderAuthResultHtml(false, { errorMsg: `Connecting to PLiMS: ${parsedErrMsg}` });
-      }
-
-      const tokenData: any = await tokenResponse.json();
-
-      const userInfoResponse = await fetch('https://openidconnect.googleapis.com/v1/userinfo', {
-        headers: {
-          Authorization: `Bearer ${tokenData.access_token}`,
-        },
-      });
-
-      if (!userInfoResponse.ok) {
-        return renderAuthResultHtml(false, { errorMsg: 'Failed to retrieve verified user profile from Google OpenID Connect.' });
-      }
-
-      const userInfo: any = await userInfoResponse.json();
-
-      if (!userInfo.sub || !userInfo.email) {
-        return renderAuthResultHtml(false, { errorMsg: 'Incomplete user profile received from Google.' });
+      const { user } = req.body;
+      if (!user || !user.id) {
+        return res.status(400).json({ error: 'User profile is required' });
       }
 
       const sessionToken = crypto.randomBytes(32).toString('hex');
@@ -866,101 +532,72 @@ async function startServer() {
       });
 
       const sanitizedPayload = {
-        sub: String(userInfo.sub),
-        email: String(userInfo.email),
-        name: String(userInfo.name || userInfo.email.split('@')[0]),
-        picture: typeof userInfo.picture === 'string' ? userInfo.picture : undefined,
-        emailVerified: Boolean(userInfo.email_verified),
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        memberCode: user.memberCode,
+        branch: user.assignedBranch,
       };
 
-      return renderAuthResultHtml(true, { payload: sanitizedPayload });
-    } catch (authErr: any) {
-      console.error('[Google Auth Callback Exception]:', authErr);
-      return renderAuthResultHtml(false, { errorMsg: 'Network notice during Google communication. Returning to PLiMS...' });
-    }
-  });
-
-  // 3b. Direct JSON Code Exchange API Endpoint (Used by client SPA or popups)
-  app.all('/api/auth/google/exchange', async (req, res) => {
-    const code = req.query.code || req.body?.code;
-    const state = req.query.state || req.body?.state;
-
-    if (!code || typeof code !== 'string') {
-      return res.status(400).json({ error: 'Authorization code is required' });
-    }
-
-    const clientId = process.env.GOOGLE_CLIENT_ID ? process.env.GOOGLE_CLIENT_ID.trim() : null;
-    const clientSecret = process.env.GOOGLE_CLIENT_SECRET ? process.env.GOOGLE_CLIENT_SECRET.trim() : null;
-
-    if (!clientId || !clientSecret) {
-      return res.status(503).json({ error: 'Google OAuth credentials not configured on server' });
-    }
-
-    const protocol = req.headers['x-forwarded-proto'] || req.protocol || 'https';
-    const host = req.headers['x-forwarded-host'] || req.headers.host || 'localhost:3000';
-    const dynamicCallback = `${protocol}://${host}/auth/google/callback`;
-
-    let redirectUriToUse = process.env.GOOGLE_REDIRECT_URI || (process.env.APP_URL ? `${process.env.APP_URL.trim()}/auth/google/callback` : dynamicCallback);
-    if (state && typeof state === 'string') {
-      const stateRecord = oauthStates.get(state);
-      if (stateRecord) {
-        redirectUriToUse = stateRecord.redirectUri;
-        oauthStates.delete(state);
-      }
-    }
-
-    try {
-      const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: new URLSearchParams({
-          code,
-          client_id: clientId,
-          client_secret: clientSecret,
-          redirect_uri: redirectUriToUse,
-          grant_type: 'authorization_code',
-        }),
+      activeServerSessions.set(sessionToken, {
+        createdAt: Date.now(),
+        payload: sanitizedPayload,
       });
-
-      if (!tokenResponse.ok) {
-        const errText = await tokenResponse.text();
-        return res.status(400).json({ error: 'Token exchange failed', details: errText });
-      }
-
-      const tokenData: any = await tokenResponse.json();
-      const userInfoResponse = await fetch('https://openidconnect.googleapis.com/v1/userinfo', {
-        headers: { Authorization: `Bearer ${tokenData.access_token}` },
-      });
-
-      if (!userInfoResponse.ok) {
-        return res.status(400).json({ error: 'Failed to retrieve user profile from Google' });
-      }
-
-      const userInfo: any = await userInfoResponse.json();
-      const sessionToken = crypto.randomBytes(32).toString('hex');
-      res.cookie('plims_session', sessionToken, {
-        httpOnly: true,
-        secure: true,
-        sameSite: 'none',
-        maxAge: 7 * 24 * 60 * 60 * 1000,
-      });
-
-      const sanitizedPayload = {
-        sub: String(userInfo.sub),
-        email: String(userInfo.email),
-        name: String(userInfo.name || userInfo.email.split('@')[0]),
-        picture: typeof userInfo.picture === 'string' ? userInfo.picture : undefined,
-        emailVerified: Boolean(userInfo.email_verified),
-      };
 
       res.json({ success: true, payload: sanitizedPayload });
     } catch (err: any) {
-      res.status(500).json({ error: err.message || 'Server error during OAuth exchange' });
+      res.status(500).json({ error: err.message || 'Server error establishing session' });
     }
   });
 
-  // 4. Terminate PLiMS Session
+  // 4. Retrieve Active Authenticated Session (Cookie-based validation)
+  app.get('/api/auth/session', (req, res) => {
+    try {
+      const cookieHeader = req.headers.cookie;
+      if (!cookieHeader) {
+        return res.json({ authenticated: false });
+      }
+      const cookies = Object.fromEntries(
+        cookieHeader.split(';').map(c => {
+          const parts = c.trim().split('=');
+          return [parts[0], parts.slice(1).join('=')];
+        })
+      );
+      const token = cookies['plims_session'];
+      if (token && activeServerSessions.has(token)) {
+        const sessionRecord = activeServerSessions.get(token)!;
+        return res.json({
+          authenticated: true,
+          payload: sessionRecord.payload,
+        });
+      }
+      return res.json({ authenticated: false });
+    } catch (err) {
+      return res.json({ authenticated: false });
+    }
+  });
+
+  // 5. Terminate PLiMS Session
   app.post('/api/auth/logout', (req, res) => {
+    try {
+      const cookieHeader = req.headers.cookie;
+      if (cookieHeader) {
+        const cookies = Object.fromEntries(
+          cookieHeader.split(';').map(c => {
+            const parts = c.trim().split('=');
+            return [parts[0], parts.slice(1).join('=')];
+          })
+        );
+        const token = cookies['plims_session'];
+        if (token) {
+          activeServerSessions.delete(token);
+        }
+      }
+    } catch {
+      // ignore
+    }
+
     res.clearCookie('plims_session', {
       httpOnly: true,
       secure: true,
