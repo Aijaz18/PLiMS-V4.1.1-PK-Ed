@@ -1,107 +1,70 @@
 {
   "version": "4.1.1",
-  "releaseName": "PLiMS 4.1.1 PK Desktop Official Package (Authentic Windows Binaries)",
-  "releaseDate": "2026-10-17T15:46:17.123Z",
+  "releaseRevision": "R2",
+  "releaseName": "PLiMS 4.1.1 PK Desktop Official Package (R2 Winsock TCP Engine & Native Launcher)",
+  "releaseDate": "2026-10-17T17:25:32.759Z",
+  "repairTools": {
+    "repairExe": {
+      "filename": "PLiMS-4.1.1-Repair.exe",
+      "sizeFormatted": "186.5 KB",
+      "sha256": "94c5ed17eaa61995f2f0182f4c1be29e6b3eb047fe69022d44d78ba690a955d0",
+      "downloadUrl": "/api/desktop/download/PLiMS-4.1.1-Repair.exe"
+    },
+    "repairBat": {
+      "filename": "PLiMS-4.1.1-Repair.bat",
+      "sizeFormatted": "19.0 KB",
+      "sha256": "a49576dca6eb9264a4a7e4166163663811347ea6ed0c363bcf0d0ef6565cb616",
+      "downloadUrl": "/api/desktop/download/PLiMS-4.1.1-Repair.bat"
+    }
+  },
   "packages": [
     {
       "id": "setup-x64",
       "filename": "PLiMS-4.1.1-Setup-x64.exe",
       "name": "Official Windows Desktop Installer (64-Bit)",
       "arch": "x64 (AMD64 / Intel 64-bit)",
-      "sizeBytes": 1598202,
-      "sizeFormatted": "1.52 MB",
-      "sha256": "876b1dd97bcf8f8c2889f50c0fb2d37956d6a6de3c9e84ca9e9e109d9ec1d2cf",
+      "sizeBytes": 1645543,
+      "sizeFormatted": "1.57 MB",
+      "sha256": "a6806d517ee384134f40d1c747712f54cca212a8356651ca5c8092050c828144",
       "type": "installer",
       "minOs": "Windows 10 / 11 / Server 2016+ (64-bit)",
-      "recommendedFor": "Standard desktop PCs, campus library circulation desks, head librarian workstations",
-      "modulesIncluded": [
-        "OPAC Online Catalog",
-        "MARC21 / RDA Cataloguer",
-        "Circulation Desk (Issue/Return/Renew/Fines)",
-        "24/7 AI Librarian Bot",
-        "Barcode & QR Label Generator",
-        "Authority Control (Authors, Subjects)",
-        "Stock Verification & Audit",
-        "Reports & Analytics (PDF/Excel)",
-        "Multi-Branch Campus Control",
-        "ESC/POS Thermal Receipt Printer",
-        "Offline Localhost Server Engine"
-      ]
+      "recommendedFor": "Standard desktop PCs, campus library circulation desks, head librarian workstations"
     },
     {
       "id": "setup-x32",
       "filename": "PLiMS-4.1.1-Setup-x32.exe",
       "name": "Official Windows Desktop Installer (32-Bit)",
       "arch": "x86 (Legacy 32-bit)",
-      "sizeBytes": 1601111,
-      "sizeFormatted": "1.53 MB",
-      "sha256": "e98dcd7f4c45460a2ef2b908afc642c2cd045d0b6e64477501fb0065495d3050",
+      "sizeBytes": 1648690,
+      "sizeFormatted": "1.57 MB",
+      "sha256": "ad22aa3a998d7ebcf2b27c1114cd39595a022d0b4c2da9d811ebda8773164e96",
       "type": "installer",
       "minOs": "Windows 7 SP1 / 8 / 10 / 11 (32-bit & 64-bit)",
-      "recommendedFor": "Older college and school computer labs across Pakistan with 32-bit hardware",
-      "modulesIncluded": [
-        "OPAC Online Catalog",
-        "MARC21 / RDA Cataloguer",
-        "Circulation Desk (Issue/Return/Renew/Fines)",
-        "24/7 AI Librarian Bot",
-        "Barcode & QR Label Generator",
-        "Authority Control",
-        "Stock Verification & Audit",
-        "Reports & Analytics (PDF/Excel)",
-        "Multi-Branch Campus Control",
-        "ESC/POS Thermal Receipt Printer",
-        "Offline Localhost Server Engine"
-      ]
+      "recommendedFor": "Older college and school computer labs across Pakistan with 32-bit hardware"
     },
     {
       "id": "setup-x64-portable",
-      "filename": "PLiMS-4.1.1-Setup-x64.Portable",
+      "filename": "PLiMS-4.1.1-Setup-x64.Portable.exe",
       "name": "Official Windows Desktop Portable Edition",
       "arch": "x64 Portable (Zero-Install)",
-      "sizeBytes": 1588167,
-      "sizeFormatted": "1.51 MB",
-      "sha256": "0202c6069244261f34907785ca8689e985fafc8e24f371eb1f93c647473032c3",
+      "sizeBytes": 1645752,
+      "sizeFormatted": "1.57 MB",
+      "sha256": "465578ff22a140ac26f8877ca9c18b0992f5b229af1bf2244c9cb4a204f52768",
       "type": "portable",
       "minOs": "Windows 10 / 11 / Server (Runs from USB flash drive without admin privileges)",
-      "recommendedFor": "Librarians needing a flash-drive portable kit, traveling audits, or zero-admin PCs",
-      "modulesIncluded": [
-        "OPAC Online Catalog",
-        "MARC21 / RDA Cataloguer",
-        "Circulation Desk (Issue/Return/Renew/Fines)",
-        "24/7 AI Librarian Bot",
-        "Barcode & QR Label Generator",
-        "Authority Control",
-        "Stock Verification & Audit",
-        "Reports & Analytics (PDF/Excel)",
-        "Multi-Branch Campus Control",
-        "ESC/POS Thermal Receipt Printer",
-        "Offline Localhost Server Engine"
-      ]
+      "recommendedFor": "Librarians needing a flash-drive portable kit, traveling audits, or zero-admin PCs"
     },
     {
       "id": "setup-x64-portable-zip",
       "filename": "PLiMS-4.1.1-Setup-x64.Portable.zip",
       "name": "Official Windows Desktop Portable Bundle (ZIP Archive)",
       "arch": "All Windows (ZIP Archive for USB)",
-      "sizeBytes": 2402437,
-      "sizeFormatted": "2.29 MB",
-      "sha256": "92ae193540890ff9f36b53298b5fca5c61a88c8a6d12dfe31eef04d9f93f4c8a",
+      "sizeBytes": 2467000,
+      "sizeFormatted": "2.35 MB",
+      "sha256": "29c0c5c37daee01d9d4708b2f741908a3d468968fa1b7914aa10e15a093abfe4",
       "type": "portable_zip",
       "minOs": "Windows 7 / 8 / 10 / 11 / Server (Extract directly to USB)",
-      "recommendedFor": "Extract and double-click PLiMS-Launch.bat on any USB drive with all modules pre-loaded",
-      "modulesIncluded": [
-        "OPAC Online Catalog",
-        "MARC21 / RDA Cataloguer",
-        "Circulation Desk (Issue/Return/Renew/Fines)",
-        "24/7 AI Librarian Bot",
-        "Barcode & QR Label Generator",
-        "Authority Control",
-        "Stock Verification & Audit",
-        "Reports & Analytics (PDF/Excel)",
-        "Multi-Branch Campus Control",
-        "ESC/POS Thermal Receipt Printer",
-        "Offline Localhost Server Engine"
-      ]
+      "recommendedFor": "Extract and double-click PLiMS.exe or PLiMS-Launch.bat on any folder or USB drive"
     }
   ]
 }

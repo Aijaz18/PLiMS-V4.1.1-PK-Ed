@@ -872,7 +872,16 @@ export function App() {
               if (portal) setLoginPortalMode(portal);
               setIsLoginViewOpen(true);
             }}
+            onOpenDesktopPackage={() => setIsDesktopPackageOpen(true)}
           />
+          <React.Suspense fallback={null}>
+            {isDesktopPackageOpen && (
+              <DesktopPackageModal
+                isOpen={isDesktopPackageOpen}
+                onClose={() => setIsDesktopPackageOpen(false)}
+              />
+            )}
+          </React.Suspense>
         </ErrorBoundary>
       );
     }
@@ -915,6 +924,14 @@ export function App() {
           onBackToOpac={() => setIsLoginViewOpen(false)}
           onOpenDesktopPackage={() => setIsDesktopPackageOpen(true)}
         />
+        <React.Suspense fallback={null}>
+          {isDesktopPackageOpen && (
+            <DesktopPackageModal
+              isOpen={isDesktopPackageOpen}
+              onClose={() => setIsDesktopPackageOpen(false)}
+            />
+          )}
+        </React.Suspense>
       </ErrorBoundary>
     );
   }

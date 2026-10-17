@@ -58,6 +58,7 @@ interface PublicOpacPageProps {
   isAuthenticated?: boolean;
   onOpenLogin: (portal?: 'STAFF' | 'MEMBER') => void;
   onReturnToDashboard?: () => void;
+  onOpenDesktopPackage?: () => void;
 }
 
 export const PublicOpacPage: React.FC<PublicOpacPageProps> = ({
@@ -67,7 +68,8 @@ export const PublicOpacPage: React.FC<PublicOpacPageProps> = ({
   currentUser,
   isAuthenticated = false,
   onOpenLogin,
-  onReturnToDashboard
+  onReturnToDashboard,
+  onOpenDesktopPackage
 }) => {
   // Navigation Section State: 'HOME' | 'OPAC' | 'BROWSE' | 'INFO' | 'ABOUT' | 'CONTACT'
   const [activeSection, setActiveSection] = useState<'HOME' | 'OPAC' | 'BROWSE' | 'INFO' | 'ABOUT' | 'CONTACT'>('HOME');
@@ -277,6 +279,16 @@ export const PublicOpacPage: React.FC<PublicOpacPageProps> = ({
                   <span>{settings.openingHours || 'Mon - Sat: 08:00 AM - 08:00 PM'}</span>
                 </div>
                 <div className="flex items-center space-x-2">
+                  {onOpenDesktopPackage && (
+                    <button
+                      onClick={onOpenDesktopPackage}
+                      className="px-2.5 py-1 rounded-md bg-amber-400 hover:bg-amber-300 text-slate-950 font-extrabold transition-all shadow-xs flex items-center space-x-1 cursor-pointer text-[11px]"
+                      title="Fix Installed Desktop 4.1.1 PK or Download Updated R2 Installers"
+                    >
+                      <Laptop className="w-3.5 h-3.5 text-slate-950" />
+                      <span>Desktop 4.1.1 PK (Fix / Download)</span>
+                    </button>
+                  )}
                   <button
                     onClick={() => onOpenLogin('STAFF')}
                     className="px-2.5 py-1 rounded-md bg-emerald-800/90 hover:bg-emerald-700 text-white font-bold transition-all shadow-xs flex items-center space-x-1 cursor-pointer border border-emerald-500/40 text-[11px]"
