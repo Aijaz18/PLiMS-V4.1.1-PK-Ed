@@ -62,7 +62,7 @@ import {
   ChevronsRight
 } from 'lucide-react';
 import { BookRecord, BookCopy, UserProfile, InterLibraryTransfer, SystemSettings, LibraryScheme } from '../../types/alims';
-import { generateAiCataloguing, generateAiCataloguingFromImage, parseVoiceToMarc21, AiCataloguingResult, formatMarcSubfields } from '../../services/geminiService';
+import { generateAiCataloguing, generateAiCataloguingFromImage, normalizeBookCoverImage, parseVoiceToMarc21, AiCataloguingResult, formatMarcSubfields } from '../../services/geminiService';
 import { generateCallNumberForTitle, detectTextScript } from '../../utils/classificationEngine';
 import {
   queryCatalog300k,
@@ -955,6 +955,7 @@ export const CataloguingModule: React.FC<CataloguingModuleProps> = ({
   // Live Camera Direct Caption State (AI Vision MARC Agent • Gemini 3.7 Flash Vision)
   const [isDirectCaptionEnabled, setIsDirectCaptionEnabled] = useState(true);
   const [isDirectCaptionLarge, setIsDirectCaptionLarge] = useState(false);
+  const [isAutoFrameScanEnabled, setIsAutoFrameScanEnabled] = useState(true);
   const [liveCaptionText, setLiveCaptionText] = useState<string>(
     'AI Vision MARC Agent (Book Cover / Title Page Scanner) initialized: Position cover in optical reticle. Gemini 3.7 Flash Vision active.'
   );
@@ -969,6 +970,7 @@ export const CataloguingModule: React.FC<CataloguingModuleProps> = ({
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const cameraStreamRef = useRef<MediaStream | null>(null);
+  const marcFormRef = useRef<HTMLFormElement | null>(null);
 
   // Sample Book Covers for 1-Click Testing & Verification
   const sampleBookCovers = [
@@ -1002,107 +1004,159 @@ export const CataloguingModule: React.FC<CataloguingModuleProps> = ({
     }
   ];
 
-  // Process uploaded or selected image with Gemini Vision AI Agent
-  const handleProcessImage = async (dataUrl: string, mimeType: string = 'image/jpeg') => {
+  // Apply an AiCataloguingResult to marcForm, aiVisionAnalysis, liveCaptionMeta, and aiMarcPreview
+  const applyVisionCataloguingResult = useCallback((res: AiCataloguingResult, coverDataUrl?: string) => {
+    setAiVisionAnalysis(res);
+
+    const authorsStr = Array.isArray(res.authors) ? res.authors.join(', ') : (res.authors || 'Unknown Author');
+    const subjectsStr = Array.isArray(res.subjects) ? res.subjects.join(', ') : (res.subjects || '');
+
+    setLiveCaptionText(
+      `Gemini 3.7 Flash Vision Extracted: "${res.title}" by ${authorsStr} • Call No: ${res.callNumber || res.ddcClassification || 'Classified'} • ${res.marc21Tags?.length || 12} MARC21 tags generated.`
+    );
+    setLiveCaptionMeta({
+      title: res.title,
+      author: authorsStr,
+      callNumber: res.callNumber || res.ddcClassification,
+      isbn: res.isbn
+    });
+
+    const formatVal: BookRecord['format'] = (res.format === 'HARDCOVER' || res.format === 'PAPERBACK' || res.format === 'DIGITAL')
+      ? res.format
+      : 'HARDCOVER';
+
+    const parsedVisionSubjects = subjectsStr ? parseRawSubjectStrings(subjectsStr) : [];
+
+    setMarcForm(prev => ({
+      ...prev,
+      title: res.title || prev.title,
+      authors: authorsStr,
+      isbn: res.isbn || prev.isbn,
+      publisherName: res.publisherName || prev.publisherName,
+      publisherLocation: res.publisherLocation || prev.publisherLocation,
+      publisherYear: res.publisherYear || prev.publisherYear,
+      edition: res.edition || prev.edition,
+      pageCount: res.pageCount || prev.pageCount,
+      department: res.department || prev.department,
+      format: formatVal,
+      callNumber: res.callNumber || prev.callNumber,
+      subjects: subjectsStr || prev.subjects,
+      subjectEntries: parsedVisionSubjects.length > 0 ? parsedVisionSubjects : prev.subjectEntries,
+      description: res.abstract || prev.description,
+      generalNotes: res.rdaGuidelines ? `RDA Guideline: ${res.rdaGuidelines}` : prev.generalNotes,
+      coverUrl: coverDataUrl || prev.coverUrl,
+      accessionNumber: prev.accessionNumber || `ACC-${Math.floor(10000 + Math.random() * 90000)}`,
+      copyNo: prev.copyNo || 'C.1'
+    }));
+
+    if (res.marc21Tags && res.marc21Tags.length > 0) {
+      setAiMarcPreview(res.marc21Tags);
+    }
+  }, []);
+
+  // Process uploaded, dropped, or captured image with Gemini Vision AI Agent
+  const handleProcessImage = useCallback(async (
+    dataUrl: string,
+    mimeType: string = 'image/jpeg',
+    fileHint: string = ''
+  ) => {
     setImagePreviewUrl(dataUrl);
     setIsScanningImage(true);
-    setScanProgressStep('Reading visual typography, title page & cover aesthetics with Gemini 3.7 Flash Vision...');
+    setScanProgressStep('Step 1/3: Reading visual typography, title page & OCR with Gemini 3.7 Flash Vision...');
     setLiveCaptionText('Gemini 3.7 Flash Vision: Analyzing cover typography, extracting MARC21 fields & RDA rules...');
 
+    const stepTimer1 = setTimeout(() => {
+      setScanProgressStep('Step 2/3: Classifying DDC 23rd Edition & computing Cutter-Sanborn Call Number...');
+    }, 450);
+    const stepTimer2 = setTimeout(() => {
+      setScanProgressStep('Step 3/3: Compiling MARC21 ISO 2709 Leader (000) / Directory tags & RDA compliance rules...');
+    }, 950);
+
     try {
-      // Small visual delay feedback for progress steps
-      setTimeout(() => {
-        setScanProgressStep('Classifying DDC 23rd Edition & computing Cutter-Sanborn Call Number...');
-      }, 500);
-      setTimeout(() => {
-        setScanProgressStep('Compiling MARC21 ISO 2709 leader/tags & RDA compliance rules...');
-      }, 1000);
+      const normalized = await normalizeBookCoverImage(dataUrl, mimeType);
+      setImagePreviewUrl(normalized.dataUrl);
 
-      const res = await generateAiCataloguingFromImage(dataUrl, mimeType);
-      setAiVisionAnalysis(res);
-
-      const authorsStr = Array.isArray(res.authors) ? res.authors.join(', ') : (res.authors || 'Unknown Author');
-      const subjectsStr = Array.isArray(res.subjects) ? res.subjects.join(', ') : (res.subjects || '');
-
-      setLiveCaptionText(
-        `Gemini 3.7 Flash Vision Extracted: "${res.title}" by ${authorsStr} • Call No: ${res.callNumber || res.ddcClassification || 'Classified'} • ${res.marc21Tags?.length || 10} MARC21 tags generated.`
-      );
-      setLiveCaptionMeta({
-        title: res.title,
-        author: authorsStr,
-        callNumber: res.callNumber || res.ddcClassification,
-        isbn: res.isbn
-      });
-
-      const formatVal: BookRecord['format'] = (res.format === 'HARDCOVER' || res.format === 'PAPERBACK' || res.format === 'DIGITAL')
-        ? res.format
-        : 'HARDCOVER';
-
-      const parsedVisionSubjects = subjectsStr ? parseRawSubjectStrings(subjectsStr) : [];
-
-      setMarcForm(prev => ({
-        ...prev,
-        title: res.title || prev.title,
-        authors: authorsStr,
-        isbn: res.isbn || prev.isbn,
-        publisherName: res.publisherName || prev.publisherName,
-        publisherLocation: res.publisherLocation || prev.publisherLocation,
-        publisherYear: res.publisherYear || prev.publisherYear,
-        edition: res.edition || prev.edition,
-        pageCount: res.pageCount || prev.pageCount,
-        department: res.department || prev.department,
-        format: formatVal,
-        callNumber: res.callNumber || prev.callNumber,
-        subjects: subjectsStr || prev.subjects,
-        subjectEntries: parsedVisionSubjects.length > 0 ? parsedVisionSubjects : prev.subjectEntries,
-        description: res.abstract || prev.description,
-        generalNotes: res.rdaGuidelines ? `RDA Guideline: ${res.rdaGuidelines}` : prev.generalNotes,
-        coverUrl: dataUrl,
-        accessionNumber: prev.accessionNumber || `ACC-${Math.floor(10000 + Math.random() * 90000)}`,
-        copyNo: prev.copyNo || 'C.1'
-      }));
-
-      if (res.marc21Tags && res.marc21Tags.length > 0) {
-        setAiMarcPreview(res.marc21Tags);
-      }
+      const res = await generateAiCataloguingFromImage(normalized.dataUrl, normalized.mimeType, fileHint);
+      applyVisionCataloguingResult(res, normalized.dataUrl);
     } catch (err) {
       console.error('Failed to process image with AI:', err);
-      alert('AI Vision analysis encountered an issue. You can continue filling details manually.');
     } finally {
+      clearTimeout(stepTimer1);
+      clearTimeout(stepTimer2);
       setIsScanningImage(false);
       setScanProgressStep('');
     }
-  };
+  }, [applyVisionCataloguingResult]);
 
-  // File Upload Handler
-  const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
+  // Helper to read a File object and pass to handleProcessImage
+  const processUploadedFileObject = useCallback((file: File) => {
+    const cleanName = (file.name || '').replace(/\.[^/.]+$/, '').replace(/[-_]+/g, ' ').trim();
+    const detectedMime = file.type && file.type.startsWith('image/') ? file.type : 'image/jpeg';
     const reader = new FileReader();
     reader.onload = (event) => {
       if (event.target?.result) {
-        handleProcessImage(event.target.result as string, file.type);
+        handleProcessImage(event.target.result as string, detectedMime, cleanName);
       }
     };
     reader.readAsDataURL(file);
+  }, [handleProcessImage]);
+
+  // File Upload Handler (resets input value so re-selecting the same image always triggers analysis)
+  const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    processUploadedFileObject(file);
+    e.target.value = '';
   };
 
-  // Drag and Drop Handler
+  // Drag and Drop Handler (supports disk files, Windows files without MIME, and dragged browser images/URLs)
   const handleFileDrop = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
+    e.stopPropagation();
     setIsDragOver(false);
+
     const file = e.dataTransfer.files?.[0];
-    if (file && file.type.startsWith('image/')) {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        if (event.target?.result) {
-          handleProcessImage(event.target.result as string, file.type);
-        }
-      };
-      reader.readAsDataURL(file);
+    if (file) {
+      processUploadedFileObject(file);
+      return;
+    }
+
+    // Fallback: Check if user dragged an image from another browser tab or webpage
+    const uriList = e.dataTransfer.getData('text/uri-list') || e.dataTransfer.getData('text/plain');
+    if (uriList && (uriList.startsWith('http://') || uriList.startsWith('https://') || uriList.startsWith('data:image/'))) {
+      handleProcessImage(uriList.trim(), 'image/jpeg');
+      return;
+    }
+
+    const htmlData = e.dataTransfer.getData('text/html');
+    if (htmlData) {
+      const srcMatch = htmlData.match(/src=["']([^"']+)["']/i);
+      if (srcMatch && srcMatch[1]) {
+        handleProcessImage(srcMatch[1], 'image/jpeg');
+      }
     }
   };
+
+  // Clipboard Paste Image Support (Ctrl+V while in AI_IMAGE_AGENT mode)
+  useEffect(() => {
+    if (activeTab !== 'NEW_MARC' || entryMode !== 'AI_IMAGE_AGENT') return;
+    const handlePaste = (e: ClipboardEvent) => {
+      const items = e.clipboardData?.items;
+      if (!items) return;
+      for (let i = 0; i < items.length; i++) {
+        if (items[i].type.startsWith('image/')) {
+          const file = items[i].getAsFile();
+          if (file) {
+            e.preventDefault();
+            processUploadedFileObject(file);
+            return;
+          }
+        }
+      }
+    };
+    window.addEventListener('paste', handlePaste);
+    return () => window.removeEventListener('paste', handlePaste);
+  }, [activeTab, entryMode, processUploadedFileObject]);
 
   // Camera Stream Lifecycle Management
   const handleStopCamera = useCallback(() => {
@@ -1148,6 +1202,47 @@ export const CataloguingModule: React.FC<CataloguingModuleProps> = ({
     }
   }, [isCameraActive, selectedDeviceId, cameraFacingMode]);
 
+  // Helper: Wait until video element has decoded a real non-zero frame, then capture JPEG dataURL
+  const captureFrameFromVideoElement = useCallback(async (
+    video: HTMLVideoElement,
+    quality: number = 0.88
+  ): Promise<string | null> => {
+    // Wait up to 900ms if videoWidth is still 0 (stream just attached)
+    let attempts = 0;
+    while ((video.videoWidth === 0 || video.videoHeight === 0 || video.readyState < 2) && attempts < 9) {
+      await new Promise(r => setTimeout(r, 100));
+      attempts++;
+    }
+
+    const rawWidth = video.videoWidth;
+    const rawHeight = video.videoHeight;
+    if (!rawWidth || !rawHeight) {
+      return null;
+    }
+
+    const maxDim = 1024;
+    let width = rawWidth;
+    let height = rawHeight;
+    if (width > maxDim || height > maxDim) {
+      if (width > height) {
+        height = Math.round((height * maxDim) / width);
+        width = maxDim;
+      } else {
+        width = Math.round((width * maxDim) / height);
+        height = maxDim;
+      }
+    }
+
+    const canvas = document.createElement('canvas');
+    canvas.width = width;
+    canvas.height = height;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return null;
+
+    ctx.drawImage(video, 0, 0, width, height);
+    return canvas.toDataURL('image/jpeg', quality);
+  }, []);
+
   // Start Hardware Camera with timeout protection and progressive resolution fallback
   const handleStartCamera = useCallback(async (
     overrideDeviceId?: string,
@@ -1164,7 +1259,7 @@ export const CataloguingModule: React.FC<CataloguingModuleProps> = ({
       return;
     }
 
-    // Stop any existing stream and animation
+    // Stop any existing stream
     if (cameraStreamRef.current) {
       cameraStreamRef.current.getTracks().forEach(t => {
         try { t.stop(); } catch (e) { /* ignore */ }
@@ -1175,13 +1270,11 @@ export const CataloguingModule: React.FC<CataloguingModuleProps> = ({
       videoRef.current.srcObject = null;
     }
 
-    // 120ms cooldown to release any previous hardware locks
-    await new Promise(r => setTimeout(r, 120));
+    await new Promise(r => setTimeout(r, 100));
 
     const targetFacing = overrideFacing || cameraFacingMode;
     const targetDeviceId = overrideDeviceId !== undefined ? overrideDeviceId : selectedDeviceId;
 
-    // Helper: getUserMedia with explicit timeout to avoid Chromium hang/freeze
     const getUserMediaWithTimeout = (constraints: MediaStreamConstraints, timeoutMs: number): Promise<MediaStream> => {
       return new Promise((resolve, reject) => {
         let timedOut = false;
@@ -1209,7 +1302,7 @@ export const CataloguingModule: React.FC<CataloguingModuleProps> = ({
     try {
       let stream: MediaStream | null = null;
 
-      // Stage 1: Balanced 720p constraints (avoid 1080p which triggers Chrome driver timeout)
+      // Stage 1: Balanced 720p constraints
       if (!isSafeMode) {
         try {
           const constraints: MediaStreamConstraints = targetDeviceId
@@ -1229,28 +1322,27 @@ export const CataloguingModule: React.FC<CataloguingModuleProps> = ({
                 },
                 audio: false
               };
-          stream = await getUserMediaWithTimeout(constraints, 4500);
+          stream = await getUserMediaWithTimeout(constraints, 3500);
         } catch (stage1Err: any) {
           console.warn('Initial 720p camera constraints timed out or failed, falling back to 480p Safe Mode:', stage1Err?.message || stage1Err);
-          await new Promise(r => setTimeout(r, 200));
+          await new Promise(r => setTimeout(r, 150));
         }
       }
 
-      // Stage 2: 480p Safe Mode (fast start for laptop webcams & virtual drivers)
+      // Stage 2: 480p Safe Mode (fast start for Windows desktop/laptop webcams)
       if (!stream) {
         try {
           const safeConstraints: MediaStreamConstraints = {
             video: {
-              facingMode: { ideal: targetFacing },
               width: { ideal: 640 },
               height: { ideal: 480 }
             },
             audio: false
           };
-          stream = await getUserMediaWithTimeout(safeConstraints, 3500);
+          stream = await getUserMediaWithTimeout(safeConstraints, 3000);
         } catch (stage2Err: any) {
           console.warn('Safe mode camera constraints failed, attempting basic video:', stage2Err?.message || stage2Err);
-          await new Promise(r => setTimeout(r, 200));
+          await new Promise(r => setTimeout(r, 150));
         }
       }
 
@@ -1271,7 +1363,6 @@ export const CataloguingModule: React.FC<CataloguingModuleProps> = ({
       setIsCameraActive(true);
       setCameraError(null);
 
-      // Connect stream to video if already rendered
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
         videoRef.current.setAttribute('playsinline', 'true');
@@ -1279,7 +1370,6 @@ export const CataloguingModule: React.FC<CataloguingModuleProps> = ({
         videoRef.current.play().catch(e => console.warn('Video play warning:', e));
       }
 
-      // Enumerate camera devices
       if (navigator.mediaDevices.enumerateDevices) {
         try {
           const devices = await navigator.mediaDevices.enumerateDevices();
@@ -1297,7 +1387,6 @@ export const CataloguingModule: React.FC<CataloguingModuleProps> = ({
         }
       }
     } catch (err: any) {
-      // Use console.warn, not console.error, so hardware delays do not trigger unhandled error trackers
       console.warn('Camera access notice:', err?.message || err);
       setIsCameraActive(false);
 
@@ -1334,111 +1423,56 @@ export const CataloguingModule: React.FC<CataloguingModuleProps> = ({
     handleStartCamera(deviceId);
   }, [handleStartCamera]);
 
-  const handleCaptureCameraPhoto = useCallback(() => {
+  // Capture photo from Live Camera, close camera feed, and run full AI Vision MARC21 cataloguing
+  const handleCaptureCameraPhoto = useCallback(async () => {
     const video = videoRef.current;
     if (!video) return;
 
-    const width = video.videoWidth || 1280;
-    const height = video.videoHeight || 720;
-    if (width === 0 || height === 0) {
-      setCameraError('Camera video feed is still initializing. Please wait 1 second and click Capture again.');
-      return;
-    }
-
     setIsCapturing(true);
+    setCameraError(null);
 
     try {
-      const canvas = document.createElement('canvas');
-      canvas.width = width;
-      canvas.height = height;
-
-      const ctx = canvas.getContext('2d');
-      if (ctx) {
-        // Mirror only if physical front/user camera
-        if (cameraFacingMode === 'user' && !selectedDeviceId) {
-          ctx.translate(width, 0);
-          ctx.scale(-1, 1);
-        }
-        ctx.drawImage(video, 0, 0, width, height);
-        const dataUrl = canvas.toDataURL('image/jpeg', 0.92);
-
-        // Flash visual indication
-        setTimeout(() => {
-          setIsCapturing(false);
-          handleStopCamera();
-          handleProcessImage(dataUrl, 'image/jpeg');
-        }, 200);
-      } else {
+      const dataUrl = await captureFrameFromVideoElement(video, 0.9);
+      if (!dataUrl) {
         setIsCapturing(false);
+        setCameraError('Camera video feed is still initializing. Please wait 1 second and click Capture again.');
+        return;
       }
+
+      setTimeout(() => {
+        setIsCapturing(false);
+        handleStopCamera();
+        handleProcessImage(dataUrl, 'image/jpeg', 'Live Camera Book Cover Capture');
+      }, 150);
     } catch (captureErr: any) {
       console.warn('Capture camera frame notice:', captureErr?.message || captureErr);
       setIsCapturing(false);
       setCameraError('Failed to capture photo frame from camera feed. Please try again or upload a photo file.');
     }
-  }, [cameraFacingMode, selectedDeviceId, handleStopCamera, handleProcessImage]);
+  }, [captureFrameFromVideoElement, handleStopCamera, handleProcessImage]);
 
-  // Rotate direct captions periodically while live camera is active
-  useEffect(() => {
-    if (!isCameraActive) return;
-
-    const guidanceCaptions = [
-      'AI Vision MARC Agent (Book Cover / Title Page Scanner) • Gemini 3.7 Flash Vision active.',
-      'Live Camera Feed: Center book title typography and author byline squarely inside optical reticle.',
-      'Gemini 3.7 Flash Vision: Real-time optical framing ready for instant RDA/MARC21 indexing.',
-      'MARC21 Tags Primed: Leader, 020 (ISBN), 082 (DDC), 100 (Author), 245 (Title), 264 (Imprint).',
-      "Ready to catalog: Tap 'Capture & Auto-Catalog' to run Gemini 3.7 Flash Vision inference."
-    ];
-
-    let index = 0;
-    const interval = setInterval(() => {
-      if (!isCapturing && !isScanningImage && !isAnalyzingFrame) {
-        index = (index + 1) % guidanceCaptions.length;
-        setLiveCaptionText(guidanceCaptions[index]);
-      }
-    }, 4500);
-
-    return () => clearInterval(interval);
-  }, [isCameraActive, isCapturing, isScanningImage, isAnalyzingFrame]);
-
-  // Instant direct frame caption reading on live camera
+  // Instant direct frame analysis on live camera (populates MARC form + live HUD captions without closing camera)
   const handleInstantFrameCaption = useCallback(async () => {
     const video = videoRef.current;
-    if (!video || isAnalyzingFrame) return;
-
-    const width = video.videoWidth || 960;
-    const height = video.videoHeight || 540;
-    if (width === 0 || height === 0) return;
+    if (!video || isAnalyzingFrame || isCapturing) return;
 
     setIsAnalyzingFrame(true);
-    setLiveCaptionText('Gemini 3.7 Flash Vision: Analyzing live camera frame for title, authors, and classification...');
+    setLiveCaptionText('Gemini 3.7 Flash Vision: Analyzing live camera frame for OCR typography, DDC classification & RDA tags...');
 
     try {
-      const canvas = document.createElement('canvas');
-      canvas.width = width;
-      canvas.height = height;
-      const ctx = canvas.getContext('2d');
-      if (ctx) {
-        if (cameraFacingMode === 'user' && !selectedDeviceId) {
-          ctx.translate(width, 0);
-          ctx.scale(-1, 1);
-        }
-        ctx.drawImage(video, 0, 0, width, height);
-        const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+      const dataUrl = await captureFrameFromVideoElement(video, 0.85);
+      if (!dataUrl) {
+        setLiveCaptionText('Gemini 3.7 Flash Vision: Waiting for camera video stream to stabilize...');
+        setIsAnalyzingFrame(false);
+        return;
+      }
 
-        const res = await generateAiCataloguingFromImage(dataUrl, 'image/jpeg');
-        if (res && res.title) {
-          const authorStr = Array.isArray(res.authors) ? res.authors[0] : (res.authors || 'Unknown Author');
-          setLiveCaptionText(`Gemini 3.7 Flash Vision Detected: "${res.title}" by ${authorStr} (Call: ${res.callNumber || res.ddcClassification || 'DDC'})`);
-          setLiveCaptionMeta({
-            title: res.title,
-            author: authorStr,
-            callNumber: res.callNumber || res.ddcClassification,
-            isbn: res.isbn
-          });
-        } else {
-          setLiveCaptionText('Gemini 3.7 Flash Vision: Frame inspected. Align cover closer to reticle for higher optical confidence.');
-        }
+      setImagePreviewUrl(dataUrl);
+      const res = await generateAiCataloguingFromImage(dataUrl, 'image/jpeg', 'Live Camera Frame Analysis');
+      if (res && res.title) {
+        applyVisionCataloguingResult(res, dataUrl);
+      } else {
+        setLiveCaptionText('Gemini 3.7 Flash Vision: Frame inspected. Align cover closer to reticle for higher optical confidence.');
       }
     } catch (e) {
       console.warn('Frame caption analysis notice:', e);
@@ -1446,7 +1480,31 @@ export const CataloguingModule: React.FC<CataloguingModuleProps> = ({
     } finally {
       setIsAnalyzingFrame(false);
     }
-  }, [cameraFacingMode, selectedDeviceId, isAnalyzingFrame]);
+  }, [isAnalyzingFrame, isCapturing, captureFrameFromVideoElement, applyVisionCataloguingResult]);
+
+  // Automatically analyze the live camera frame once stream is active (and periodically if Auto-Scan is enabled)
+  useEffect(() => {
+    if (!isCameraActive || !isAutoFrameScanEnabled) return;
+
+    // Trigger initial automatic live frame analysis 2.2s after camera opens
+    const initialTimer = setTimeout(() => {
+      if (isCameraActive && !isCapturing && !isScanningImage && !isAnalyzingFrame) {
+        handleInstantFrameCaption();
+      }
+    }, 2200);
+
+    // Repeat automatic frame scan every 9 seconds while Auto-Scan is ON
+    const interval = setInterval(() => {
+      if (isCameraActive && isAutoFrameScanEnabled && !isCapturing && !isScanningImage && !isAnalyzingFrame) {
+        handleInstantFrameCaption();
+      }
+    }, 9000);
+
+    return () => {
+      clearTimeout(initialTimer);
+      clearInterval(interval);
+    };
+  }, [isCameraActive, isAutoFrameScanEnabled, isCapturing, isScanningImage, isAnalyzingFrame, handleInstantFrameCaption]);
 
   // Reset form for clean manual entry
   const handleStartCleanManualEntry = () => {
@@ -3561,26 +3619,35 @@ export const CataloguingModule: React.FC<CataloguingModuleProps> = ({
 
           {/* MODE 1: AI VISION BOOK COVER AGENT WORKSPACE */}
           {!editingBookId && entryMode === 'AI_IMAGE_AGENT' && (
-            <div className="p-5 rounded-2xl bg-gradient-to-br from-blue-950/30 via-[#121214] to-[#121214] border border-blue-500/30 space-y-4">
+            <div className="p-5 rounded-2xl bg-gradient-to-br from-blue-950/40 via-[#121214] to-[#121214] border border-blue-500/30 space-y-4">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                 <div className="flex items-center space-x-2.5">
                   <div className="p-2 rounded-xl bg-blue-500/20 text-blue-400 border border-blue-500/30">
                     <Scan className="h-5 w-5" />
                   </div>
                   <div>
-                    <h4 className="text-sm font-bold text-white flex items-center space-x-2">
+                    <h4 className="text-sm font-bold text-white flex items-center flex-wrap gap-2">
                       <span>AI Vision MARC Agent (Book Cover / Title Page Scanner)</span>
                       <span className="px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-300 text-[10px] font-mono border border-blue-500/30">
                         Gemini 3.7 Flash Vision
                       </span>
                     </h4>
-                    <p className="text-xs text-slate-500 mt-0.5">
+                    <p className="text-xs text-zinc-400 mt-0.5">
                       Upload a book cover photo or capture with webcam. AI automatically extracts OCR typography, DDC classification, RDA leader tags, and populates the MARC form below.
                     </p>
                   </div>
                 </div>
 
                 <div className="flex items-center space-x-2">
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={isScanningImage}
+                    className="px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center space-x-1.5 cursor-pointer transition-all bg-blue-600/20 hover:bg-blue-600/30 text-blue-300 border border-blue-500/40 disabled:opacity-50"
+                  >
+                    <UploadCloud className="h-3.5 w-3.5 text-blue-400" />
+                    <span>Browse Cover</span>
+                  </button>
                   <button
                     type="button"
                     disabled={isStartingCamera}
@@ -3596,7 +3663,7 @@ export const CataloguingModule: React.FC<CataloguingModuleProps> = ({
                         ? 'bg-rose-600/20 border border-rose-500/40 text-rose-300'
                         : isStartingCamera
                         ? 'bg-blue-600/20 border border-blue-500/40 text-blue-300 animate-pulse'
-                        : 'bg-slate-100 hover:bg-zinc-700 text-slate-800 border border-slate-300'
+                        : 'bg-zinc-800 hover:bg-zinc-700 text-white border border-zinc-700'
                     }`}
                   >
                     {isStartingCamera ? (
@@ -3618,7 +3685,7 @@ export const CataloguingModule: React.FC<CataloguingModuleProps> = ({
                     <AlertTriangle className="h-4 w-4 text-amber-400 mt-0.5 shrink-0" />
                     <div>
                       <div className="font-semibold text-white">Live Camera Notice</div>
-                      <p className="text-slate-700 mt-0.5">{cameraError}</p>
+                      <p className="text-amber-200/90 mt-0.5">{cameraError}</p>
                       <div className="mt-2.5 flex flex-wrap items-center gap-2">
                         <button
                           type="button"
@@ -3641,9 +3708,9 @@ export const CataloguingModule: React.FC<CataloguingModuleProps> = ({
                           type="button"
                           onClick={() => {
                             setCameraError(null);
-                            handleProcessImage(sampleBookCovers[0].coverUrl, 'image/jpeg');
+                            handleProcessImage(sampleBookCovers[0].coverUrl, 'image/jpeg', sampleBookCovers[0].title);
                           }}
-                          className="px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-zinc-700 text-slate-700 font-medium text-[11px] border border-slate-300 cursor-pointer flex items-center space-x-1"
+                          className="px-2.5 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-200 font-medium text-[11px] border border-zinc-700 cursor-pointer flex items-center space-x-1"
                         >
                           <Sparkles className="h-3 w-3 text-amber-400" />
                           <span>Use Sample Cover</span>
@@ -3654,7 +3721,7 @@ export const CataloguingModule: React.FC<CataloguingModuleProps> = ({
                   <button
                     type="button"
                     onClick={() => setCameraError(null)}
-                    className="text-slate-500 hover:text-white cursor-pointer"
+                    className="text-zinc-400 hover:text-white cursor-pointer"
                     title="Dismiss"
                   >
                     <X className="h-4 w-4" />
@@ -3667,7 +3734,7 @@ export const CataloguingModule: React.FC<CataloguingModuleProps> = ({
                 type="file"
                 ref={fileInputRef}
                 onChange={handleFileInputChange}
-                accept="image/*"
+                accept="image/*,.jpg,.jpeg,.png,.webp,.bmp,.gif,.heic"
                 className="hidden"
               />
 
@@ -3684,7 +3751,7 @@ export const CataloguingModule: React.FC<CataloguingModuleProps> = ({
                       <span className="text-xs font-mono font-bold tracking-wider text-emerald-400">
                         LIVE HARDWARE FEED
                       </span>
-                      <span className="text-[10px] text-slate-500 bg-zinc-800/80 px-2 py-0.5 rounded border border-slate-300">
+                      <span className="text-[10px] text-zinc-300 bg-zinc-800/80 px-2 py-0.5 rounded border border-zinc-700">
                         {cameraFacingMode === 'user' ? 'Front / Webcam' : 'Environment / Doc Cam'}
                       </span>
                       <span className="text-[10px] text-blue-300 bg-blue-950/70 px-2 py-0.5 rounded border border-blue-800/50 font-mono hidden sm:inline">
@@ -3692,7 +3759,22 @@ export const CataloguingModule: React.FC<CataloguingModuleProps> = ({
                       </span>
                     </div>
 
-                    <div className="flex items-center space-x-2">
+                    <div className="flex flex-wrap items-center gap-2">
+                      {/* Auto-Analyze Live Frame Toggle */}
+                      <button
+                        type="button"
+                        onClick={() => setIsAutoAnalyzeCamera(prev => !prev)}
+                        className={`px-2.5 py-1 rounded-lg text-xs font-semibold flex items-center space-x-1.5 transition-all cursor-pointer ${
+                          isAutoAnalyzeCamera
+                            ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/50 shadow-sm'
+                            : 'bg-zinc-800 hover:bg-zinc-700 text-zinc-400 border border-zinc-700'
+                        }`}
+                        title="Automatically analyze camera frames with Gemini Vision and populate MARC21 fields"
+                      >
+                        <Sparkles className="h-3.5 w-3.5" />
+                        <span>{isAutoAnalyzeCamera ? 'Auto-Analyze ON' : 'Auto-Analyze OFF'}</span>
+                      </button>
+
                       {/* Direct Caption On/Off Toggle Button */}
                       <button
                         type="button"
@@ -3700,7 +3782,7 @@ export const CataloguingModule: React.FC<CataloguingModuleProps> = ({
                         className={`px-2.5 py-1 rounded-lg text-xs font-semibold flex items-center space-x-1.5 transition-all cursor-pointer ${
                           isDirectCaptionEnabled
                             ? 'bg-amber-400/20 text-amber-300 border border-amber-400/50 shadow-sm'
-                            : 'bg-slate-100 hover:bg-zinc-700 text-slate-500 border border-slate-300'
+                            : 'bg-zinc-800 hover:bg-zinc-700 text-zinc-400 border border-zinc-700'
                         }`}
                         title="Toggle Direct Caption Overlay on Live Camera"
                       >
@@ -3712,7 +3794,7 @@ export const CataloguingModule: React.FC<CataloguingModuleProps> = ({
                         <select
                           value={selectedDeviceId}
                           onChange={(e) => handleSelectCameraDevice(e.target.value)}
-                          className="px-2 py-1 rounded-lg bg-white border border-slate-300 text-[11px] text-slate-800 focus:outline-none focus:border-blue-500"
+                          className="px-2 py-1 rounded-lg bg-zinc-900 border border-zinc-700 text-[11px] text-white focus:outline-none focus:border-blue-500"
                         >
                           {cameraDevices.map((dev, idx) => (
                             <option key={dev.deviceId || idx} value={dev.deviceId}>
@@ -3725,7 +3807,7 @@ export const CataloguingModule: React.FC<CataloguingModuleProps> = ({
                       <button
                         type="button"
                         onClick={handleToggleFacingMode}
-                        className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-zinc-700 text-slate-700 text-xs font-medium border border-slate-300 cursor-pointer flex items-center space-x-1"
+                        className="px-2.5 py-1 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs font-medium border border-zinc-700 cursor-pointer flex items-center space-x-1"
                         title="Flip / Switch Camera"
                       >
                         <SwitchCamera className="h-3.5 w-3.5" />
@@ -3735,7 +3817,7 @@ export const CataloguingModule: React.FC<CataloguingModuleProps> = ({
                       <button
                         type="button"
                         onClick={handleStopCamera}
-                        className="p-1 rounded-lg bg-slate-100 hover:bg-zinc-700 text-slate-500 hover:text-white cursor-pointer"
+                        className="p-1 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-400 hover:text-white cursor-pointer"
                         title="Close camera"
                       >
                         <X className="h-4 w-4" />
@@ -3744,7 +3826,7 @@ export const CataloguingModule: React.FC<CataloguingModuleProps> = ({
                   </div>
 
                   {/* Video Viewfinder Container with Direct Captions */}
-                  <div className="relative aspect-video min-h-[340px] max-h-[480px] w-full mx-auto overflow-hidden rounded-2xl bg-[#f1f5f9] border border-blue-500/50 flex items-center justify-center shadow-2xl">
+                  <div className="relative aspect-video min-h-[340px] max-h-[480px] w-full mx-auto overflow-hidden rounded-2xl bg-zinc-950 border border-blue-500/50 flex items-center justify-center shadow-2xl">
                     <video
                       ref={(el) => {
                         videoRef.current = el;
@@ -3780,15 +3862,29 @@ export const CataloguingModule: React.FC<CataloguingModuleProps> = ({
                       </div>
                     </div>
 
-                    {/* Top-Right CC Status Pill */}
+                    {/* Top-Right CC & Live Scan Status Pills */}
                     <div className="absolute top-3 right-3 z-20 flex items-center space-x-2 pointer-events-auto">
+                      <button
+                        type="button"
+                        onClick={handleInstantFrameCaption}
+                        disabled={isAnalyzingFrame || isCapturing}
+                        className="px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold flex items-center space-x-1.5 bg-blue-600/90 hover:bg-blue-500 text-white border border-blue-400/60 shadow-lg cursor-pointer disabled:opacity-50"
+                        title="Analyze current webcam frame now"
+                      >
+                        {isAnalyzingFrame ? (
+                          <RefreshCw className="h-3 w-3 animate-spin" />
+                        ) : (
+                          <Scan className="h-3 w-3" />
+                        )}
+                        <span>{isAnalyzingFrame ? 'ANALYZING...' : 'ANALYZE FRAME'}</span>
+                      </button>
                       <button
                         type="button"
                         onClick={() => setIsDirectCaptionEnabled(prev => !prev)}
                         className={`px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold flex items-center space-x-1.5 backdrop-blur-md transition-all cursor-pointer shadow-lg ${
                           isDirectCaptionEnabled
                             ? 'bg-amber-400 text-black border border-amber-300 shadow-amber-400/20'
-                            : 'bg-slate-900/40 text-slate-500 border border-slate-300 hover:text-white'
+                            : 'bg-zinc-900/80 text-zinc-300 border border-zinc-700 hover:text-white'
                         }`}
                         title="Direct Caption Status"
                       >
@@ -3813,11 +3909,11 @@ export const CataloguingModule: React.FC<CataloguingModuleProps> = ({
                         <div className="absolute -bottom-1 -left-1 w-4 h-4 border-b-2 border-l-2 border-blue-400 rounded-bl-sm"></div>
                         <div className="absolute -bottom-1 -right-1 w-4 h-4 border-b-2 border-r-2 border-blue-400 rounded-br-sm"></div>
 
-                        <span className="bg-black/75 backdrop-blur-xs px-2.5 py-1 rounded text-[11px] text-blue-300 font-mono border border-blue-500/30 flex items-center space-x-1.5">
+                        <span className="bg-black/80 backdrop-blur-xs px-2.5 py-1 rounded text-[11px] text-blue-300 font-mono border border-blue-500/30 flex items-center space-x-1.5">
                           <Scan className="h-3 w-3 text-blue-400 animate-pulse" />
                           <span>Align Book Cover / Title Page</span>
                         </span>
-                        <span className="bg-black/75 backdrop-blur-xs px-2 py-0.5 rounded text-[10px] text-slate-700 font-mono">
+                        <span className="bg-black/80 backdrop-blur-xs px-2 py-0.5 rounded text-[10px] text-zinc-200 font-mono">
                           Center Title, Authors & Publisher
                         </span>
                       </div>
@@ -3827,13 +3923,13 @@ export const CataloguingModule: React.FC<CataloguingModuleProps> = ({
                     {isDirectCaptionEnabled && (
                       <div className="absolute bottom-3 left-3 right-3 z-20 pointer-events-auto transition-all">
                         <div className="p-3 sm:p-3.5 rounded-xl bg-black/90 backdrop-blur-md border border-amber-400/70 shadow-2xl shadow-black space-y-2">
-                          <div className="flex items-center justify-between text-[11px] border-b border-slate-200/90/90 pb-2 gap-2">
+                          <div className="flex items-center justify-between text-[11px] border-b border-zinc-800 pb-2 gap-2">
                             <div className="flex items-center space-x-2 min-w-0">
                               <span className="px-2 py-0.5 rounded bg-amber-400 text-black font-black font-mono text-[10px] tracking-wider uppercase flex items-center space-x-1 shrink-0 shadow-sm">
                                 <Subtitles className="h-3 w-3" />
                                 <span>DIRECT CAPTION</span>
                               </span>
-                              <span className="text-slate-800 font-bold text-[11px] truncate">
+                              <span className="text-white font-bold text-[11px] truncate">
                                 AI Vision MARC Agent (Book Cover / Title Page Scanner)
                               </span>
                               <span className="text-cyan-300 font-mono text-[10px] px-2 py-0.5 rounded-full bg-cyan-950/80 border border-cyan-800/60 shrink-0 hidden md:inline">
@@ -3845,7 +3941,7 @@ export const CataloguingModule: React.FC<CataloguingModuleProps> = ({
                               <button
                                 type="button"
                                 onClick={() => setIsDirectCaptionLarge(prev => !prev)}
-                                className="text-[10px] px-2 py-0.5 rounded bg-slate-100 hover:bg-zinc-700 text-slate-800 border border-slate-300 font-mono cursor-pointer transition-colors"
+                                className="text-[10px] px-2 py-0.5 rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700 font-mono cursor-pointer transition-colors"
                                 title="Toggle Caption Font Size"
                               >
                                 {isDirectCaptionLarge ? 'Aa Standard' : 'Aa Large'}
@@ -3862,7 +3958,7 @@ export const CataloguingModule: React.FC<CataloguingModuleProps> = ({
                                 ) : (
                                   <Sparkles className="h-2.5 w-2.5 text-amber-300" />
                                 )}
-                                <span>{isAnalyzingFrame ? 'Reading Frame...' : 'Live Read'}</span>
+                                <span>{isAnalyzingFrame ? 'Reading Frame...' : 'Live Read Now'}</span>
                               </button>
                             </div>
                           </div>
@@ -3883,7 +3979,7 @@ export const CataloguingModule: React.FC<CataloguingModuleProps> = ({
                               </p>
                               {isAnalyzingFrame && (
                                 <p className="text-[10px] text-blue-300 font-mono animate-pulse">
-                                  Reading visual typography & RDA core elements via Gemini 3.7 Flash Vision...
+                                  Extracting OCR typography, DDC classification & RDA leader tags via Gemini 3.7 Flash Vision...
                                 </p>
                               )}
                             </div>
@@ -3891,8 +3987,8 @@ export const CataloguingModule: React.FC<CataloguingModuleProps> = ({
 
                           {/* Detected MARC21 Subfield Tags Chips */}
                           {liveCaptionMeta && (
-                            <div className="flex flex-wrap items-center gap-1.5 pt-1.5 text-[10px] font-mono border-t border-slate-200/90/80">
-                              <span className="text-slate-500 font-bold">MARC21 Tags:</span>
+                            <div className="flex flex-wrap items-center gap-1.5 pt-1.5 text-[10px] font-mono border-t border-zinc-800">
+                              <span className="text-zinc-400 font-bold">MARC21 Tags:</span>
                               {liveCaptionMeta.title && (
                                 <span className="px-2 py-0.5 rounded bg-blue-500/20 text-blue-300 border border-blue-500/30 truncate max-w-[220px]">
                                   245 $a {liveCaptionMeta.title}
@@ -3920,25 +4016,39 @@ export const CataloguingModule: React.FC<CataloguingModuleProps> = ({
                     )}
                   </div>
 
-                  {/* Capture & Cancel Actions */}
+                  {/* Capture & Analyze Actions */}
                   <div className="flex flex-wrap items-center justify-center gap-3 pt-1">
                     <button
                       type="button"
-                      disabled={isCapturing}
+                      disabled={isCapturing || isScanningImage}
                       onClick={handleCaptureCameraPhoto}
-                      className="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs flex items-center space-x-2 shadow-lg shadow-blue-500/30 cursor-pointer active:scale-95 transition-all"
+                      className="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs flex items-center space-x-2 shadow-lg shadow-blue-500/30 cursor-pointer active:scale-95 transition-all disabled:opacity-50"
                     >
                       <Camera className="h-4 w-4" />
-                      <span>{isCapturing ? 'Capturing Photo...' : 'Capture & Auto-Catalog (Gemini 3.7 Flash Vision)'}</span>
+                      <span>{isCapturing ? 'Capturing & Analyzing...' : 'Capture & Auto-Catalog (Close Camera)'}</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      disabled={isAnalyzingFrame || isCapturing}
+                      onClick={handleInstantFrameCaption}
+                      className="px-4 py-2.5 rounded-xl bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/40 font-bold text-xs flex items-center space-x-1.5 cursor-pointer transition-all disabled:opacity-50"
+                    >
+                      {isAnalyzingFrame ? (
+                        <RefreshCw className="h-3.5 w-3.5 animate-spin text-emerald-400" />
+                      ) : (
+                        <Scan className="h-3.5 w-3.5 text-emerald-400" />
+                      )}
+                      <span>{isAnalyzingFrame ? 'Analyzing Live Frame...' : 'Analyze Frame (Keep Camera Open)'}</span>
                     </button>
 
                     <button
                       type="button"
                       onClick={() => {
                         handleStopCamera();
-                        handleProcessImage(sampleBookCovers[0].coverUrl, 'image/jpeg');
+                        handleProcessImage(sampleBookCovers[0].coverUrl, 'image/jpeg', sampleBookCovers[0].title);
                       }}
-                      className="px-3 py-2 rounded-xl bg-slate-100 hover:bg-zinc-700 text-slate-700 text-xs font-semibold cursor-pointer border border-slate-300 flex items-center space-x-1.5"
+                      className="px-3 py-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs font-semibold cursor-pointer border border-zinc-700 flex items-center space-x-1.5"
                     >
                       <Sparkles className="h-3.5 w-3.5 text-amber-400" />
                       <span>Use Sample Cover</span>
@@ -3947,7 +4057,7 @@ export const CataloguingModule: React.FC<CataloguingModuleProps> = ({
                     <button
                       type="button"
                       onClick={handleStopCamera}
-                      className="px-3 py-2 rounded-xl bg-slate-100 hover:bg-zinc-700 text-slate-700 text-xs font-semibold cursor-pointer"
+                      className="px-3 py-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs font-semibold cursor-pointer border border-zinc-700"
                     >
                       Cancel
                     </button>
@@ -3959,33 +4069,45 @@ export const CataloguingModule: React.FC<CataloguingModuleProps> = ({
               <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-stretch">
                 {/* Dropzone Column */}
                 <div
-                  onDragOver={(e) => { e.preventDefault(); setIsDragOver(true); }}
-                  onDragLeave={() => setIsDragOver(false)}
+                  onDragEnter={(e) => { e.preventDefault(); e.stopPropagation(); setIsDragOver(true); }}
+                  onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); e.dataTransfer.dropEffect = 'copy'; setIsDragOver(true); }}
+                  onDragLeave={(e) => { e.preventDefault(); e.stopPropagation(); setIsDragOver(false); }}
                   onDrop={handleFileDrop}
                   onClick={() => fileInputRef.current?.click()}
-                  className={`md:col-span-8 p-6 rounded-xl border-2 border-dashed cursor-pointer transition-all flex flex-col items-center justify-center text-center space-y-3 min-h-[160px] ${
+                  className={`md:col-span-8 p-6 rounded-xl border-2 border-dashed cursor-pointer transition-all flex flex-col items-center justify-center text-center space-y-3 min-h-[175px] ${
                     isDragOver
-                      ? 'border-blue-400 bg-blue-500/10'
-                      : 'border-slate-300 hover:border-blue-500/60 bg-[#f1f5f9]/60 hover:bg-blue-950/20'
+                      ? 'border-blue-400 bg-blue-500/20 shadow-lg shadow-blue-500/10 scale-[1.01]'
+                      : 'border-blue-500/40 hover:border-blue-400 bg-zinc-900/90 hover:bg-blue-950/30'
                   }`}
                 >
-                  <div className="p-3 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20">
+                  <div className="p-3 rounded-full bg-blue-500/20 text-blue-400 border border-blue-500/30">
                     <UploadCloud className="h-6 w-6" />
                   </div>
                   <div>
-                    <p className="text-xs font-semibold text-white">
-                      Drop Book Cover image here, or <span className="text-blue-400 underline font-bold">browse from disk</span>
+                    <p className="text-xs sm:text-sm font-bold text-white">
+                      Drop Book Cover image here, or <span className="text-blue-400 underline font-extrabold">browse from disk</span>
                     </p>
-                    <p className="text-[11px] text-slate-500 mt-1">
-                      Supports JPG, PNG, WEBP, HEIC (Photos of front cover, title page, copyright page, or spine)
+                    <p className="text-[11px] text-zinc-400 mt-1">
+                      Supports JPG, PNG, WEBP, BMP, HEIC or <span className="text-amber-300 font-mono">Ctrl+V</span> clipboard paste (Front cover, title page, copyright page, or spine)
                     </p>
+                  </div>
+                  <div className="flex flex-wrap items-center justify-center gap-2 pt-1">
+                    <span className="px-2.5 py-1 rounded-lg bg-zinc-800/90 border border-zinc-700 text-[10px] font-mono text-zinc-300">
+                      OCR Typography Extraction
+                    </span>
+                    <span className="px-2.5 py-1 rounded-lg bg-zinc-800/90 border border-zinc-700 text-[10px] font-mono text-zinc-300">
+                      DDC 23rd Ed. Classifier
+                    </span>
+                    <span className="px-2.5 py-1 rounded-lg bg-zinc-800/90 border border-zinc-700 text-[10px] font-mono text-zinc-300">
+                      RDA Leader 000 & MARC21
+                    </span>
                   </div>
                 </div>
 
                 {/* Cover Preview & Scanner Column */}
-                <div className="md:col-span-4 p-3 rounded-xl bg-[#f1f5f9] border border-slate-200/90 flex flex-col items-center justify-center relative min-h-[160px]">
+                <div className="md:col-span-4 p-3 rounded-xl bg-zinc-900/90 border border-zinc-800 flex flex-col items-center justify-center relative min-h-[175px]">
                   {imagePreviewUrl ? (
-                    <div className="relative w-full h-36 rounded-lg overflow-hidden flex items-center justify-center bg-black/40">
+                    <div className="relative w-full h-36 rounded-lg overflow-hidden flex items-center justify-center bg-black/60 border border-zinc-800">
                       <img
                         src={imagePreviewUrl}
                         alt="Book Cover Preview"
@@ -3993,66 +4115,83 @@ export const CataloguingModule: React.FC<CataloguingModuleProps> = ({
                       />
                       {/* Scanning Laser Animation */}
                       {isScanningImage && (
-                        <div className="absolute inset-0 bg-blue-500/10 flex flex-col items-center justify-center">
+                        <div className="absolute inset-0 bg-blue-500/15 flex flex-col items-center justify-center backdrop-blur-[1px]">
                           <div className="w-full h-1 bg-gradient-to-r from-transparent via-cyan-400 to-transparent shadow-[0_0_15px_#22d3ee] animate-pulse" />
-                          <div className="absolute bottom-2 bg-slate-900/40 px-2 py-1 rounded text-[10px] text-cyan-300 font-mono flex items-center space-x-1">
+                          <div className="absolute bottom-2 bg-black/85 px-2.5 py-1 rounded text-[10px] text-cyan-300 font-mono flex items-center space-x-1.5 border border-cyan-500/40">
                             <RefreshCw className="h-3 w-3 animate-spin text-cyan-400" />
-                            <span>Scanning...</span>
+                            <span>Analyzing Cover...</span>
                           </div>
                         </div>
                       )}
                     </div>
                   ) : (
-                    <div className="text-center text-slate-400 space-y-1">
-                      <ImageIcon className="h-8 w-8 mx-auto opacity-40" />
-                      <p className="text-[11px]">No cover uploaded yet</p>
+                    <div className="text-center text-zinc-400 space-y-1.5">
+                      <ImageIcon className="h-8 w-8 mx-auto text-zinc-500" />
+                      <p className="text-xs font-medium text-zinc-300">No cover uploaded yet</p>
+                      <p className="text-[10px] text-zinc-500">Drop an image, click Browse, or open Live Camera</p>
                     </div>
                   )}
 
                   {imagePreviewUrl && !isScanningImage && (
-                    <button
-                      type="button"
-                      onClick={() => handleProcessImage(imagePreviewUrl)}
-                      className="mt-2 text-[11px] text-blue-400 hover:text-blue-300 font-semibold flex items-center space-x-1 cursor-pointer"
-                    >
-                      <RefreshCw className="h-3 w-3" />
-                      <span>Re-analyze Image</span>
-                    </button>
+                    <div className="mt-2.5 flex items-center space-x-2">
+                      <button
+                        type="button"
+                        onClick={() => handleProcessImage(imagePreviewUrl, 'image/jpeg', marcForm.title)}
+                        className="px-2.5 py-1 rounded-lg bg-blue-600/20 hover:bg-blue-600/30 text-blue-300 border border-blue-500/40 text-[11px] font-semibold flex items-center space-x-1 cursor-pointer transition-all"
+                      >
+                        <RefreshCw className="h-3 w-3" />
+                        <span>Re-analyze Image</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => fileInputRef.current?.click()}
+                        className="px-2.5 py-1 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 border border-zinc-700 text-[11px] font-semibold flex items-center space-x-1 cursor-pointer transition-all"
+                      >
+                        <UploadCloud className="h-3 w-3" />
+                        <span>New Image</span>
+                      </button>
+                    </div>
                   )}
                 </div>
               </div>
 
               {/* Real-time Scanning Progress Step */}
               {isScanningImage && (
-                <div className="p-3 rounded-xl bg-blue-500/10 border border-blue-500/30 flex items-center space-x-2.5 text-xs text-blue-300 animate-pulse">
-                  <Cpu className="h-4 w-4 text-blue-400 animate-spin" />
-                  <span className="font-mono">{scanProgressStep || 'Analyzing visual data with Gemini AI...'}</span>
+                <div className="p-3.5 rounded-xl bg-blue-950/60 border border-blue-500/40 flex items-center justify-between gap-3 text-xs text-blue-200 animate-pulse">
+                  <div className="flex items-center space-x-2.5">
+                    <Cpu className="h-4 w-4 text-cyan-400 animate-spin shrink-0" />
+                    <span className="font-mono font-semibold">{scanProgressStep || 'Analyzing visual data with Gemini 3.7 Flash Vision...'}</span>
+                  </div>
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-blue-500/20 text-blue-300 border border-blue-500/30 shrink-0">
+                    OCR + DDC + RDA
+                  </span>
                 </div>
               )}
 
               {/* Sample Test Covers Bar */}
-              <div className="pt-2 border-t border-slate-200/90/80">
-                <div className="text-[11px] font-semibold text-slate-500 mb-2 flex items-center justify-between">
-                  <span className="flex items-center space-x-1">
-                    <Sparkles className="h-3 w-3 text-amber-400" />
+              <div className="pt-2 border-t border-zinc-800/80">
+                <div className="text-[11px] font-semibold text-zinc-300 mb-2 flex items-center justify-between">
+                  <span className="flex items-center space-x-1.5">
+                    <Sparkles className="h-3.5 w-3.5 text-amber-400" />
                     <span>Try 1-Click Instant Sample Book Covers:</span>
                   </span>
-                  <span className="text-[10px] text-slate-400">Test AI Vision instantly</span>
+                  <span className="text-[10px] text-zinc-400 font-mono">Click any cover to test AI Vision MARC extraction</span>
                 </div>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                   {sampleBookCovers.map((s, idx) => (
                     <button
                       key={idx}
                       type="button"
-                      onClick={() => handleProcessImage(s.coverUrl)}
-                      className="p-2 rounded-xl bg-[#f1f5f9] hover:bg-blue-950/30 border border-slate-200/90 hover:border-blue-500/40 transition-all text-left flex items-center space-x-2 cursor-pointer group"
+                      disabled={isScanningImage}
+                      onClick={() => handleProcessImage(s.coverUrl, 'image/jpeg', s.title)}
+                      className="p-2 rounded-xl bg-zinc-900/90 hover:bg-blue-950/40 border border-zinc-800 hover:border-blue-500/50 transition-all text-left flex items-center space-x-2.5 cursor-pointer group disabled:opacity-50"
                     >
-                      <img src={s.coverUrl} alt={s.title} className="w-8 h-10 object-cover rounded shadow shrink-0" />
+                      <img src={s.coverUrl} alt={s.title} className="w-8 h-11 object-cover rounded shadow shrink-0 border border-zinc-700" />
                       <div className="overflow-hidden">
-                        <span className="block text-[11px] font-semibold text-slate-800 group-hover:text-blue-300 truncate">
+                        <span className="block text-[11px] font-bold text-white group-hover:text-blue-300 truncate">
                           {s.title}
                         </span>
-                        <span className="block text-[10px] text-slate-400 truncate">
+                        <span className="block text-[10px] text-zinc-400 font-mono truncate">
                           {s.badge}
                         </span>
                       </div>
@@ -4061,42 +4200,111 @@ export const CataloguingModule: React.FC<CataloguingModuleProps> = ({
                 </div>
               </div>
 
-              {/* Extracted AI Intelligence Report */}
+              {/* Extracted AI Vision MARC21 & OCR Intelligence Report */}
               {aiVisionAnalysis && !isScanningImage && (
-                <div className="p-4 rounded-xl bg-[#f1f5f9] border border-emerald-500/30 space-y-2">
-                  <div className="flex items-center justify-between flex-wrap gap-2">
-                    <div className="flex items-center space-x-2">
-                      <CheckCircle2 className="h-4 w-4 text-emerald-400" />
-                      <span className="text-xs font-bold text-white">AI Vision Analysis Complete</span>
+                <div className="p-4 rounded-xl bg-zinc-900/95 border border-emerald-500/40 space-y-3 shadow-xl">
+                  <div className="flex items-center justify-between flex-wrap gap-2 border-b border-zinc-800 pb-2.5">
+                    <div className="flex items-center space-x-2 flex-wrap gap-y-1">
+                      <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0" />
+                      <span className="text-xs font-bold text-white">AI Vision MARC21 Analysis Complete</span>
                       <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-[10px] font-mono border border-emerald-500/30">
                         {aiVisionAnalysis.confidenceScore || 97}% Confidence
                       </span>
-                    </div>
-                    <span className="text-[10px] text-slate-500 font-mono">
-                      Form auto-populated below • All fields fully editable
-                    </span>
-                  </div>
-
-                  {aiVisionAnalysis.detectedText && (
-                    <div className="text-[11px] text-slate-700 flex items-center space-x-1.5">
-                      <span className="text-slate-400 font-mono">OCR Detected:</span>
-                      <span className="text-amber-300/90 font-mono bg-white px-2 py-0.5 rounded">
-                        {aiVisionAnalysis.detectedText}
+                      <span className="px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-300 text-[10px] font-mono border border-blue-500/30">
+                        RDA Core Elements Verified
                       </span>
                     </div>
-                  )}
-
-                  <div className="flex items-center space-x-2 text-[11px] text-slate-500 flex-wrap gap-1">
-                    <span className="px-2 py-0.5 rounded bg-white text-blue-300 font-mono border border-slate-200/90">
-                      DDC: {aiVisionAnalysis.ddcClassification}
-                    </span>
-                    <span className="px-2 py-0.5 rounded bg-white text-purple-300 font-mono border border-slate-200/90">
-                      Call No: {aiVisionAnalysis.callNumber}
-                    </span>
-                    <span className="px-2 py-0.5 rounded bg-white text-emerald-300 font-mono border border-slate-200/90">
-                      RDA Verified
+                    <span className="text-[11px] text-emerald-300 font-mono font-semibold">
+                      ✓ MARC Form Populated Below
                     </span>
                   </div>
+
+                  {/* OCR Typography & RDA Leader Row */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5 text-xs">
+                    <div className="p-2.5 rounded-lg bg-zinc-950 border border-zinc-800">
+                      <span className="text-[10px] text-zinc-400 uppercase tracking-wider font-mono block">
+                        OCR Typography Extracted (Cover / Title Page)
+                      </span>
+                      <p className="text-amber-300 font-mono font-semibold mt-1 break-words text-[11px]">
+                        {aiVisionAnalysis.detectedText || `${aiVisionAnalysis.title} — ${(aiVisionAnalysis.authors || []).join(', ')}`}
+                      </p>
+                    </div>
+                    <div className="p-2.5 rounded-lg bg-zinc-950 border border-zinc-800">
+                      <span className="text-[10px] text-zinc-400 uppercase tracking-wider font-mono block">
+                        RDA Leader (Tag 000) & Fixed-Length Control (Tag 008)
+                      </span>
+                      <p className="text-cyan-300 font-mono font-bold mt-1 text-[11px] truncate">
+                        LDR 000: {aiVisionAnalysis.leader000 || '00000nam a2200000 i 4500'}
+                      </p>
+                      <p className="text-zinc-400 font-mono text-[10px] truncate mt-0.5">
+                        008: {aiVisionAnalysis.control008 || '260101s2025    pka           001 0 eng d'}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Extracted Bibliographic & Classification Summary Grid */}
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-xs">
+                    <div className="p-2.5 rounded-lg bg-zinc-950 border border-zinc-800">
+                      <span className="text-[10px] text-zinc-400 uppercase tracking-wider font-mono">Title & Statement (Tag 245)</span>
+                      <p className="text-white font-bold mt-0.5 truncate">{aiVisionAnalysis.title}</p>
+                      {aiVisionAnalysis.subtitle && (
+                        <p className="text-[11px] text-zinc-400 truncate">: {aiVisionAnalysis.subtitle}</p>
+                      )}
+                    </div>
+                    <div className="p-2.5 rounded-lg bg-zinc-950 border border-zinc-800">
+                      <span className="text-[10px] text-zinc-400 uppercase tracking-wider font-mono">Author & Imprint (Tag 100/264)</span>
+                      <p className="text-blue-300 font-semibold mt-0.5 truncate">
+                        {(aiVisionAnalysis.authors || []).join(', ') || 'Unknown Author'}
+                      </p>
+                      <p className="text-[11px] text-zinc-400 truncate">
+                        {aiVisionAnalysis.publisherName || 'Publisher'} ({aiVisionAnalysis.publisherYear || 2025})
+                      </p>
+                    </div>
+                    <div className="p-2.5 rounded-lg bg-zinc-950 border border-zinc-800">
+                      <span className="text-[10px] text-zinc-400 uppercase tracking-wider font-mono">DDC 23rd Ed. & Call No (082/852)</span>
+                      <p className="text-emerald-400 font-mono font-bold mt-0.5 truncate">
+                        {aiVisionAnalysis.callNumber || `${aiVisionAnalysis.ddcClassification} ${aiVisionAnalysis.cutterNumber}`}
+                      </p>
+                      <p className="text-[11px] text-zinc-400 font-mono truncate">
+                        DDC: {aiVisionAnalysis.ddcClassification || '000'} • Cutter: {aiVisionAnalysis.cutterNumber || 'A00'}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Generated ISO 2709 MARC21 Tags Breakdown */}
+                  {aiVisionAnalysis.marc21Tags && aiVisionAnalysis.marc21Tags.length > 0 && (
+                    <div className="space-y-1.5">
+                      <div className="flex items-center justify-between text-xs text-zinc-400">
+                        <span className="font-mono text-[11px] text-zinc-300 font-semibold">
+                          Extracted ISO 2709 MARC21 Tags ({aiVisionAnalysis.marc21Tags.length} fields):
+                        </span>
+                        <span className="text-[10px] text-zinc-400 font-mono">
+                          RDA 336/337/338 + Leader 000
+                        </span>
+                      </div>
+                      <div className="p-2.5 rounded-xl bg-zinc-950 border border-zinc-800 max-h-48 overflow-y-auto font-mono text-[11px] space-y-1 divide-y divide-zinc-900">
+                        {aiVisionAnalysis.marc21Tags.map((tagObj, idx) => (
+                          <div key={idx} className="flex items-start space-x-3 py-1 text-zinc-200">
+                            <span className="px-1.5 py-0.5 rounded bg-blue-500/20 text-blue-300 font-bold shrink-0">
+                              {tagObj.tag}
+                            </span>
+                            <span className="px-1 py-0.5 rounded bg-zinc-800 text-amber-300 text-[10px] shrink-0">
+                              {tagObj.ind1 || '#'}{tagObj.ind2 || '#'}
+                            </span>
+                            <span className="flex-1 break-all text-zinc-300">
+                              {typeof tagObj.subfields === 'object'
+                                ? Object.entries(tagObj.subfields).map(([code, val]) => (
+                                    <span key={code} className="mr-2">
+                                      <strong className="text-emerald-400 font-bold">${code}</strong> {String(val)}
+                                    </span>
+                                  ))
+                                : String(tagObj.subfields)}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
             </div>

@@ -2,7 +2,7 @@
   "version": "4.1.1",
   "releaseRevision": "R2",
   "releaseName": "PLiMS 4.1.1 PK Desktop Official Package (R2 Winsock TCP Engine & Native Launcher)",
-  "releaseDate": "2026-10-17T17:25:32.759Z",
+  "releaseDate": "2026-10-17T18:10:39.596Z",
   "repairTools": {
     "repairExe": {
       "filename": "PLiMS-4.1.1-Repair.exe",
@@ -12,8 +12,8 @@
     },
     "repairBat": {
       "filename": "PLiMS-4.1.1-Repair.bat",
-      "sizeFormatted": "19.0 KB",
-      "sha256": "a49576dca6eb9264a4a7e4166163663811347ea6ed0c363bcf0d0ef6565cb616",
+      "sizeFormatted": "24.5 KB",
+      "sha256": "61d0e27e1e309ccff5926166933a773adbfc1e63efcdc95e3e4695addac63769",
       "downloadUrl": "/api/desktop/download/PLiMS-4.1.1-Repair.bat"
     }
   },
@@ -59,9 +59,9 @@
       "filename": "PLiMS-4.1.1-Setup-x64.Portable.zip",
       "name": "Official Windows Desktop Portable Bundle (ZIP Archive)",
       "arch": "All Windows (ZIP Archive for USB)",
-      "sizeBytes": 2467000,
-      "sizeFormatted": "2.35 MB",
-      "sha256": "29c0c5c37daee01d9d4708b2f741908a3d468968fa1b7914aa10e15a093abfe4",
+      "sizeBytes": 2355073,
+      "sizeFormatted": "2.25 MB",
+      "sha256": "79cad9acb29bd5ab373a4e27fc18f1530f0f3cb858c343fc8b28e9f23e9e8ddf",
       "type": "portable_zip",
       "minOs": "Windows 7 / 8 / 10 / 11 / Server (Extract directly to USB)",
       "recommendedFor": "Extract and double-click PLiMS.exe or PLiMS-Launch.bat on any folder or USB drive"

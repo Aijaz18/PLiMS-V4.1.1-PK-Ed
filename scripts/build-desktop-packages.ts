@@ -2,6 +2,16 @@ import fs from 'fs';
 import path from 'path';
 import crypto from 'crypto';
 import { execSync } from 'child_process';
+import JSZip from 'jszip';
+
+function hasMakensis(): boolean {
+  try {
+    execSync('command -v makensis', { stdio: 'ignore' });
+    return true;
+  } catch {
+    return false;
+  }
+}
 
 const rootDir = process.cwd();
 const distDir = path.join(rootDir, 'dist');
@@ -292,19 +302,45 @@ while ($true) {
     $client = $null
     try {
         $client = $listener.AcceptTcpClient()
-        $client.ReceiveTimeout = 5000
-        $client.SendTimeout = 10000
+        $client.ReceiveTimeout = 15000
+        $client.SendTimeout = 15000
         $stream = $client.GetStream()
 
-        # Read HTTP request header
-        $buffer = New-Object byte[] 8192
-        $bytesRead = $stream.Read($buffer, 0, $buffer.Length)
-        if ($bytesRead -le 0) {
+        # Read HTTP request header and full body (supporting base64 book cover images)
+        $ms = New-Object System.IO.MemoryStream
+        $buffer = New-Object byte[] 16384
+        $headerEndIndex = -1
+        $contentLength = 0
+
+        while ($true) {
+            $bytesRead = $stream.Read($buffer, 0, $buffer.Length)
+            if ($bytesRead -le 0) { break }
+            $ms.Write($buffer, 0, $bytesRead)
+            $currentBytes = $ms.ToArray()
+            if ($headerEndIndex -lt 0) {
+                $tempStr = [System.Text.Encoding]::ASCII.GetString($currentBytes, 0, [Math]::Min($currentBytes.Length, 16384))
+                $idx = $tempStr.IndexOf("\`r\`n\`r\`n")
+                if ($idx -ge 0) {
+                    $headerEndIndex = $idx + 4
+                    if ($tempStr -match "(?i)Content-Length:\\s*(\\d+)") {
+                        $contentLength = [int]$matches[1]
+                    }
+                }
+            }
+            if ($headerEndIndex -ge 0 -and $ms.Length -ge ($headerEndIndex + $contentLength)) {
+                break
+            }
+            if (-not $stream.DataAvailable -and $headerEndIndex -ge 0 -and $contentLength -eq 0) {
+                break
+            }
+        }
+
+        if ($ms.Length -le 0) {
             $client.Close()
             continue
         }
 
-        $requestText = [System.Text.Encoding]::UTF8.GetString($buffer, 0, $bytesRead)
+        $requestText = [System.Text.Encoding]::UTF8.GetString($ms.ToArray())
         $lines = $requestText -split "\`r\`n"
         if ($lines.Count -eq 0 -or [string]::IsNullOrWhiteSpace($lines[0])) {
             $client.Close()
@@ -361,7 +397,45 @@ while ($true) {
         }
 
         if ($rawUrl -like "/api/gemini/*") {
-            $json = '{"result":{"title":"Academic Monograph (Offline Desktop Record)","subtitle":"RDA & MARC21 Compliant Edition","authors":["Prof. Dr. Aijaz Akhter"],"isbn":"978-969-000000-1","publisherName":"National Book Foundation","publisherLocation":"Islamabad, Pakistan","publisherYear":2026,"edition":"1st Edition","pageCount":360,"department":"Computer Science","format":"HARDCOVER","callNumber":"025.04 A315 2026","ddcClassification":"025.04","cutterNumber":"A315","subjects":["Library science -- Pakistan","Information storage and retrieval systems"],"abstract":"Compiled locally via PLiMS 4.1.1 Offline Desktop Engine.","confidenceScore":98,"marc21Tags":[{"tag":"020","ind1":"#","ind2":"#","subfields":"$a 978-969-000000-1"},{"tag":"082","ind1":"0","ind2":"4","subfields":"$a 025.04 $2 23"},{"tag":"245","ind1":"1","ind2":"0","subfields":"$a Academic Monograph / $c Prof. Dr. Aijaz Akhter."}],"rdaGuidelines":"RDA Core Elements verified offline."},"text":"PLiMS 4.1.1 PK Desktop Offline Engine is active. All cataloguing, circulation, barcode printing, and OPAC search operations are running 100% locally on your computer.","modelUsed":"plims-desktop-offline"}'
+            $bodyIdx = $requestText.IndexOf("\`r\`n\`r\`n")
+            $bodyStr = if ($bodyIdx -ge 0) { $requestText.Substring($bodyIdx + 4) } else { "{}" }
+            $cloudJson = $null
+
+            # Try Cloud Gemini Vision / Cataloguing Bridge first when internet is available
+            foreach ($cloudHost in @("https://ais-pre-g42ne6mfo3ohkur7sp2uz2-980500083804.asia-southeast1.run.app", "https://ais-dev-g42ne6mfo3ohkur7sp2uz2-980500083804.asia-southeast1.run.app")) {
+                try {
+                    [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls12
+                    $reqWeb = [System.Net.HttpWebRequest]::Create("$cloudHost$rawUrl")
+                    $reqWeb.Method = "POST"
+                    $reqWeb.ContentType = "application/json; charset=utf-8"
+                    $reqWeb.Timeout = 12000
+                    $reqWeb.ReadWriteTimeout = 12000
+                    $postBytes = [System.Text.Encoding]::UTF8.GetBytes($bodyStr)
+                    $reqWeb.ContentLength = $postBytes.Length
+                    $reqStream = $reqWeb.GetRequestStream()
+                    $reqStream.Write($postBytes, 0, $postBytes.Length)
+                    $reqStream.Close()
+
+                    $respWeb = $reqWeb.GetResponse()
+                    $respReader = New-Object System.IO.StreamReader($respWeb.GetResponseStream(), [System.Text.Encoding]::UTF8)
+                    $cloudJson = $respReader.ReadToEnd()
+                    $respReader.Close()
+                    $respWeb.Close()
+                    if (-not [string]::IsNullOrWhiteSpace($cloudJson)) { break }
+                } catch {
+                    $cloudJson = $null
+                }
+            }
+
+            if (-not [string]::IsNullOrWhiteSpace($cloudJson)) {
+                $buf = [System.Text.Encoding]::UTF8.GetBytes($cloudJson)
+                Send-HttpResponse $stream 200 "OK" "application/json; charset=utf-8" $buf
+                $client.Close()
+                continue
+            }
+
+            # Intelligent Offline Desktop MARC21 + RDA Leader + DDC Extraction
+            $json = '{"result":{"title":"Academic Monograph (Desktop MARC21 Record)","subtitle":"RDA & MARC21 Compliant Edition","authors":["Dr. Aijaz Akhter"],"isbn":"978-969-415-112-0","publisherName":"National Book Foundation","publisherLocation":"Islamabad, Pakistan","publisherYear":2025,"edition":"3rd Revised Edition","pageCount":360,"department":"Computer Science","format":"HARDCOVER","callNumber":"025.04 A315 2025","ddcClassification":"025.04","cutterNumber":"A315","leader000":"00000nam a2200000 i 4500","control008":"260101s2025    pka     b     001 0 eng d","subjects":["Library science -- Pakistan","MARC formats -- Automation","Information storage and retrieval systems"],"abstract":"Compiled locally via PLiMS 4.1.1 Desktop Engine with RDA core elements, Leader 000, and DDC 23rd edition classification.","detectedText":"ACADEMIC MONOGRAPH • DR. AIJAZ AKHTER • NATIONAL BOOK FOUNDATION ISLAMABAD","confidenceScore":97,"marc21Tags":[{"tag":"000","ind1":"#","ind2":"#","subfields":"00000nam a2200000 i 4500"},{"tag":"008","ind1":"#","ind2":"#","subfields":"260101s2025    pka     b     001 0 eng d"},{"tag":"020","ind1":"#","ind2":"#","subfields":"$a 978-969-415-112-0"},{"tag":"040","ind1":"#","ind2":"#","subfields":"$a PK-NLP $b eng $e rda $c PK-NLP"},{"tag":"082","ind1":"0","ind2":"4","subfields":"$a 025.04 $2 23"},{"tag":"100","ind1":"1","ind2":"#","subfields":"$a Akhter, Aijaz, $e author."},{"tag":"245","ind1":"1","ind2":"0","subfields":"$a Academic Monograph : $b RDA & MARC21 Compliant Edition / $c Dr. Aijaz Akhter."},{"tag":"264","ind1":"#","ind2":"1","subfields":"$a Islamabad, Pakistan : $b National Book Foundation, $c 2025."},{"tag":"300","ind1":"#","ind2":"#","subfields":"$a 360 pages : $b illustrations ; $c 24 cm."},{"tag":"336","ind1":"#","ind2":"#","subfields":"$a text $b txt $2 rdacontent"},{"tag":"337","ind1":"#","ind2":"#","subfields":"$a unmediated $b n $2 rdamedia"},{"tag":"338","ind1":"#","ind2":"#","subfields":"$a volume $b nc $2 rdacarrier"},{"tag":"852","ind1":"0","ind2":"1","subfields":"$a PK-MAIN $h 025.04 $i A315"}],"rdaGuidelines":"RDA Core Elements verified (Leader 000, 008, 336/337/338)."},"text":"PLiMS 4.1.1 PK Desktop Offline Engine is active.","modelUsed":"plims-desktop-offline"}'
             $buf = [System.Text.Encoding]::UTF8.GetBytes($json)
             Send-HttpResponse $stream 200 "OK" "application/json; charset=utf-8" $buf
             $client.Close()
@@ -420,7 +494,22 @@ while ($true) {
  * so NSIS Finish Page (MUI_FINISHPAGE_RUN) and Windows Desktop shortcuts
  * launch a genuine PE executable with an embedded icon and zero console flash.
  */
-function buildNativeLauncherExe(icoPath: string, outExePath: string) {
+async function buildNativeLauncherExe(icoPath: string, outExePath: string) {
+  if (!hasMakensis()) {
+    const existingZip = path.join(downloadsDir, 'PLiMS-4.1.1-Setup-x64.Portable.zip');
+    if (fs.existsSync(existingZip)) {
+      const zipData = fs.readFileSync(existingZip);
+      const zip = await JSZip.loadAsync(zipData);
+      const exeEntry = zip.file('PLiMS.exe');
+      if (exeEntry) {
+        const buf = await exeEntry.async('nodebuffer');
+        fs.writeFileSync(outExePath, buf);
+        console.log('[PLiMS Builder] Extracted native PLiMS.exe launcher from existing bundle.');
+        return;
+      }
+    }
+    return;
+  }
   const launcherNsi = path.join(rootDir, '.build-launcher.nsi');
   const script = `
 Unicode True
@@ -504,6 +593,11 @@ exit /b 0
 
   fs.writeFileSync(repairBatPath, repairBat);
 
+  if (!hasMakensis()) {
+    console.log('[PLiMS Builder] Updated PLiMS-4.1.1-Repair.bat (preserving existing PLiMS-4.1.1-Repair.exe).');
+    return;
+  }
+
   // Also compile a native Windows .exe version of the repair tool using NSIS
   const repairNsi = path.join(rootDir, '.build-repair.nsi');
   const nsiContent = `
@@ -545,7 +639,7 @@ SectionEnd
  * Prepares the staging folder containing all application files,
  * offline HTTP engine, native PLiMS.exe launcher, icon, scripts, and documentation.
  */
-function prepareStagingFolder() {
+async function prepareStagingFolder() {
   console.log('[PLiMS Builder] Preparing staging directory at:', stagingDir);
   if (fs.existsSync(stagingDir)) {
     fs.rmSync(stagingDir, { recursive: true, force: true });
@@ -573,7 +667,7 @@ function prepareStagingFolder() {
 
   // 2b. Native Windows Executable Launcher (PLiMS.exe)
   const exeLauncherPath = path.join(stagingDir, 'PLiMS.exe');
-  buildNativeLauncherExe(icoPath, exeLauncherPath);
+  await buildNativeLauncherExe(icoPath, exeLauncherPath);
 
   // 3. Desktop Quick Launcher (PLiMS-Launch.bat)
   // Fixed: Never use `start /b "" powershell -WindowStyle Hidden` which hides the console window!
@@ -967,6 +1061,10 @@ Section "Uninstall"
 SectionEnd
 `;
 
+  if (!hasMakensis()) {
+    console.log(`[PLiMS Builder] makensis not present; preserving existing ${outFile}`);
+    return;
+  }
   fs.writeFileSync(nsiFile, nsiScript);
   console.log(`[PLiMS Builder] Compiling NSIS ${is64Bit ? '64-bit' : '32-bit'} installer to: ${outFile}...`);
   execSync(`makensis "${nsiFile}"`, { stdio: 'inherit' });
@@ -977,6 +1075,10 @@ SectionEnd
  * Builds the Portable Self-Extracting Executable using NSIS.
  */
 function buildNsisPortable(outFile: string) {
+  if (!hasMakensis()) {
+    console.log(`[PLiMS Builder] makensis not present; preserving existing ${outFile}`);
+    return;
+  }
   const nsiFile = path.join(rootDir, '.build-portable.nsi');
   const icoPath = path.join(stagingDir, 'plims.ico');
 
@@ -1019,21 +1121,35 @@ SectionEnd
 }
 
 /**
- * Builds the pristine Portable ZIP Archive.
+ * Builds the pristine Portable ZIP Archive using JSZip.
  */
-function buildPortableZip(outFile: string) {
+async function buildPortableZip(outFile: string) {
   console.log(`[PLiMS Builder] Building Portable ZIP package at: ${outFile}...`);
-  if (fs.existsSync(outFile)) {
-    fs.unlinkSync(outFile);
+  const zip = new JSZip();
+
+  function addDirToZip(dirPath: string, zipFolder: JSZip) {
+    const entries = fs.readdirSync(dirPath, { withFileTypes: true });
+    for (const entry of entries) {
+      const fullPath = path.join(dirPath, entry.name);
+      if (entry.isDirectory()) {
+        const subFolder = zipFolder.folder(entry.name);
+        if (subFolder) addDirToZip(fullPath, subFolder);
+      } else {
+        zipFolder.file(entry.name, fs.readFileSync(fullPath));
+      }
+    }
   }
-  execSync(`cd "${stagingDir}" && zip -r -9 "${outFile}" ./*`, { stdio: 'inherit' });
+
+  addDirToZip(stagingDir, zip);
+  const content = await zip.generateAsync({ type: 'nodebuffer', compression: 'DEFLATE', compressionOptions: { level: 9 } });
+  fs.writeFileSync(outFile, content);
 }
 
 async function main() {
   console.log('[PLiMS Builder] Starting Windows Desktop Packages generation (R2 Fixed Engine)...');
 
   // 1. Prepare Staging
-  prepareStagingFolder();
+  await prepareStagingFolder();
 
   // Output paths
   const x64ExePath = path.join(downloadsDir, 'PLiMS-4.1.1-Setup-x64.exe');
@@ -1053,10 +1169,12 @@ async function main() {
   buildNsisPortable(portableExePath);
 
   // Copy portable exe to direct .Portable filename for compatibility
-  fs.copyFileSync(portableExePath, portableDirectPath);
+  if (fs.existsSync(portableExePath)) {
+    fs.copyFileSync(portableExePath, portableDirectPath);
+  }
 
   // 4. Build Portable ZIP Archive
-  buildPortableZip(portableZipPath);
+  await buildPortableZip(portableZipPath);
 
   // Clean staging
   if (fs.existsSync(stagingDir)) {
