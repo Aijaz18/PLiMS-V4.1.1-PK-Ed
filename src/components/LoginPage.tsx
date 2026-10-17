@@ -33,12 +33,13 @@ import {
   MessageSquare,
   QrCode,
   Bot,
-  RotateCw
+  RotateCw,
+  Monitor,
+  Download
 } from 'lucide-react';
 import { UserProfile, UserRole, BookRecord } from '../types/alims';
 import { MemberPhotoUploader } from './MemberPhotoUploader';
 import { LicenseModal } from './LicenseModal';
-import { WhatsAppWebLoginCard } from './WhatsAppWeb/WhatsAppWebLoginCard';
 import {
   MainPageBgConfig,
   loadSavedBgConfig,
@@ -56,6 +57,7 @@ interface LoginPageProps {
   onRegisterUser: (newUser: UserProfile, branch: string) => void;
   onUpdateUser?: (id: string, updated: Partial<UserProfile>) => void;
   onBackToOpac?: () => void;
+  onOpenDesktopPackage?: () => void;
 }
 
 export const LoginPage: React.FC<LoginPageProps> = ({
@@ -67,6 +69,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
   onRegisterUser,
   onUpdateUser,
   onBackToOpac,
+  onOpenDesktopPackage
 }) => {
   // Authentication View Modes:
   // 'PORTAL': The primary landing portal (Username + Password Login)
@@ -925,10 +928,22 @@ export const LoginPage: React.FC<LoginPageProps> = ({
                 </div>
               </div>
 
-              {/* Card Footer */}
-              <div className="w-full pt-4 text-center text-[11px] text-zinc-400 space-y-0.5">
-                <p className="font-semibold text-zinc-600">PLiMS V4.1.1 PK edition</p>
-                <p>Pakistan Library Management System</p>
+              {/* Card Footer & Desktop Package Download */}
+              <div className="w-full pt-4 text-center text-[11px] text-zinc-400 space-y-2">
+                {onOpenDesktopPackage && (
+                  <button
+                    type="button"
+                    onClick={onOpenDesktopPackage}
+                    className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-xl border border-emerald-300 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 text-xs font-bold transition-all cursor-pointer shadow-2xs hover:scale-102 active:scale-98"
+                  >
+                    <Monitor className="w-3.5 h-3.5 text-emerald-700" />
+                    <span>Download Desktop Package 4.1.1 (Windows)</span>
+                  </button>
+                )}
+                <div className="space-y-0.5">
+                  <p className="font-semibold text-zinc-600">PLiMS V4.1.1 PK edition</p>
+                  <p>Pakistan Library Management System</p>
+                </div>
               </div>
             </div>
 

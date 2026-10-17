@@ -20,7 +20,8 @@ import {
   Palette,
   MessageSquare,
   Bot,
-  Sparkles
+  Sparkles,
+  Monitor
 } from 'lucide-react';
 import { UserProfile, AppTheme, SystemSettings } from '../types/alims';
 import { AppLanguage, LANGUAGES } from '../utils/i18n';
@@ -50,6 +51,7 @@ interface HeaderProps {
   onUpdateUser?: (id: string, updated: Partial<UserProfile>) => void;
   onNavigateTab?: (tab: any) => void;
   onOpenLibrarianBot?: () => void;
+  onOpenDesktopPackage?: () => void;
   onOpenWhatsAppWebAgent?: () => void;
 }
 
@@ -70,6 +72,7 @@ export const Header: React.FC<HeaderProps> = ({
   onUpdateUser,
   onNavigateTab,
   onOpenLibrarianBot,
+  onOpenDesktopPackage,
   onOpenWhatsAppWebAgent
 }) => {
   const [showBranchDropdown, setShowBranchDropdown] = useState(false);
@@ -262,6 +265,20 @@ export const Header: React.FC<HeaderProps> = ({
             <Bot className="h-4 w-4 text-emerald-700" />
             <span className="text-[11px] hidden sm:inline">Librarian Bot</span>
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+          </button>
+        )}
+
+        {/* PLiMS 4.1.1 Desktop Package & Installers Button */}
+        {onOpenDesktopPackage && (
+          <button
+            type="button"
+            onClick={onOpenDesktopPackage}
+            className="hidden lg:flex items-center space-x-1.5 px-3 py-1.5 rounded-xl border border-slate-300/80 bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold transition-all cursor-pointer shadow-2xs hover:scale-102 active:scale-98"
+            title="Download Official PLiMS 4.1.1 Windows Desktop Installers (x64, x32 & Portable)"
+          >
+            <Monitor className="h-4 w-4 text-slate-700" />
+            <span className="text-[11px]">Desktop 4.1.1</span>
+            <span className="px-1.5 py-0.2 bg-emerald-600 text-white rounded text-[9px] font-extrabold">PK</span>
           </button>
         )}
 

@@ -17,7 +17,8 @@ import {
   Sparkles,
   Settings,
   HelpCircle,
-  BookMarked
+  BookMarked,
+  Monitor
 } from 'lucide-react';
 import { AppLanguage } from '../utils/i18n';
 import { AppTheme } from '../types/alims';
@@ -44,7 +45,8 @@ export type ModuleTab =
   | 'BACKUP_LOGS'
   | 'AI_ASSISTANT'
   | 'SETTINGS'
-  | 'HELP_DOCS';
+  | 'HELP_DOCS'
+  | 'DESKTOP_PACKAGE';
 
 interface SidebarProps {
   activeTab?: string;
@@ -103,6 +105,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
         {
           title: 'INFORMATION & SUPPORT',
           items: [
+            {
+              id: 'DESKTOP_PACKAGE',
+              label: 'Desktop App 4.1.1',
+              icon: Monitor
+            },
             {
               id: 'HELP_DOCS',
               label: 'Library Rules & Guide',
@@ -203,6 +210,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
               id: 'SETTINGS',
               label: 'Settings & Profile',
               icon: Settings
+            },
+            {
+              id: 'DESKTOP_PACKAGE',
+              label: 'Desktop Package 4.1.1',
+              icon: Monitor
             },
             {
               id: 'HELP_DOCS',

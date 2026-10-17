@@ -24,11 +24,13 @@ const MyLibraryModule = React.lazy(() => import('./components/modules/MyLibraryM
 const ImportExportModule = React.lazy(() => import('./components/modules/ImportExportModule').then(m => ({ default: m.ImportExportModule })));
 const BackupLogsModule = React.lazy(() => import('./components/modules/BackupLogsModule').then(m => ({ default: m.BackupLogsModule })));
 const DocumentationModule = React.lazy(() => import('./components/modules/DocumentationModule').then(m => ({ default: m.DocumentationModule })));
+const DesktopPackageModule = React.lazy(() => import('./components/modules/DesktopPackageModule').then(m => ({ default: m.DesktopPackageModule })));
 
 // Lazy-loaded Modals
 const CommandPalette = React.lazy(() => import('./components/CommandPalette').then(m => ({ default: m.CommandPalette })));
 const AddBranchAndStaffModal = React.lazy(() => import('./components/AddBranchAndStaffModal').then(m => ({ default: m.AddBranchAndStaffModal })));
 const LibrarianBot = React.lazy(() => import('./components/LibrarianBot/LibrarianBot').then(m => ({ default: m.LibrarianBot })));
+const DesktopPackageModal = React.lazy(() => import('./components/DesktopPackage/DesktopPackageModal').then(m => ({ default: m.DesktopPackageModal })));
 
 function ModuleLoadingFallback() {
   return (
@@ -131,6 +133,7 @@ export function App() {
   // Dedicated portal mode requested: 'STAFF' (Librarian & Staff) vs 'MEMBER' (Student & Faculty Member)
   const [loginPortalMode, setLoginPortalMode] = useState<'STAFF' | 'MEMBER'>('STAFF');
   const [isLibrarianBotOpen, setIsLibrarianBotOpen] = useState<boolean>(false);
+  const [isDesktopPackageOpen, setIsDesktopPackageOpen] = useState<boolean>(false);
 
   // Public OPAC Home Page vs. Login Portal display state for unauthenticated visitors
   const [isLoginViewOpen, setIsLoginViewOpen] = useState<boolean>(() => {
@@ -910,6 +913,7 @@ export function App() {
           }}
           onUpdateUser={handleUpdateUser}
           onBackToOpac={() => setIsLoginViewOpen(false)}
+          onOpenDesktopPackage={() => setIsDesktopPackageOpen(true)}
         />
       </ErrorBoundary>
     );
@@ -942,6 +946,7 @@ export function App() {
         onUpdateUser={handleUpdateUser}
         onNavigateTab={handleNavigateTab}
         onOpenLibrarianBot={() => setIsLibrarianBotOpen(true)}
+        onOpenDesktopPackage={() => setIsDesktopPackageOpen(true)}
         onLogout={async () => {
           try {
             await fetch('/api/auth/logout', { method: 'POST' });
@@ -1165,6 +1170,10 @@ export function App() {
             {currentTab === 'HELP_DOCS' && (
               <DocumentationModule currentLanguage={currentLanguage} />
             )}
+
+            {currentTab === 'DESKTOP_PACKAGE' && (
+              <DesktopPackageModule />
+            )}
               </React.Suspense>
             </ErrorBoundary>
         </main>
@@ -1222,6 +1231,16 @@ export function App() {
             onRenewTransaction={handleRenewBook}
             onNavigateTab={handleNavigateTab}
             onUpdateUser={handleUpdateUser}
+          />
+        )}
+      </React.Suspense>
+
+      {/* PLiMS 4.1.1 Desktop Package & Windows Installers Modal */}
+      <React.Suspense fallback={null}>
+        {isDesktopPackageOpen && (
+          <DesktopPackageModal
+            isOpen={isDesktopPackageOpen}
+            onClose={() => setIsDesktopPackageOpen(false)}
           />
         )}
       </React.Suspense>

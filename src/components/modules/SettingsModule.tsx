@@ -34,7 +34,9 @@ import {
   Shield,
   AlertCircle,
   CheckCircle2,
-  User
+  User,
+  Monitor,
+  Download
 } from 'lucide-react';
 import { SystemSettings, AppTheme, UserProfile } from '../../types/alims';
 import { LIBRARIAN_THEMES, getThemeConfig } from '../../utils/themeConfig';
@@ -901,8 +903,67 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({
         </div>
 
         <p className="text-xs text-slate-500 leading-relaxed">
-          Easily install PLiMS on your Windows PC using <strong>XAMPP (Apache + MySQL/MariaDB)</strong> or run as a zero-installation Portable Edition from a USB flash drive.
+          Download the official <strong>PLiMS 4.1.1 Windows Desktop Package</strong> or deploy locally using <strong>XAMPP (Apache + MySQL/MariaDB)</strong> with offline SQLite sync resilience.
         </p>
+
+        {/* Official Windows Desktop Installers Download Bar */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 p-3 rounded-2xl bg-slate-50 border border-slate-200">
+          <a
+            href="/api/desktop/download/PLiMS-4.1.1-Setup-x64.exe"
+            download="PLiMS-4.1.1-Setup-x64.exe"
+            className="p-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex flex-col space-y-1 shadow-xs transition-all cursor-pointer"
+          >
+            <span className="flex items-center space-x-1.5">
+              <Download className="h-4 w-4" />
+              <span>PLiMS-4.1.1-Setup-x64.exe</span>
+            </span>
+            <span className="text-[10px] text-emerald-100 font-normal">
+              Modern 64-bit Windows Setup (1.52 MB • All Modules)
+            </span>
+          </a>
+
+          <a
+            href="/api/desktop/download/PLiMS-4.1.1-Setup-x32.exe"
+            download="PLiMS-4.1.1-Setup-x32.exe"
+            className="p-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs flex flex-col space-y-1 shadow-xs transition-all cursor-pointer"
+          >
+            <span className="flex items-center space-x-1.5">
+              <Download className="h-4 w-4" />
+              <span>PLiMS-4.1.1-Setup-x32.exe</span>
+            </span>
+            <span className="text-[10px] text-blue-100 font-normal">
+              Older 32-bit PCs Setup (1.53 MB • All Modules)
+            </span>
+          </a>
+
+          <a
+            href="/api/desktop/download/PLiMS-4.1.1-Setup-x64.Portable.exe"
+            download="PLiMS-4.1.1-Setup-x64.Portable.exe"
+            className="p-3 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs flex flex-col space-y-1 shadow-xs transition-all cursor-pointer"
+          >
+            <span className="flex items-center space-x-1.5">
+              <Download className="h-4 w-4" />
+              <span>PLiMS-Portable.exe</span>
+            </span>
+            <span className="text-[10px] text-amber-100 font-normal">
+              Zero-Install USB Runner (1.51 MB)
+            </span>
+          </a>
+
+          <a
+            href="/api/desktop/download/PLiMS-4.1.1-Setup-x64.Portable.zip"
+            download="PLiMS-4.1.1-Setup-x64.Portable.zip"
+            className="p-3 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs flex flex-col space-y-1 shadow-xs transition-all cursor-pointer"
+          >
+            <span className="flex items-center space-x-1.5">
+              <Download className="h-4 w-4" />
+              <span>Portable.ZIP (Flash Drive)</span>
+            </span>
+            <span className="text-[10px] text-purple-100 font-normal">
+              Clean Standard ZIP Archive (2.29 MB)
+            </span>
+          </a>
+        </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3 pt-1">
           <button

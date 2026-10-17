@@ -498,6 +498,67 @@ async function startServer() {
     });
   });
 
+  // ==========================================
+  // PLiMS 4.1.1 DESKTOP PACKAGE & INSTALLERS
+  // ==========================================
+  const downloadsDir = path.join(rootDir, 'public', 'downloads');
+
+  // Desktop Package Manifest endpoint
+  app.get('/api/desktop/manifest', (req, res) => {
+    try {
+      const manifestPath = path.join(downloadsDir, 'desktop-packages-manifest.json');
+      if (fs.existsSync(manifestPath)) {
+        const manifestData = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+        return res.json(manifestData);
+      }
+      return res.status(404).json({ error: 'Desktop package manifest not found' });
+    } catch (err: any) {
+      return res.status(500).json({ error: err.message || 'Error reading desktop manifest' });
+    }
+  });
+
+  // Dedicated Desktop Package download handler with forced attachment headers
+  app.get(['/api/desktop/download/:filename', '/downloads/:filename'], (req, res) => {
+    try {
+      const filename = path.basename(req.params.filename);
+      let filePath = path.join(downloadsDir, filename);
+
+      if (!fs.existsSync(filePath)) {
+        // Fallback for .Portable extension variations
+        if (filename === 'PLiMS-4.1.1-Setup-x64.Portable' && fs.existsSync(path.join(downloadsDir, 'PLiMS-4.1.1-Setup-x64.Portable.exe'))) {
+          filePath = path.join(downloadsDir, 'PLiMS-4.1.1-Setup-x64.Portable.exe');
+        } else {
+          return res.status(404).json({ error: `File ${filename} not found in desktop packages directory` });
+        }
+      }
+
+      const stat = fs.statSync(filePath);
+      res.setHeader('Content-Length', stat.size);
+      res.setHeader('Accept-Ranges', 'bytes');
+      res.setHeader('Cache-Control', 'public, max-age=3600');
+
+      // Determine appropriate MIME type
+      if (filename.endsWith('.exe')) {
+        res.setHeader('Content-Type', 'application/octet-stream');
+      } else if (filename.endsWith('.zip')) {
+        res.setHeader('Content-Type', 'application/zip');
+      } else if (filename.endsWith('.sha256') || filename.endsWith('.txt')) {
+        res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+      } else {
+        res.setHeader('Content-Type', 'application/octet-stream');
+      }
+
+      res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+      const fileStream = fs.createReadStream(filePath);
+      return fileStream.pipe(res);
+    } catch (err: any) {
+      return res.status(500).json({ error: err.message || 'Error downloading desktop package' });
+    }
+  });
+
+  // Serve static downloads directory as secondary fallback
+  app.use('/downloads', express.static(downloadsDir));
+
   // In-Memory Secure Session Token Store
   interface ServerSessionRecord {
     createdAt: number;
