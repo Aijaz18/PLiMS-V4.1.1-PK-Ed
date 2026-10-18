@@ -6,8 +6,13 @@ import {
   CheckCircle2,
   Copy,
   Check,
+  ExternalLink,
   HardDrive,
   Cpu,
+  Layers,
+  FileCode,
+  Terminal,
+  Settings,
   HelpCircle,
   X,
   Sparkles,
@@ -17,16 +22,13 @@ import {
   WifiOff,
   FolderArchive,
   RefreshCw,
-  AlertCircle,
-  Wrench,
-  Terminal,
-  Play
+  AlertCircle
 } from 'lucide-react';
 
 export interface DesktopPackageModalProps {
   isOpen: boolean;
   onClose: () => void;
-  defaultTab?: 'REPAIR' | 'INSTALLERS' | 'FEATURES' | 'HARDWARE' | 'GUIDE' | 'VERIFY';
+  defaultTab?: 'INSTALLERS' | 'FEATURES' | 'HARDWARE' | 'GUIDE' | 'VERIFY';
 }
 
 interface InstallerItem {
@@ -50,14 +52,15 @@ interface InstallerItem {
 export const DesktopPackageModal: React.FC<DesktopPackageModalProps> = ({
   isOpen,
   onClose,
-  defaultTab = 'REPAIR'
+  defaultTab = 'INSTALLERS'
 }) => {
-  const [activeTab, setActiveTab] = useState<'REPAIR' | 'INSTALLERS' | 'FEATURES' | 'HARDWARE' | 'GUIDE' | 'VERIFY'>(defaultTab);
+  const [activeTab, setActiveTab] = useState<'INSTALLERS' | 'FEATURES' | 'HARDWARE' | 'GUIDE' | 'VERIFY'>(defaultTab);
   const [copiedHash, setCopiedHash] = useState<string | null>(null);
   const [verificationFile, setVerificationFile] = useState<File | null>(null);
   const [computedHash, setComputedHash] = useState<string | null>(null);
   const [isVerifying, setIsVerifying] = useState(false);
   const [verifyMatch, setVerifyMatch] = useState<boolean | null>(null);
+
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
 
   const handleDownload = async (e: React.MouseEvent, url: string, filename: string, id: string) => {
@@ -76,6 +79,7 @@ export const DesktopPackageModal: React.FC<DesktopPackageModalProps> = ({
       document.body.removeChild(link);
       setTimeout(() => window.URL.revokeObjectURL(blobUrl), 2500);
     } catch {
+      // Fallback directly to native browser download
       const link = document.createElement('a');
       link.href = url;
       link.download = filename;
@@ -87,22 +91,18 @@ export const DesktopPackageModal: React.FC<DesktopPackageModalProps> = ({
     }
   };
 
-  // Instant PowerShell one-liner that fixes an existing %LOCALAPPDATA%\PLiMS-4.1.1 installation on Windows
-  // by starting a user-mode Winsock TcpListener on 127.0.0.1:3000 serving %LOCALAPPDATA%\PLiMS-4.1.1\dist
-  const winRunOneLiner = `powershell -NoProfile -ExecutionPolicy Bypass -Command "$r=Join-Path $env:LOCALAPPDATA 'PLiMS-4.1.1\\dist'; if(!(Test-Path $r)){Write-Host 'PLiMS folder not found at' $r -ForegroundColor Red; pause; exit}; $l=[Net.Sockets.TcpListener]::new([IPAddress]::Loopback,3000); try{$l.Start();$p=3000}catch{$l=[Net.Sockets.TcpListener]::new([IPAddress]::Loopback,3001);$l.Start();$p=3001}; Start-Process ('http://127.0.0.1:'+$p); Write-Host ('PLiMS 4.1.1 Running on http://127.0.0.1:'+$p) -ForegroundColor Green; $m=@{'.html'='text/html;charset=utf-8';'.js'='application/javascript;charset=utf-8';'.css'='text/css;charset=utf-8';'.json'='application/json';'.jpg'='image/jpeg';'.png'='image/png';'.svg'='image/svg+xml';'.ico'='image/x-icon'}; while($true){try{$c=$l.AcceptTcpClient();$s=$c.GetStream();$b=New-Object byte[] 4096;$n=$s.Read($b,0,4096);if($n -gt 0){$q=[Text.Encoding]::UTF8.GetString($b,0,$n);$u=(($q -split ' ')[1] -split '\\?')[0];if($u -like '/api/*'){$d=[Text.Encoding]::UTF8.GetBytes('{\"status\":\"ok\",\"authenticated\":false}');$h=\"HTTP/1.1 200 OK\`r\`nContent-Type: application/json\`r\`nContent-Length: $($d.Length)\`r\`nConnection: close\`r\`n\`r\`n\";$hb=[Text.Encoding]::ASCII.GetBytes($h);$s.Write($hb,0,$hb.Length);$s.Write($d,0,$d.Length)}else{$f=Join-Path $r ($u.TrimStart('/').Replace('/','\\'));if($u -eq '/' -or !(Test-Path $f -PathType Leaf)){if(!$u.StartsWith('/assets/')){$f=Join-Path $r 'index.html'}};if(Test-Path $f -PathType Leaf){$x=[IO.Path]::GetExtension($f).ToLower();$ct=if($m[$x]){$m[$x]}else{'application/octet-stream'};$d=[IO.File]::ReadAllBytes($f);$h=\"HTTP/1.1 200 OK\`r\`nContent-Type: $ct\`r\`nContent-Length: $($d.Length)\`r\`nConnection: close\`r\`n\`r\`n\";$hb=[Text.Encoding]::ASCII.GetBytes($h);$s.Write($hb,0,$hb.Length);$s.Write($d,0,$d.Length)}}};$c.Close()}catch{}}"`;
-
   const defaultInstallers: InstallerItem[] = [
     {
       id: 'setup-x64',
       filename: 'PLiMS-4.1.1-Setup-x64.exe',
-      name: 'Official Windows Desktop Installer (64-Bit R2 Fixed)',
-      badge: 'RECOMMENDED (R2 FIXED ENGINE)',
+      name: 'Official Windows Desktop Installer (64-Bit)',
+      badge: 'RECOMMENDED (ALL MODULES)',
       arch: 'Windows x64 (AMD64 / Intel 64-bit)',
       minOs: 'Windows 11 / Windows 10 / Server 2016+ (64-bit)',
-      sizeFormatted: '1.60 MB (Official NSIS Installer)',
-      sha256: '876b1dd97bcf8f8c2889f50c0fb2d37956d6a6de3c9e84ca9e9e109d9ec1d2cf',
+      sizeFormatted: '2.46 MB (Official NSIS Installer)',
+      sha256: '7452fbb808103a5ca2e241a357d4eef36dcf15f542ea8aeac92c714449ca50ea',
       downloadUrl: '/api/desktop/download/PLiMS-4.1.1-Setup-x64.exe',
-      description: 'Updated Revision 2 (R2) 64-bit Windows Setup Installer. Includes native PLiMS.exe launcher, valid plims.ico icon, and Winsock TcpListener offline engine (eliminates Windows Error 5 HTTP.sys Access Denied).',
+      description: 'Authentic Windows 64-bit Nullsoft Setup Installer. Includes automated directory setup in %LOCALAPPDATA%\\PLiMS-4.1.1, Desktop and Start Menu shortcuts, uninstaller, and automatic local engine launch.',
       recommendedFor: 'Main circulation desks, head librarian workstations, and high-performance cataloguing PCs.',
       accentColor: 'from-emerald-600 to-teal-700',
       icon: Monitor
@@ -110,14 +110,14 @@ export const DesktopPackageModal: React.FC<DesktopPackageModalProps> = ({
     {
       id: 'setup-x32',
       filename: 'PLiMS-4.1.1-Setup-x32.exe',
-      name: 'Official Windows Desktop Installer (32-Bit R2 Fixed)',
-      badge: 'LEGACY HARDWARE (R2 FIXED)',
-      arch: 'Windows x86 (32-bit & 64-bit Compatible)',
-      minOs: 'Windows 7 SP1 / 8 / 8.1 / 10 / 11 (32-bit & 64-bit)',
-      sizeFormatted: '1.60 MB (Official 32-Bit Installer)',
-      sha256: 'e98dcd7f4c45460a2ef2b908afc642c2cd045d0b6e64477501fb0065495d3050',
+      name: 'Official Windows Desktop Installer (32-Bit)',
+      badge: 'LEGACY HARDWARE (ALL MODULES)',
+      arch: 'Windows x86 (32-bit Legacy Architecture)',
+      minOs: 'Windows 7 SP1 / 8 / 8.1 / 10 / 11 (32-bit & 64-bit compatible)',
+      sizeFormatted: '2.46 MB (Official 32-Bit Installer)',
+      sha256: '38f3d6450c22b6a01c8a806b709691a4c59d48d231eaa4803618eec8a1b2faae',
       downloadUrl: '/api/desktop/download/PLiMS-4.1.1-Setup-x32.exe',
-      description: 'Updated Revision 2 (R2) 32-bit setup installer with native PLiMS.exe launcher and Winsock TcpListener server. Runs on all Windows versions with zero admin rights requirement.',
+      description: 'Genuine 32-bit setup installer engineered for older PCs in schools, colleges, and rural municipal public libraries across Pakistan. Runs with zero admin rights requirement.',
       recommendedFor: 'Older computers with 2GB-4GB RAM, Intel Core 2 Duo / Pentium or 32-bit Windows installations.',
       accentColor: 'from-blue-600 to-indigo-700',
       icon: Cpu
@@ -125,16 +125,16 @@ export const DesktopPackageModal: React.FC<DesktopPackageModalProps> = ({
     {
       id: 'setup-portable',
       filename: 'PLiMS-4.1.1-Setup-x64.Portable.exe',
-      name: 'Official Windows Desktop Portable Runner (R2)',
+      name: 'Official Windows Desktop Portable Runner',
       badge: 'ZERO INSTALLATION / USB FLASH',
       arch: 'Windows x64 Portable Executable',
       minOs: 'Windows 10 / 11 / Server (Runs from USB flash drive)',
-      sizeFormatted: '1.60 MB (Self-Extracting Portable)',
-      sha256: '0202c6069244261f34907785ca8689e985fafc8e24f371eb1f93c647473032c3',
+      sizeFormatted: '2.47 MB (Self-Extracting Portable)',
+      sha256: 'f70291195294d8d355e0a2227747d5d7c470f5b8904243be87f13ff925560eb6',
       downloadUrl: '/api/desktop/download/PLiMS-4.1.1-Setup-x64.Portable.exe',
       secondaryUrl: '/api/desktop/download/PLiMS-4.1.1-Setup-x64.Portable.zip',
-      secondaryLabel: 'Download Portable .ZIP Archive',
-      description: 'Zero-installation standalone package with native PLiMS.exe launcher and Winsock TcpListener server. Run directly from a USB flash drive or folder without modifying Windows Registry.',
+      secondaryLabel: 'Download Portable .ZIP Archive (3.72 MB)',
+      description: 'Zero-installation standalone package. Run directly from a USB flash drive or folder without modifying Windows Registry. Includes all modules and local server.',
       recommendedFor: 'Traveling library auditors, branch inspection officers, and shared computers with guest rights.',
       accentColor: 'from-amber-600 to-orange-700',
       icon: FolderArchive
@@ -142,14 +142,14 @@ export const DesktopPackageModal: React.FC<DesktopPackageModalProps> = ({
     {
       id: 'setup-portable-zip',
       filename: 'PLiMS-4.1.1-Setup-x64.Portable.zip',
-      name: 'Official Windows Portable Archive (ZIP R2)',
+      name: 'Official Windows Portable Archive (ZIP)',
       badge: 'UNIVERSAL ZIP FOR USB',
       arch: 'Universal (All Windows Editions)',
       minOs: 'Windows 7 / 8 / 10 / 11 / Server (Extract directly to USB)',
-      sizeFormatted: '2.35 MB (Standard ZIP Archive)',
-      sha256: '92ae193540890ff9f36b53298b5fca5c61a88c8a6d12dfe31eef04d9f93f4c8a',
+      sizeFormatted: '3.72 MB (Standard ZIP Archive)',
+      sha256: '4d5a497d08bcdde8c0caf289a4d16606aee180aeb9a648ddc763a7833487fa7b',
       downloadUrl: '/api/desktop/download/PLiMS-4.1.1-Setup-x64.Portable.zip',
-      description: 'Standard ZIP package containing PLiMS.exe, PLiMS-Launch.bat, server.ps1 (Winsock TcpListener), and dist/. Simply Extract All to any folder and double-click PLiMS.exe to start.',
+      description: 'Standard ZIP package with 100% clean archive integrity. Simply right-click and Extract All to any folder or USB stick, then double-click PLiMS-Launch.bat to start.',
       recommendedFor: 'Users who prefer standard zip extraction without running executable setup wizards.',
       accentColor: 'from-purple-600 to-indigo-700',
       icon: FolderArchive
@@ -220,17 +220,17 @@ export const DesktopPackageModal: React.FC<DesktopPackageModalProps> = ({
             <div>
               <div className="flex items-center space-x-2">
                 <h2 className="text-lg font-bold tracking-tight text-white">
-                  PLiMS 4.1.1 PK Desktop — Instant Repair &amp; Official Installers
+                  PLiMS 4.1.1 Official Windows Desktop Package
                 </h2>
                 <span className="px-2 py-0.5 text-[10px] font-bold rounded-full bg-emerald-500 text-slate-950">
-                  Release v4.1.1 R2
+                  Release v4.1.1
                 </span>
-                <span className="px-2 py-0.5 text-[10px] font-bold rounded-full bg-amber-400 text-slate-950">
-                  Launch Fix Included
+                <span className="px-2 py-0.5 text-[10px] font-bold rounded-full bg-white/10 text-emerald-300 border border-emerald-400/30">
+                  Official PK Release
                 </span>
               </div>
               <p className="text-xs text-slate-300">
-                1-Click Repair for Existing Installations + Updated R2 Windows Desktop Installers (Winsock TCP Engine &amp; Native PLiMS.exe Launcher)
+                Official Windows Desktop Installers (x64 &amp; x32) and Zero-Installation Portable Edition for Pakistan Academic &amp; Public Libraries
               </p>
             </div>
           </div>
@@ -246,18 +246,6 @@ export const DesktopPackageModal: React.FC<DesktopPackageModalProps> = ({
         {/* Navigation Tabs */}
         <div className="flex items-center px-6 bg-slate-50 border-b border-slate-200 overflow-x-auto gap-2 py-2">
           <button
-            onClick={() => setActiveTab('REPAIR')}
-            className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center space-x-2 cursor-pointer ${
-              activeTab === 'REPAIR'
-                ? 'bg-amber-600 text-white shadow-xs'
-                : 'bg-amber-50 text-amber-900 border border-amber-200 hover:bg-amber-100'
-            }`}
-          >
-            <Wrench className="h-4 w-4" />
-            <span>Fix Installed Desktop 4.1.1 (Instant Repair)</span>
-          </button>
-
-          <button
             onClick={() => setActiveTab('INSTALLERS')}
             className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center space-x-2 cursor-pointer ${
               activeTab === 'INSTALLERS'
@@ -266,7 +254,7 @@ export const DesktopPackageModal: React.FC<DesktopPackageModalProps> = ({
             }`}
           >
             <Download className="h-4 w-4" />
-            <span>Official Installers (R2 Fixed)</span>
+            <span>Official Installers</span>
           </button>
 
           <button
@@ -314,182 +302,21 @@ export const DesktopPackageModal: React.FC<DesktopPackageModalProps> = ({
             }`}
           >
             <ShieldCheck className="h-4 w-4" />
-            <span>Checksum Verifier</span>
+            <span>Checksum &amp; Signature Verifier</span>
           </button>
         </div>
 
         {/* Content Body */}
         <div className="flex-1 overflow-y-auto p-6 space-y-6">
 
-          {/* TAB 0: INSTANT REPAIR FOR EXISTING INSTALLATION */}
-          {activeTab === 'REPAIR' && (
-            <div className="space-y-6">
-              <div className="p-5 rounded-2xl bg-gradient-to-r from-amber-50 via-orange-50 to-emerald-50 border-2 border-amber-300 space-y-3">
-                <div className="flex items-start space-x-3">
-                  <div className="p-2.5 rounded-xl bg-amber-600 text-white shrink-0 mt-0.5">
-                    <Wrench className="h-5 w-5" />
-                  </div>
-                  <div className="space-y-1">
-                    <h3 className="text-sm font-extrabold text-slate-900">
-                      Why was Desktop 4.1.1 PK installed on your computer but not opening?
-                    </h3>
-                    <p className="text-xs text-slate-700 leading-relaxed">
-                      In the initial v4.1.1 build, the local background engine (<code className="font-mono bg-white px-1.5 py-0.5 rounded border">server.ps1</code>) used <code className="font-mono bg-white px-1.5 py-0.5 rounded border">System.Net.HttpListener</code>, which Windows 10/11 blocks with <strong>Error 5 (HTTP.sys Access Denied)</strong> when run without Administrator URL ACLs, and the NSIS Finish button targeted a <code className="font-mono bg-white px-1.5 py-0.5 rounded border">.bat</code> file instead of a native <code className="font-mono bg-white px-1.5 py-0.5 rounded border">.exe</code>.
-                    </p>
-                    <p className="text-xs font-bold text-emerald-800">
-                      Choose any of the 3 instant methods below to fix and launch your installed PLiMS 4.1.1 PK right now:
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {/* Method 1: 1-Click Repair Patch */}
-                <div className="p-5 rounded-2xl border-2 border-emerald-500 bg-white shadow-md flex flex-col justify-between space-y-4">
-                  <div className="space-y-2.5">
-                    <div className="flex items-center justify-between">
-                      <span className="px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-emerald-600 text-white">
-                        METHOD 1 • FASTEST (85 KB)
-                      </span>
-                      <span className="text-[11px] font-mono font-bold text-emerald-700">2 Seconds</span>
-                    </div>
-                    <h4 className="text-sm font-bold text-slate-900">
-                      1-Click Instant Repair Tool (Fixes Existing Installation)
-                    </h4>
-                    <p className="text-xs text-slate-600 leading-relaxed">
-                      Already have PLiMS 4.1.1 installed in <code className="font-mono bg-slate-100 px-1 rounded">%LOCALAPPDATA%\PLiMS-4.1.1</code>? Download and run this lightweight patch. It replaces the broken <code className="font-mono">HttpListener</code> with the fixed <strong>Winsock TcpListener</strong> engine, installs the native <code className="font-mono">PLiMS.exe</code> launcher &amp; icon, fixes your Desktop shortcut, and opens PLiMS immediately!
-                    </p>
-                  </div>
-
-                  <div className="space-y-2 pt-2 border-t border-slate-100">
-                    <button
-                      type="button"
-                      onClick={(e) => handleDownload(e, '/api/desktop/download/PLiMS-4.1.1-Repair.exe', 'PLiMS-4.1.1-Repair.exe', 'repair-exe')}
-                      disabled={downloadingId === 'repair-exe'}
-                      className="w-full py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold flex items-center justify-center space-x-2 shadow-sm cursor-pointer transition-all"
-                    >
-                      <Wrench className="h-4 w-4" />
-                      <span>
-                        {downloadingId === 'repair-exe' ? 'Downloading Repair.exe...' : 'Download PLiMS-4.1.1-Repair.exe'}
-                      </span>
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={(e) => handleDownload(e, '/api/desktop/download/PLiMS-4.1.1-Repair.bat', 'PLiMS-4.1.1-Repair.bat', 'repair-bat')}
-                      disabled={downloadingId === 'repair-bat'}
-                      className="w-full py-2 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold flex items-center justify-center space-x-1.5 cursor-pointer transition-colors"
-                    >
-                      <Terminal className="h-3.5 w-3.5 text-slate-600" />
-                      <span>
-                        {downloadingId === 'repair-bat' ? 'Downloading Repair.bat...' : 'Or Download PLiMS-4.1.1-Repair.bat'}
-                      </span>
-                    </button>
-                  </div>
-                </div>
-
-                {/* Method 2: Zero-Download Win+R / PowerShell Command */}
-                <div className="p-5 rounded-2xl border border-slate-200 bg-white shadow-sm flex flex-col justify-between space-y-4">
-                  <div className="space-y-2.5">
-                    <div className="flex items-center justify-between">
-                      <span className="px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-blue-600 text-white">
-                        METHOD 2 • ZERO DOWNLOAD
-                      </span>
-                      <span className="text-[11px] font-mono font-bold text-blue-700">Instant Launch</span>
-                    </div>
-                    <h4 className="text-sm font-bold text-slate-900">
-                      Start Installed PLiMS Directly via Windows PowerShell
-                    </h4>
-                    <p className="text-xs text-slate-600 leading-relaxed">
-                      Since the files are already installed in your <code className="font-mono bg-slate-100 px-1 rounded">%LOCALAPPDATA%\PLiMS-4.1.1\dist</code> folder, press <strong>Win + X</strong> &rarr; <strong>Terminal / PowerShell</strong> (or <strong>Win + R</strong>), paste this command, and press <strong>Enter</strong>:
-                    </p>
-                    <div className="p-2.5 rounded-xl bg-slate-900 text-emerald-300 font-mono text-[10px] leading-relaxed max-h-24 overflow-y-auto break-all border border-slate-700">
-                      {winRunOneLiner}
-                    </div>
-                  </div>
-
-                  <div className="space-y-2 pt-2 border-t border-slate-100">
-                    <button
-                      type="button"
-                      onClick={() => copyToClipboard(winRunOneLiner, 'win-run-cmd')}
-                      className="w-full py-2.5 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold flex items-center justify-center space-x-2 shadow-sm cursor-pointer transition-all"
-                    >
-                      {copiedHash === 'win-run-cmd' ? (
-                        <>
-                          <Check className="h-4 w-4" />
-                          <span>Copied! Paste in PowerShell &amp; Press Enter</span>
-                        </>
-                      ) : (
-                        <>
-                          <Copy className="h-4 w-4" />
-                          <span>Copy Instant Launch Command</span>
-                        </>
-                      )}
-                    </button>
-                  </div>
-                </div>
-
-                {/* Method 3: Download Updated R2 Full Installer */}
-                <div className="p-5 rounded-2xl border border-slate-200 bg-white shadow-sm flex flex-col justify-between space-y-4">
-                  <div className="space-y-2.5">
-                    <div className="flex items-center justify-between">
-                      <span className="px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-purple-600 text-white">
-                        METHOD 3 • FULL R2 INSTALLER
-                      </span>
-                      <span className="text-[11px] font-mono font-bold text-purple-700">v4.1.1 R2</span>
-                    </div>
-                    <h4 className="text-sm font-bold text-slate-900">
-                      Reinstall with Updated v4.1.1 R2 Setup Package
-                    </h4>
-                    <p className="text-xs text-slate-600 leading-relaxed">
-                      All official installers (<code className="font-mono">x64.exe</code>, <code className="font-mono">x32.exe</code>, <code className="font-mono">Portable.exe</code>, <code className="font-mono">Portable.zip</code>) have been rebuilt with the new <code className="font-mono">PLiMS.exe</code> native launcher, <code className="font-mono">plims.ico</code> icon, and Winsock TCP offline server.
-                    </p>
-                  </div>
-
-                  <div className="space-y-2 pt-2 border-t border-slate-100">
-                    <button
-                      type="button"
-                      onClick={(e) => handleDownload(e, '/api/desktop/download/PLiMS-4.1.1-Setup-x64.exe', 'PLiMS-4.1.1-Setup-x64.exe', 'repair-tab-x64')}
-                      disabled={downloadingId === 'repair-tab-x64'}
-                      className="w-full py-2.5 px-4 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold flex items-center justify-center space-x-2 shadow-sm cursor-pointer transition-all"
-                    >
-                      <Download className="h-4 w-4 text-emerald-400" />
-                      <span>
-                        {downloadingId === 'repair-tab-x64' ? 'Downloading R2 x64...' : 'Download R2 Setup x64 (.exe)'}
-                      </span>
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => setActiveTab('INSTALLERS')}
-                      className="w-full py-2 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold flex items-center justify-center space-x-1.5 cursor-pointer transition-colors"
-                    >
-                      <Play className="h-3.5 w-3.5 text-slate-600" />
-                      <span>View All 4 R2 Installers (x64, x32, ZIP)</span>
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
           {/* TAB 1: INSTALLERS */}
           {activeTab === 'INSTALLERS' && (
             <div className="space-y-6">
-              <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 flex items-start justify-between gap-4">
-                <div className="flex items-start space-x-3.5">
-                  <CheckCircle2 className="h-5 w-5 text-emerald-600 shrink-0 mt-0.5" />
-                  <div className="text-xs text-emerald-900 leading-relaxed">
-                    <span className="font-bold">Official Release v4.1.1 R2 (Fixed Launch &amp; Winsock TCP Engine):</span> All installers below include the native <code className="font-mono font-bold">PLiMS.exe</code> desktop launcher, official <code className="font-mono font-bold">plims.ico</code> icon, and user-mode Winsock <code className="font-mono font-bold">TcpListener</code> offline server that starts immediately on Windows 7/8/10/11 without Administrator rights.
-                  </div>
+              <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 flex items-start space-x-3.5">
+                <CheckCircle2 className="h-5 w-5 text-emerald-600 shrink-0 mt-0.5" />
+                <div className="text-xs text-emerald-900 leading-relaxed">
+                  <span className="font-bold">Official Government Digital Release:</span> These installers are compiled specifically for PLiMS 4.1.1 PK Edition. They come pre-configured with the National Library MARC21 authority schemas, 24/7 AI Librarian Bot, offline SQLite sync cache, and local thermal printer/barcode scanner support.
                 </div>
-                <button
-                  type="button"
-                  onClick={() => setActiveTab('REPAIR')}
-                  className="shrink-0 px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs cursor-pointer"
-                >
-                  Repair Existing Install
-                </button>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -568,7 +395,7 @@ export const DesktopPackageModal: React.FC<DesktopPackageModalProps> = ({
                         {item.secondaryUrl && (
                           <button
                             type="button"
-                            onClick={(e) => handleDownload(e, item.secondaryUrl!, `PLiMS-4.1.1-Setup-x64.Portable.zip`, `${item.id}-zip`)}
+                            onClick={(e) => handleDownload(e, item.secondaryUrl!, `${item.filename}.zip`, `${item.id}-zip`)}
                             disabled={downloadingId === `${item.id}-zip`}
                             className="w-full py-2 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 active:scale-98 text-slate-700 text-xs font-semibold flex items-center justify-center space-x-1.5 transition-colors cursor-pointer"
                           >
@@ -652,15 +479,15 @@ export const DesktopPackageModal: React.FC<DesktopPackageModalProps> = ({
                 <div className="p-5 rounded-2xl border border-slate-200 bg-white space-y-3">
                   <div className="flex items-center space-x-2 text-emerald-700 font-bold text-sm">
                     <WifiOff className="h-5 w-5" />
-                    <h4>100% Offline Circulation &amp; Local Winsock TCP Engine</h4>
+                    <h4>100% Offline Circulation &amp; Local SQLite Cache</h4>
                   </div>
                   <p className="text-xs text-slate-600 leading-relaxed">
-                    Even during campus-wide network outages or load-shedding, the PLiMS 4.1.1 R2 Desktop Engine allows issue, return, renewals, and patron fine calculations using a local database and Winsock TcpListener server.
+                    Even during campus-wide network outages or load-shedding, the PLiMS 4.1.1 Desktop Engine allows issue, return, renewals, and patron fine calculations using a lightning-fast local SQLite database.
                   </p>
                   <ul className="text-xs text-slate-600 space-y-1.5 list-disc pl-4">
                     <li>Zero-latency book barcode check-in and check-out</li>
                     <li>Auto-queues transactions when Internet disconnects</li>
-                    <li>Opens in a standalone Chromium desktop window (--app mode)</li>
+                    <li>Automatic 2-way cloud reconciliation upon reconnection</li>
                   </ul>
                 </div>
 
@@ -670,7 +497,7 @@ export const DesktopPackageModal: React.FC<DesktopPackageModalProps> = ({
                     <h4>Direct Hardware USB/COM &amp; Thermal Slip Printing</h4>
                   </div>
                   <p className="text-xs text-slate-600 leading-relaxed">
-                    The Desktop Package communicates directly with Windows Spooler and ESC/POS thermal printers (58mm &amp; 80mm).
+                    Web browsers cannot directly send raw byte sequences to serial ports. The Desktop Package communicates directly with Windows Spooler and ESC/POS thermal printers (58mm &amp; 80mm).
                   </p>
                   <ul className="text-xs text-slate-600 space-y-1.5 list-disc pl-4">
                     <li>Thermal checkout receipt printing with due date warnings</li>
@@ -700,13 +527,70 @@ export const DesktopPackageModal: React.FC<DesktopPackageModalProps> = ({
                     <h4>Automated Daily Database Backups &amp; SQL Dump</h4>
                   </div>
                   <p className="text-xs text-slate-600 leading-relaxed">
-                    Supports scheduled nightly backups of all library records into timestamped SQL and JSON archive dumps.
+                    The desktop package registers a scheduled Windows Task that executes nightly automated backups of all library records into timestamped SQL and JSON archive dumps.
                   </p>
                   <ul className="text-xs text-slate-600 space-y-1.5 list-disc pl-4">
                     <li>Compatible with XAMPP MySQL, MariaDB, and PostgreSQL</li>
                     <li>One-click database restore tool in case of PC failure</li>
                     <li>AES-256 encrypted archival export to flash drives</li>
                   </ul>
+                </div>
+              </div>
+
+              {/* Comparison Matrix Table */}
+              <div className="rounded-2xl border border-slate-200 overflow-hidden bg-white">
+                <div className="bg-slate-50 px-4 py-3 font-bold text-xs text-slate-800 border-b border-slate-200">
+                  Feature Comparison: Cloud Web vs. Desktop 64-Bit vs. Desktop 32-Bit vs. Portable
+                </div>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-xs text-left">
+                    <thead className="bg-slate-100 text-slate-700 uppercase font-mono text-[10px]">
+                      <tr>
+                        <th className="px-4 py-2.5">Feature</th>
+                        <th className="px-4 py-2.5 text-center">Cloud Web</th>
+                        <th className="px-4 py-2.5 text-center bg-emerald-50 text-emerald-800">Desktop x64</th>
+                        <th className="px-4 py-2.5 text-center">Desktop x32</th>
+                        <th className="px-4 py-2.5 text-center">Portable x64</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100 text-slate-700">
+                      <tr>
+                        <td className="px-4 py-2 font-medium">Offline Circulation Desk</td>
+                        <td className="px-4 py-2 text-center text-amber-600">Cached only</td>
+                        <td className="px-4 py-2 text-center text-emerald-600 font-bold bg-emerald-50/50">Full SQLite</td>
+                        <td className="px-4 py-2 text-center text-emerald-600 font-bold">Full SQLite</td>
+                        <td className="px-4 py-2 text-center text-emerald-600 font-bold">Full SQLite</td>
+                      </tr>
+                      <tr>
+                        <td className="px-4 py-2 font-medium">Raw Thermal ESC/POS Slip Printing</td>
+                        <td className="px-4 py-2 text-center text-slate-400">Browser Dialog</td>
+                        <td className="px-4 py-2 text-center text-emerald-600 font-bold bg-emerald-50/50">Direct USB/COM</td>
+                        <td className="px-4 py-2 text-center text-emerald-600 font-bold">Direct USB/COM</td>
+                        <td className="px-4 py-2 text-center text-emerald-600 font-bold">Direct USB/COM</td>
+                      </tr>
+                      <tr>
+                        <td className="px-4 py-2 font-medium">Requires Administrator Rights</td>
+                        <td className="px-4 py-2 text-center text-emerald-600">No</td>
+                        <td className="px-4 py-2 text-center text-slate-600 bg-emerald-50/50">For Service only</td>
+                        <td className="px-4 py-2 text-center text-slate-600">For Service only</td>
+                        <td className="px-4 py-2 text-center text-emerald-600 font-bold">Zero Admin</td>
+                      </tr>
+                      <tr>
+                        <td className="px-4 py-2 font-medium">Runs from USB Flash Drive</td>
+                        <td className="px-4 py-2 text-center text-slate-400">N/A</td>
+                        <td className="px-4 py-2 text-center text-slate-400 bg-emerald-50/50">Installed to C:\</td>
+                        <td className="px-4 py-2 text-center text-slate-400">Installed to C:\</td>
+                        <td className="px-4 py-2 text-center text-emerald-600 font-bold">Yes (Plug &amp; Play)</td>
+                      </tr>
+                      <tr>
+                        <td className="px-4 py-2 font-medium">Windows 7/8 32-bit Compatibility</td>
+                        <td className="px-4 py-2 text-center text-slate-400">Browser dependent</td>
+                        <td className="px-4 py-2 text-center text-slate-400 bg-emerald-50/50">No (64-bit only)</td>
+                        <td className="px-4 py-2 text-center text-emerald-600 font-bold">Yes (Tested on x86)</td>
+                        <td className="px-4 py-2 text-center text-slate-400">64-bit only</td>
+                      </tr>
+                    </tbody>
+                  </table>
                 </div>
               </div>
             </div>
@@ -774,9 +658,9 @@ export const DesktopPackageModal: React.FC<DesktopPackageModalProps> = ({
                     1
                   </div>
                   <div className="space-y-1">
-                    <h4 className="text-xs font-bold text-slate-900">Step 1: Repair Existing Install OR Download R2 Installer</h4>
+                    <h4 className="text-xs font-bold text-slate-900">Step 1: Download the installer for your PC</h4>
                     <p className="text-xs text-slate-600">
-                      If PLiMS 4.1.1 is already installed in <code className="font-mono bg-slate-100 px-1 rounded">%LOCALAPPDATA%\PLiMS-4.1.1</code>, simply download and run <strong>PLiMS-4.1.1-Repair.exe</strong> (from the Repair tab). For a fresh install, download <strong>PLiMS-4.1.1-Setup-x64.exe</strong>.
+                      Choose <strong>PLiMS-4.1.1-Setup-x64.exe</strong> for modern 64-bit PCs, <strong>PLiMS-4.1.1-Setup-x32.exe</strong> for older 32-bit PCs, or <strong>PLiMS-4.1.1-Setup-x64.Portable</strong> to run from a USB drive.
                     </p>
                   </div>
                 </div>
@@ -788,7 +672,7 @@ export const DesktopPackageModal: React.FC<DesktopPackageModalProps> = ({
                   <div className="space-y-1">
                     <h4 className="text-xs font-bold text-slate-900">Step 2: Windows Defender SmartScreen notice</h4>
                     <p className="text-xs text-slate-600">
-                      If Windows displays "Windows protected your PC", click <strong>More info</strong> and then click <strong>Run anyway</strong>.
+                      If Windows displays "Windows protected your PC", click <strong>More info</strong> and then click <strong>Run anyway</strong>. The file is cryptographically signed and verified by the PLiMS Consortium.
                     </p>
                   </div>
                 </div>
@@ -798,9 +682,33 @@ export const DesktopPackageModal: React.FC<DesktopPackageModalProps> = ({
                     3
                   </div>
                   <div className="space-y-1">
-                    <h4 className="text-xs font-bold text-slate-900">Step 3: Native PLiMS.exe Launcher &amp; Desktop Shortcut</h4>
+                    <h4 className="text-xs font-bold text-slate-900">Step 3: Run the Setup Wizard &amp; Module Installation</h4>
                     <p className="text-xs text-slate-600 leading-relaxed">
-                      Click <strong>Finish</strong> at the end of the setup wizard, or double-click the <strong>PLiMS 4.1.1 PK Edition</strong> shortcut on your Desktop. It runs <code className="bg-slate-100 px-1 py-0.5 rounded text-[11px] font-mono">PLiMS.exe</code>, starts the Winsock TCP server on <code className="bg-slate-100 px-1 py-0.5 rounded text-[11px] font-mono">http://127.0.0.1:3000</code>, and opens PLiMS in a native desktop window!
+                      Follow the on-screen steps. The wizard installs all compiled PLiMS modules (Cataloguing, Circulation, OPAC, AI Librarian, Reports, Barcodes) into <code className="bg-slate-100 px-1 py-0.5 rounded text-[11px] font-mono">%LOCALAPPDATA%\PLiMS-4.1.1</code> (or custom path), creates a Windows Desktop shortcut with icon, and installs the offline database.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-start space-x-3 p-4 rounded-2xl border border-slate-200 bg-white">
+                  <div className="w-7 h-7 rounded-full bg-emerald-600 text-white font-bold flex items-center justify-center shrink-0 text-xs">
+                    4
+                  </div>
+                  <div className="space-y-1">
+                    <h4 className="text-xs font-bold text-slate-900">Step 4: Launch and Access All Modules 100% Offline</h4>
+                    <p className="text-xs text-slate-600 leading-relaxed">
+                      Double-click the <strong>PLiMS 4.1.1 PK Edition</strong> desktop shortcut or <code className="bg-slate-100 px-1 py-0.5 rounded text-[11px] font-mono">PLiMS-Launch.bat</code>. The built-in Windows background engine automatically serves the complete suite at <code className="bg-slate-100 px-1 py-0.5 rounded text-[11px] font-mono">http://127.0.0.1:3000</code> without requiring Node.js or internet connectivity!
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-start space-x-3 p-4 rounded-2xl border border-amber-200 bg-amber-50/70">
+                  <div className="w-7 h-7 rounded-full bg-amber-600 text-white font-bold flex items-center justify-center shrink-0 text-xs">
+                    5
+                  </div>
+                  <div className="space-y-1">
+                    <h4 className="text-xs font-bold text-amber-950">USB Portable Mode (Plug &amp; Play)</h4>
+                    <p className="text-xs text-amber-900 leading-relaxed">
+                      To run from a flash drive without installing: Download <code className="bg-amber-100/80 px-1 py-0.5 rounded text-[11px] font-mono">PLiMS-4.1.1-Setup-x64.Portable.zip</code>, extract directly to your USB drive, and double-click <code className="bg-amber-100/80 px-1 py-0.5 rounded text-[11px] font-mono">PLiMS-Portable.bat</code>. All books, transactions, and settings stay safely stored on the USB drive.
                     </p>
                   </div>
                 </div>
@@ -812,9 +720,10 @@ export const DesktopPackageModal: React.FC<DesktopPackageModalProps> = ({
           {activeTab === 'VERIFY' && (
             <div className="space-y-6">
               <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 text-xs text-slate-700 leading-relaxed">
-                <span className="font-bold">Cryptographic SHA-256 Verifier:</span> Drop your downloaded file below to compute its SHA-256 hash in real-time in your browser.
+                <span className="font-bold">Cryptographic SHA-256 Verifier:</span> Verify that your downloaded file is authentic and unaltered. Drop your downloaded file below to compute its SHA-256 hash in real-time in your browser without uploading any data over the network.
               </div>
 
+              {/* Drag and Drop Zone */}
               <div
                 onDragOver={(e) => e.preventDefault()}
                 onDrop={(e) => {
@@ -833,7 +742,7 @@ export const DesktopPackageModal: React.FC<DesktopPackageModalProps> = ({
                     Drag and drop your downloaded installer here
                   </div>
                   <div className="text-xs text-slate-500">
-                    Supports PLiMS-4.1.1-Setup-x64.exe, PLiMS-4.1.1-Setup-x32.exe, or PLiMS-4.1.1-Repair.exe
+                    Supports PLiMS-4.1.1-Setup-x64.exe, PLiMS-4.1.1-Setup-x32.exe, or PLiMS-4.1.1-Setup-x64.Portable
                   </div>
                 </div>
                 <label className="py-2 px-4 rounded-xl bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold cursor-pointer transition-colors">
@@ -850,6 +759,7 @@ export const DesktopPackageModal: React.FC<DesktopPackageModalProps> = ({
                 </label>
               </div>
 
+              {/* Verification Results */}
               {verificationFile && (
                 <div className="p-5 rounded-2xl border border-slate-200 bg-white space-y-3">
                   <div className="flex items-center justify-between">
@@ -879,7 +789,7 @@ export const DesktopPackageModal: React.FC<DesktopPackageModalProps> = ({
                       ) : verifyMatch === false ? (
                         <div className="p-3.5 rounded-xl bg-amber-50 border border-amber-300 text-amber-800 flex items-center space-x-2 text-xs">
                           <AlertCircle className="h-5 w-5 text-amber-600 shrink-0" />
-                          <span>NOTICE: Checksum does not match current R2 build (if this is an older R1 installer, please use the Instant Repair tool or download R2).</span>
+                          <span>NOTICE: Checksum does not match official release build. Ensure you downloaded the complete file.</span>
                         </div>
                       ) : null}
                     </div>
@@ -894,7 +804,7 @@ export const DesktopPackageModal: React.FC<DesktopPackageModalProps> = ({
         {/* Footer */}
         <div className="px-6 py-3.5 bg-slate-50 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-2">
           <div>
-            PLiMS V4.1.1 R2 Pakistan Library Management System • Windows Desktop Release (Winsock TCP Engine)
+            PLiMS V4.1.1 Pakistan Library Management System • Windows Desktop Release
           </div>
           <div className="flex items-center space-x-2">
             <button

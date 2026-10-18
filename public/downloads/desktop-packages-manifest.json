@@ -1,70 +1,47 @@
 {
   "version": "4.1.1",
-  "releaseRevision": "R2",
-  "releaseName": "PLiMS 4.1.1 PK Desktop Official Package (R2 Winsock TCP Engine & Native Launcher)",
-  "releaseDate": "2026-10-17T18:10:39.596Z",
-  "repairTools": {
-    "repairExe": {
-      "filename": "PLiMS-4.1.1-Repair.exe",
-      "sizeFormatted": "186.5 KB",
-      "sha256": "94c5ed17eaa61995f2f0182f4c1be29e6b3eb047fe69022d44d78ba690a955d0",
-      "downloadUrl": "/api/desktop/download/PLiMS-4.1.1-Repair.exe"
-    },
-    "repairBat": {
-      "filename": "PLiMS-4.1.1-Repair.bat",
-      "sizeFormatted": "24.5 KB",
-      "sha256": "61d0e27e1e309ccff5926166933a773adbfc1e63efcdc95e3e4695addac63769",
-      "downloadUrl": "/api/desktop/download/PLiMS-4.1.1-Repair.bat"
-    }
-  },
+  "edition": "PK_OFFICIAL_DESKTOP",
+  "generatedAt": "2026-10-18T06:04:36.679Z",
   "packages": [
     {
       "id": "setup-x64",
       "filename": "PLiMS-4.1.1-Setup-x64.exe",
-      "name": "Official Windows Desktop Installer (64-Bit)",
-      "arch": "x64 (AMD64 / Intel 64-bit)",
-      "sizeBytes": 1645543,
-      "sizeFormatted": "1.57 MB",
-      "sha256": "a6806d517ee384134f40d1c747712f54cca212a8356651ca5c8092050c828144",
-      "type": "installer",
-      "minOs": "Windows 10 / 11 / Server 2016+ (64-bit)",
-      "recommendedFor": "Standard desktop PCs, campus library circulation desks, head librarian workstations"
+      "sizeBytes": 2579759,
+      "sizeFormatted": "2.46 MB (Official NSIS Installer)",
+      "sha256": "7452fbb808103a5ca2e241a357d4eef36dcf15f542ea8aeac92c714449ca50ea",
+      "downloadUrl": "/api/desktop/download/PLiMS-4.1.1-Setup-x64.exe"
     },
     {
       "id": "setup-x32",
       "filename": "PLiMS-4.1.1-Setup-x32.exe",
-      "name": "Official Windows Desktop Installer (32-Bit)",
-      "arch": "x86 (Legacy 32-bit)",
-      "sizeBytes": 1648690,
-      "sizeFormatted": "1.57 MB",
-      "sha256": "ad22aa3a998d7ebcf2b27c1114cd39595a022d0b4c2da9d811ebda8773164e96",
-      "type": "installer",
-      "minOs": "Windows 7 SP1 / 8 / 10 / 11 (32-bit & 64-bit)",
-      "recommendedFor": "Older college and school computer labs across Pakistan with 32-bit hardware"
+      "sizeBytes": 2582543,
+      "sizeFormatted": "2.46 MB (Official 32-Bit Installer)",
+      "sha256": "38f3d6450c22b6a01c8a806b709691a4c59d48d231eaa4803618eec8a1b2faae",
+      "downloadUrl": "/api/desktop/download/PLiMS-4.1.1-Setup-x32.exe"
     },
     {
-      "id": "setup-x64-portable",
+      "id": "setup-portable-raw",
+      "filename": "PLiMS-4.1.1-Setup-x64.Portable",
+      "sizeBytes": 2587390,
+      "sizeFormatted": "2.47 MB (Self-Extracting Portable)",
+      "sha256": "f70291195294d8d355e0a2227747d5d7c470f5b8904243be87f13ff925560eb6",
+      "downloadUrl": "/api/desktop/download/PLiMS-4.1.1-Setup-x64.Portable"
+    },
+    {
+      "id": "setup-portable",
       "filename": "PLiMS-4.1.1-Setup-x64.Portable.exe",
-      "name": "Official Windows Desktop Portable Edition",
-      "arch": "x64 Portable (Zero-Install)",
-      "sizeBytes": 1645752,
-      "sizeFormatted": "1.57 MB",
-      "sha256": "465578ff22a140ac26f8877ca9c18b0992f5b229af1bf2244c9cb4a204f52768",
-      "type": "portable",
-      "minOs": "Windows 10 / 11 / Server (Runs from USB flash drive without admin privileges)",
-      "recommendedFor": "Librarians needing a flash-drive portable kit, traveling audits, or zero-admin PCs"
+      "sizeBytes": 2587390,
+      "sizeFormatted": "2.47 MB (Self-Extracting Portable)",
+      "sha256": "f70291195294d8d355e0a2227747d5d7c470f5b8904243be87f13ff925560eb6",
+      "downloadUrl": "/api/desktop/download/PLiMS-4.1.1-Setup-x64.Portable.exe"
     },
     {
-      "id": "setup-x64-portable-zip",
+      "id": "setup-portable-zip",
       "filename": "PLiMS-4.1.1-Setup-x64.Portable.zip",
-      "name": "Official Windows Desktop Portable Bundle (ZIP Archive)",
-      "arch": "All Windows (ZIP Archive for USB)",
-      "sizeBytes": 2355073,
-      "sizeFormatted": "2.25 MB",
-      "sha256": "79cad9acb29bd5ab373a4e27fc18f1530f0f3cb858c343fc8b28e9f23e9e8ddf",
-      "type": "portable_zip",
-      "minOs": "Windows 7 / 8 / 10 / 11 / Server (Extract directly to USB)",
-      "recommendedFor": "Extract and double-click PLiMS.exe or PLiMS-Launch.bat on any folder or USB drive"
+      "sizeBytes": 3900084,
+      "sizeFormatted": "3.72 MB (Standard ZIP Archive)",
+      "sha256": "4d5a497d08bcdde8c0caf289a4d16606aee180aeb9a648ddc763a7833487fa7b",
+      "downloadUrl": "/api/desktop/download/PLiMS-4.1.1-Setup-x64.Portable.zip"
     }
   ]
 }
