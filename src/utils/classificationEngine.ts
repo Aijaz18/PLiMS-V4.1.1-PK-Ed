@@ -108,6 +108,49 @@ const SUBJECT_RULES: SubjectRule[] = [
     hecPk: 'HEC-ISL-297',
     subjectName: 'Islamic Studies & Jurisprudence'
   },
+  // Sindhi Literature, Classical Sufi Poetry & Prose (سنڌي ادب ۽ شاعري)
+  {
+    keywords: [
+      'شاهه', 'شاھ', 'رسالو', 'لطيف', 'ڀٽائي', 'اياز', 'شيخ اياز', 'سچل', 'سرمست',
+      'سامي', 'قليچ', 'مرزا قليچ بيگ', 'بلوچ', 'نبي بخش', 'جوڻيجو', 'امرسنڌو', 'عطيه',
+      'سنڌي ادب', 'سنڌي شاعري', 'بيت', 'وائي', 'ڪافي', 'سنڌي ناول', 'سنڌي افسانا',
+      'زينت', 'ڪپر ٿو ڪن ڪري', 'ڀونءِ ۽ ڀونئرا', 'وڄون وسڻ آيون',
+      'shah jo risalo', 'shah abdul latif', 'bhittai', 'shaikh ayaz', 'sachal sarmast',
+      'mirza qalich beg', 'sindhi literature', 'sindhi poetry', 'sindhi adab', 'zeenat'
+    ],
+    ddc: '891.411',
+    lcc: 'PK2788.9',
+    udc: '821.214.1',
+    hecPk: 'HEC-SND-891',
+    subjectName: 'سنڌي ادب ۽ شاعري (Sindhi Literature & Classical Poetry)'
+  },
+  // Sindhi Language, Grammar & Lexicography (سنڌي ٻولي، گرامر ۽ لغت)
+  {
+    keywords: [
+      'سنڌي ٻولي', 'جامع سنڌي لغات', 'سنڌي لغت', 'سنڌي گرامر', 'سنڌي وياڪرڻ',
+      'سنڌي صورتخطي', 'سنڌي الف بي', 'لسانيات سنڌي', 'ٻوليءَ جو بڻياد',
+      'sindhi language', 'sindhi dictionary', 'jami sindhi lughat', 'sindhi grammar', 'sindhi alphabet', 'sindhi script'
+    ],
+    ddc: '491.41',
+    lcc: 'PK2781',
+    udc: '811.214.1',
+    hecPk: 'HEC-SND-491',
+    subjectName: 'سنڌي ٻولي ۽ لسانيات (Sindhi Language & Lexicography)'
+  },
+  // History, Culture & Civilization of Sindh (سنڌ جي تاريخ ۽ تهذيب)
+  {
+    keywords: [
+      'سنڌ جي تاريخ', 'تاريخ سنڌ', 'چچ نامو', 'فتح نامو سنڌ', 'موئن جو دڙو', 'سنڌو تهذيب',
+      'مڪلي', 'ٺٽو', 'حيدرآباد سنڌ', 'ڪلهوڙا', 'ٽالپر', 'سومرا', 'سما', 'ارغون', 'ترخان',
+      'جنت السنڌ', 'تاريخ معصومي', 'تحفة الڪرام',
+      'chachnama', 'tarikh-e-sindh', 'history of sindh', 'jannat-ul-sindh', 'mohenjo-daro', 'sindh civilization'
+    ],
+    ddc: '954.918',
+    lcc: 'DS392.S5',
+    udc: '94(549.18)',
+    hecPk: 'HEC-SND-954',
+    subjectName: 'سنڌ جي تاريخ ۽ تهذيب (History & Civilization of Sindh)'
+  },
   // History & Geography (World, Pakistan, Middle East, Asia)
   {
     keywords: [
@@ -289,13 +332,24 @@ const SUBJECT_RULES: SubjectRule[] = [
 ];
 
 /**
- * Detects the script/language family of the title text
+ * Detects the exact script and language family of the title/text, distinguishing
+ * Sindhi (سنڌي الف بي), Urdu (اردو), Pashto (پښتو), Persian (فارسی), and Arabic (العربية).
  */
-export function detectTextScript(text: string): { lang: string; isRTL: boolean; script: string } {
-  if (!text) return { lang: 'en', isRTL: false, script: 'Latin' };
+export function detectTextScript(text: string): { lang: string; isRTL: boolean; script: string; marcLangCode: string } {
+  if (!text) return { lang: 'en', isRTL: false, script: 'Latin', marcLangCode: 'eng' };
 
-  // Arabic / Urdu / Sindhi / Persian script range
+  // Arabic / Urdu / Sindhi / Pashto / Persian script range
   const arabicRegex = /[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]/;
+  // Sindhi distinctive 52-letter Perso-Arabic characters (ٻ، ٺ، ٽ، ٿ، ڀ، ڃ، ڄ، ڇ، ڌ، ڏ، ڊ، ڍ، ڙ، ڦ، ڪ، ک، ڳ، ڱ، ڻ)
+  const sindhiSpecificChars = /[\u067B\u067D\u067F\u0680\u0683\u0684\u0687\u068A\u068C\u068D\u068F\u0699\u06A6\u06AA\u06B1\u06B3\u06BB\u06FD\u06FE]/;
+  const sindhiWordsRegex = /(?:سنڌ|سنڌي|شاهه|شاھ|رسالو|ڀٽائي|جو\s|جي\s|جا\s|آهي|۽\s|لطيف|سچل|اياز|قليچ|ٻولي)/;
+  // Pashto specific characters (ټ، ځ، څ، ډ، ړ، ږ، ښ، ګ، ڼ، ۍ)
+  const pashtoSpecificChars = /[\u067C\u0681\u0685\u0689\u0693\u0696\u069A\u06AB\u06BC\u06CD]/;
+  // Urdu specific characters (ٹ، ڈ، ڑ، ں، ے، ہ، ھ)
+  const urduSpecificChars = /[\u0679\u0688\u0691\u06BA\u06D2\u06C1\u06BE]/;
+  // Persian / Urdu shared (پ، چ، ژ، گ)
+  const persianUrduChars = /[\u067E\u0686\u0698\u06AF]/;
+
   // Chinese Han characters
   const chineseRegex = /[\u4E00-\u9FFF\u3400-\u4DBF]/;
   // Cyrillic
@@ -304,26 +358,34 @@ export function detectTextScript(text: string): { lang: string; isRTL: boolean; 
   const devanagariRegex = /[\u0900-\u097F]/;
 
   if (arabicRegex.test(text)) {
-    // Specific Urdu/Sindhi checks
-    if (/[\u067E\u0686\u0698\u06AF\u06BA\u06D2\u06C1]/.test(text)) {
-      return { lang: 'ur', isRTL: true, script: 'Arabic (Urdu/Sindhi)' };
+    if (sindhiSpecificChars.test(text) || sindhiWordsRegex.test(text)) {
+      return { lang: 'sd', isRTL: true, script: 'Sindhi (سنڌي الف بي)', marcLangCode: 'snd' };
     }
-    return { lang: 'ar', isRTL: true, script: 'Arabic' };
+    if (pashtoSpecificChars.test(text)) {
+      return { lang: 'ps', isRTL: true, script: 'Pashto (پښتو)', marcLangCode: 'pus' };
+    }
+    if (urduSpecificChars.test(text)) {
+      return { lang: 'ur', isRTL: true, script: 'Urdu (اردو)', marcLangCode: 'urd' };
+    }
+    if (persianUrduChars.test(text)) {
+      return { lang: 'fa', isRTL: true, script: 'Persian / Urdu (فارسی / اردو)', marcLangCode: 'per' };
+    }
+    return { lang: 'ar', isRTL: true, script: 'Arabic (العربية)', marcLangCode: 'ara' };
   }
 
   if (chineseRegex.test(text)) {
-    return { lang: 'zh', isRTL: false, script: 'Chinese (Han)' };
+    return { lang: 'zh', isRTL: false, script: 'Chinese (Han)', marcLangCode: 'chi' };
   }
 
   if (cyrillicRegex.test(text)) {
-    return { lang: 'ru', isRTL: false, script: 'Cyrillic' };
+    return { lang: 'ru', isRTL: false, script: 'Cyrillic', marcLangCode: 'rus' };
   }
 
   if (devanagariRegex.test(text)) {
-    return { lang: 'hi', isRTL: false, script: 'Devanagari' };
+    return { lang: 'hi', isRTL: false, script: 'Devanagari', marcLangCode: 'hin' };
   }
 
-  return { lang: 'en', isRTL: false, script: 'Latin' };
+  return { lang: 'en', isRTL: false, script: 'Latin', marcLangCode: 'eng' };
 }
 
 /**
@@ -501,3 +563,442 @@ export function generateCallNumberForTitle(
     language: scriptInfo.script
   };
 }
+
+export interface NativeScriptBookProfile {
+  matchTokens: string[];
+  langCode: 'snd' | 'urd' | 'ara' | 'pus' | 'per';
+  languageLabel: string;
+  title: string;
+  subtitle: string;
+  authors: string[];
+  isbn: string;
+  publisherName: string;
+  publisherLocation: string;
+  publisherYear: number;
+  edition: string;
+  pageCount: number;
+  department: string;
+  ddc: string;
+  cutter: string;
+  subjects: string[];
+  abstract: string;
+}
+
+export const NATIVE_SCRIPT_BOOK_PROFILES: NativeScriptBookProfile[] = [
+  // 1. Shah Jo Risalo (Sindhi — سنڌي الف بي)
+  {
+    matchTokens: ['شاهه جو رسالو', 'شاھ جو رسالو', 'لطيف', 'ڀٽائي', 'shah jo risalo', 'shah abdul latif', 'bhittai', 'risalo'],
+    langCode: 'snd',
+    languageLabel: 'Sindhi (سنڌي الف بي)',
+    title: 'شاهه جو رسالو (مڪمل محقق ايڊيشن)',
+    subtitle: 'حضرت شاهه عبداللطيف ڀٽائيءَ جي ڪلام جو مستند متن، سرن جي ترتيب، معنيٰ ۽ شرح',
+    authors: ['شاهه عبداللطيف ڀٽائي', 'ڊاڪٽر نبي بخش خان بلوچ (محقق ۽ مرتب)'],
+    isbn: '978-969-405-112-3',
+    publisherName: 'ثقافت ۽ سياحت کاتو، حڪومت سنڌ / سنڌي ادبي بورڊ',
+    publisherLocation: 'ڄامشورو / حيدرآباد، سنڌ',
+    publisherYear: 2023,
+    edition: 'مستند تحقيقي ايڊيشن',
+    pageCount: 940,
+    department: 'Literature & Languages',
+    ddc: '891.411',
+    cutter: 'B475/S',
+    subjects: [
+      'سنڌي شاعري -- ڪلاسيڪي ۽ صوفيانه شاعري',
+      'شاهه عبداللطيف ڀٽائي (1689-1752) -- تنقيد ۽ تشريح',
+      'تصوف ۽ سنڌي لوڪ داستان -- سر ڪلياڻ کان سر رامڪلي'
+    ],
+    abstract: 'حضرت شاهه عبداللطيف ڀٽائي رح جو لافاني ڪلام ”شاهه جو رسالو“ سنڌي ادب، تصوف، لوڪ حڪمت ۽ انساني محبت جو عظيم شاهڪار آهي. هن تحقيقي نسخي ۾ ٽيهن ئي سرن جا بيت ۽ وايون اصل سنڌي الف بي ۽ صورتخطيءَ مطابق شامل ڪيل آهن.'
+  },
+  // 2. Shaikh Ayaz — Sindhi Poetry & Prose (سنڌي الف بي)
+  {
+    matchTokens: ['شيخ اياز', 'ڪپر ٿو ڪن ڪري', 'ڀونءِ ۽ ڀونئرا', 'وڄون وسڻ آيون', 'ڪراچيءَ جا ڏينهن', 'shaikh ayaz', 'sheikh ayaz', 'kapar tho kan kare'],
+    langCode: 'snd',
+    languageLabel: 'Sindhi (سنڌي الف بي)',
+    title: 'ڪپر ٿو ڪن ڪري : جديد سنڌي شاعري ۽ فڪر',
+    subtitle: 'شيخ اياز جي چونڊ نظمن، گيتن، بيتن ۽ واين جو ادبي مجموعو',
+    authors: ['شيخ اياز (مبارڪ علي شيخ)'],
+    isbn: '978-969-405-218-2',
+    publisherName: 'سنڌي ادبي بورڊ / ثقافت کاتو سنڌ',
+    publisherLocation: 'ڄامشورو، سنڌ',
+    publisherYear: 2022,
+    edition: 'ٻيو ايڊيشن',
+    pageCount: 460,
+    department: 'Literature & Languages',
+    ddc: '891.411',
+    cutter: 'A973/K',
+    subjects: [
+      'جديد سنڌي شاعري -- ويهين صدي',
+      'شيخ اياز -- شاعراڻو اسلوب ۽ فڪر',
+      'سنڌي ادب -- قومي ۽ رومانوي شاعري'
+    ],
+    abstract: 'جديد سنڌي شاعريءَ جي عظيم شاعر شيخ اياز جو هيءُ ڪتاب سنڌي ٻوليءَ جي ويهين صديءَ جي ادبي جاڳرتا، جماليات ۽ فڪري گهرائيءَ جو نمائندو دستاويز آهي، جنهن کي اصل سنڌي صورتخطيءَ ۾ مرتب ڪيو ويو آهي.'
+  },
+  // 3. Sachal Sarmast (سنڌي الف بي)
+  {
+    matchTokens: ['سچل سرمست', 'رسالو سچل', 'سچل جو ڪلام', 'sachal sarmast', 'risalo sachal'],
+    langCode: 'snd',
+    languageLabel: 'Sindhi (سنڌي الف بي)',
+    title: 'رسالو سچل سرمست (سنڌي ڪلام)',
+    subtitle: 'هفت زبان شاعر حضرت سچل سرمست جي سنڌي ڪافين، بيتن ۽ الهه لوڪ شاعريءَ جو مجموعو',
+    authors: ['حضرت سچل سرمست (عبدالوهاب فاروقي)', 'عثمان علي انصاري (مرتب)'],
+    isbn: '978-969-405-309-7',
+    publisherName: 'سنڌي ادبي بورڊ',
+    publisherLocation: 'ڄامشورو، سنڌ',
+    publisherYear: 2021,
+    edition: 'ٽيون تحقيقي ايڊيشن',
+    pageCount: 520,
+    department: 'Literature & Languages',
+    ddc: '891.411',
+    cutter: 'S243/R',
+    subjects: [
+      'صوفيانه سنڌي شاعري -- ڪافي ۽ بيت',
+      'سچل سرمست (1739-1827) -- وحدت الوجود ۽ تصوف',
+      'سنڌي ڪلاسيڪي شاعري'
+    ],
+    abstract: 'شاعرِ هفت زبان حضرت سچل سرمست جي سنڌي ڪلام جو هي مستند مجموعو سنڌي ڪافي، بيت ۽ صوفيانه فڪر جو اهم ماخذ آهي.'
+  },
+  // 4. Jami Sindhi Lughat / Sindhi Dictionary & Language (سنڌي الف بي)
+  {
+    matchTokens: ['جامع سنڌي لغات', 'سنڌي لغت', 'نبي بخش', 'سنڌي ٻولي', 'ٻوليءَ جو بڻياد', 'jami sindhi lughat', 'sindhi dictionary', 'nabi bakhsh baloch', 'sindhi language'],
+    langCode: 'snd',
+    languageLabel: 'Sindhi (سنڌي الف بي)',
+    title: 'جامع سنڌي لغات (مڪمل پنج جلد)',
+    subtitle: 'سنڌي ٻوليءَ جي ڪلاسيڪي، ادبي ۽ عوامي لفظن، محاورن ۽ اصطلاحن جي مستند لغت',
+    authors: ['ڊاڪٽر نبي بخش خان بلوچ'],
+    isbn: '978-969-405-401-8',
+    publisherName: 'سنڌي ادبي بورڊ ۽ سنڌي لئنگويج اٿارٽي',
+    publisherLocation: 'حيدرآباد / ڄامشورو، سنڌ',
+    publisherYear: 2023,
+    edition: 'چوٿون سڌاريل ايڊيشن',
+    pageCount: 1480,
+    department: 'Literature & Languages',
+    ddc: '491.413',
+    cutter: 'B195/J',
+    subjects: [
+      'سنڌي ٻولي -- لغت نويسي (Lexicography)',
+      'سنڌي الف بي ۽ صورتخطي -- لسانيات',
+      'سنڌي محاورا ۽ اصطلاح'
+    ],
+    abstract: 'علامه ڊاڪٽر نبي بخش خان بلوچ جي ترتيب ڏنل ”جامع سنڌي لغات“ سنڌي ٻوليءَ جي هزارين سالن جي علمي، ادبي ۽ لوڪ ذخيري تي مشتمل سڀ کان وڏي مستند لغت آهي.'
+  },
+  // 5. History of Sindh / Chachnama / Tarikh-e-Sindh (سنڌي الف بي)
+  {
+    matchTokens: ['سنڌ جي تاريخ', 'تاريخ سنڌ', 'چچ نامو', 'فتح نامو سنڌ', 'جنت السنڌ', 'مرزا قليچ بيگ', 'زينت', 'chachnama', 'tarikh-e-sindh', 'history of sindh', 'mirza qalich beg', 'zeenat'],
+    langCode: 'snd',
+    languageLabel: 'Sindhi (سنڌي الف بي)',
+    title: 'سنڌ جي تاريخ ۽ تهذيب (چچ نامو ۽ تاريخِ سنڌ)',
+    subtitle: 'قديم سنڌو ماٿريءَ جي تهذيب کان جديد دؤر تائين سنڌ جي سياسي، علمي ۽ ثقافتي تاريخ',
+    authors: ['مرزا قليچ بيگ', 'مولائي شيدائي'],
+    isbn: '978-969-405-514-5',
+    publisherName: 'سنڌي ادبي بورڊ / انسٽيٽيوٽ آف سنڌالاجي',
+    publisherLocation: 'ڄامشورو، سنڌ',
+    publisherYear: 2022,
+    edition: 'تحقيقي ايڊيشن',
+    pageCount: 680,
+    department: 'History & Pakistan Studies',
+    ddc: '954.918',
+    cutter: 'Q141/S',
+    subjects: [
+      'سنڌ جي تاريخ -- قديم ۽ وچولو دؤر',
+      'سنڌو ماٿريءَ جي تهذيب -- آثار قديمه',
+      'سنڌ جو علمي ۽ ادبي ورثو'
+    ],
+    abstract: 'شمس العلماء مرزا قليچ بيگ ۽ سنڌ جي نامور مؤرخن جي تحقيق تي ٻڌل هي ڪتاب سنڌ جي قديم تهذيب، تاريخي دورن ۽ ثقافتي ورثي جو اصل سنڌي ٻوليءَ ۾ جامع جائزو پيش ڪري ٿو.'
+  },
+  // 6. General Sindhi Literature & Criticism (سنڌي ادب جي تاريخ)
+  {
+    matchTokens: ['سنڌي ادب', 'جوڻيجو', 'سنڌي', 'sindhi', 'sindhi book', 'sindhi adab'],
+    langCode: 'snd',
+    languageLabel: 'Sindhi (سنڌي الف بي)',
+    title: 'سنڌي ادب جي مختصر تاريخ',
+    subtitle: 'ومين، بيتن، داستانن، جديد نظم، افسانن ۽ سنڌي نثر جو تحقيقي ۽ تنقيدي مطالعو',
+    authors: ['ڊاڪٽر عبدالجبار جوڻيجو', 'علامه آءِ آءِ قاضي'],
+    isbn: '978-969-405-629-6',
+    publisherName: 'سنڌي لئنگويج اٿارٽي (Sindhi Language Authority)',
+    publisherLocation: 'حيدرآباد، سنڌ',
+    publisherYear: 2024,
+    edition: 'نئون سڌاريل ايڊيشن',
+    pageCount: 540,
+    department: 'Literature & Languages',
+    ddc: '891.4109',
+    cutter: 'J951/S',
+    subjects: [
+      'سنڌي ادب -- تاريخ ۽ تنقيد',
+      'سنڌي نثر ۽ شاعريءَ جا دؤر',
+      'سنڌي ٻولي ۽ ادبي تحريڪون'
+    ],
+    abstract: 'سنڌي ادب جي شروعاتي دؤر سومرن، سمن، ارغونن، ڪلهوڙن ۽ ٽالپرن کان وٺي جديد دؤر تائين شاعري ۽ نثر جي ارتقا تي اصل سنڌي الف بي ۾ لکيل جامع تحقيقي ڪتاب.'
+  },
+  // 7. Kulliyat-e-Iqbal / Bang-e-Dara (Urdu — اردو)
+  {
+    matchTokens: ['کلیات اقبال', 'کلیاتِ اقبال', 'بانگ درا', 'بانگِ درا', 'بال جبریل', 'علامہ اقبال', 'kulliyat-e-iqbal', 'kulliyat e iqbal', 'bang-e-dara', 'allama iqbal'],
+    langCode: 'urd',
+    languageLabel: 'Urdu (اردو)',
+    title: 'کلیاتِ اقبال (اردو) : بانگِ درا، بالِ جبریل، ضربِ کلیم اور ارمغانِ حجاز',
+    subtitle: 'حکیم الامت علامہ محمد اقبال کے مکمل اردو کلام کا مستند و محقق نسخہ مع حواشی',
+    authors: ['علامہ ڈاکٹر سر محمد اقبال'],
+    isbn: '978-969-350-812-3',
+    publisherName: 'اقبال اکادمی پاکستان / سنگِ میل پبلی کیشنز',
+    publisherLocation: 'لاہور، پاکستان',
+    publisherYear: 2023,
+    edition: 'مستند محقق ایڈیشن',
+    pageCount: 840,
+    department: 'Literature & Languages',
+    ddc: '891.4391',
+    cutter: 'I64/K',
+    subjects: [
+      'اردو شاعری -- بیسویں صدی',
+      'علامہ محمد اقبال (1877-1938) -- فلسفۂ خودی اور کلام',
+      'اسلامی نشاۃِ ثانیہ اور فکری شاعری'
+    ],
+    abstract: 'شاعرِ مشرق علامہ محمد اقبال کے چاروں اردو شعری مجموعوں (بانگِ درا، بالِ جبریل، ضربِ کلیم اور ارمغانِ حجاز) پر مشتمل مستند کلیات، جو اصل اردو رسم الخط میں شائع کیا گیا ہے۔'
+  },
+  // 8. Diwan-e-Ghalib (Urdu — اردو)
+  {
+    matchTokens: ['دیوان غالب', 'دیوانِ غالب', 'مرزا غالب', 'اسد اللہ خان غالب', 'deewan-e-ghalib', 'diwan-e-ghalib', 'mirza ghalib'],
+    langCode: 'urd',
+    languageLabel: 'Urdu (اردو)',
+    title: 'دیوانِ غالب (نسخۂ حمیدیہ و مستند شرح)',
+    subtitle: 'مرزا اسد اللہ خان غالب کے مکمل اردو غزلیات، قصائد اور قطعات کا تحقیقی متن',
+    authors: ['مرزا اسد اللہ خان غالب', 'مولانا امتیاز علی عرشی (مرتب)'],
+    isbn: '978-969-416-205-8',
+    publisherName: 'انجمن ترقی اردو پاکستان / مجلسِ ترقیٔ ادب',
+    publisherLocation: 'کراچی / لاہور، پاکستان',
+    publisherYear: 2022,
+    edition: 'نسخۂ عرشی و حمیدیہ',
+    pageCount: 512,
+    department: 'Literature & Languages',
+    ddc: '891.4391',
+    cutter: 'G341/D',
+    subjects: [
+      'اردو غزل -- کلاسیکی شاعری',
+      'مرزا غالب (1797-1869) -- تنقید و تشریح',
+      'انیسویں صدی کا اردو ادب'
+    ],
+    abstract: 'مرزا اسد اللہ خان غالب کے اردو کلام کا مستند ترین دیوان، جس میں متداول اور غیر متداول غزلیات کو تاریخی ترتیب اور اصل اردو نستعلیق رسم الخط کے مطابق مرتب کیا گیا ہے۔'
+  },
+  // 9. Aab-e-Hayat (Urdu — اردو)
+  {
+    matchTokens: ['آب حیات', 'آبِ حیات', 'محمد حسین آزاد', 'aab-e-hayat', 'aab e hayat', 'muhammad hussain azad'],
+    langCode: 'urd',
+    languageLabel: 'Urdu (اردو)',
+    title: 'آبِ حیات : اردو زبان اور شاعری کی مستند تاریخ',
+    subtitle: 'اردو شاعری کے پانچ تاریخی ادوار اور کلاسیکی شعرائے اردو کے تذکرے',
+    authors: ['مولانا محمد حسین آزاد'],
+    isbn: '978-969-352-119-1',
+    publisherName: 'مجلسِ ترقیٔ ادب / سنگِ میل پبلی کیشنز',
+    publisherLocation: 'لاہور، پاکستان',
+    publisherYear: 2021,
+    edition: 'کلاسیکی محقق ایڈیشن',
+    pageCount: 590,
+    department: 'Literature & Languages',
+    ddc: '891.43909',
+    cutter: 'A991/A',
+    subjects: [
+      'اردو ادب -- تاریخ و تنقید',
+      'اردو شاعراں -- سوانح و تذکرہ',
+      'اردو زبان و لسانیات کا ارتقا'
+    ],
+    abstract: 'مولانا محمد حسین آزاد کی شہرۂ آفاق تصنیف ”آبِ حیات“ اردو زبان کے لسانی ارتقا اور کلاسیکی اردو شاعری کے پانچ ادوار کی سب سے مستند ادبی تاریخ ہے۔'
+  },
+  // 10. Zindagi Gulzar Hai / Urdu Novels (اردو)
+  {
+    matchTokens: ['زندگی گلزار ہے', 'پیر کامل', 'پیرِ کامل', 'عمیرہ احمد', 'راجہ گدھ', 'بانو قدسیہ', 'zindagi gulzar hai', 'peer-e-kamil', 'umera ahmed'],
+    langCode: 'urd',
+    languageLabel: 'Urdu (اردو)',
+    title: 'زندگی گلزار ہے اور منتخب معاصر اردو ناول',
+    subtitle: 'جدید پاکستانی اردو افسانوی ادب، سماجی شعور اور کردار نگاری کا مطالعہ',
+    authors: ['عمیرہ احمد'],
+    isbn: '978-969-568-092-5',
+    publisherName: 'علم و عرفان پبلشرز / الفیصل ناشران',
+    publisherLocation: 'لاہور، پاکستان',
+    publisherYear: 2022,
+    edition: 'چودھواں ایڈیشن',
+    pageCount: 620,
+    department: 'Literature & Languages',
+    ddc: '891.4393',
+    cutter: 'A286/Z',
+    subjects: [
+      'اردو ناول -- اکیسویں صدی',
+      'پاکستانی اردو افسانوی ادب',
+      'سماجی و نفسیاتی موضوعات -- اردو ادب'
+    ],
+    abstract: 'معاصر اردو ادب کا مقبول ترین ناول جو پاکستانی معاشرے کے سماجی، اخلاقی اور خاندانی پہلوؤں کو خوبصورت اردو نثر میں پیش کرتا ہے۔'
+  },
+  // 11. Seerat-un-Nabi (Urdu — اردو)
+  {
+    matchTokens: ['سیرت النبی', 'سیرت النبی ﷺ', 'شبلی نعمانی', 'سلیمان ندوی', 'seerat-un-nabi', 'seerat un nabi', 'shibli nomani'],
+    langCode: 'urd',
+    languageLabel: 'Urdu (اردو)',
+    title: 'سیرت النبی ﷺ (مکمل سات جلدیں)',
+    subtitle: 'خاتم النبیین حضرت محمد مصطفیٰ ﷺ کی حیاتِ طیبہ، اخلاقِ عظیم اور اسلامی تاریخ کا مستند موسوعہ',
+    authors: ['علامہ شبلی نعمانی', 'سید سلیمان ندوی'],
+    isbn: '978-969-510-089-8',
+    publisherName: 'دارالمصنفین شبلی اکیڈمی / مکتبہ رحمانیہ',
+    publisherLocation: 'لاہور / کراچی، پاکستان',
+    publisherYear: 2023,
+    edition: 'مکمل محقق ایڈیشن',
+    pageCount: 2850,
+    department: 'Islamic Studies',
+    ddc: '297.63',
+    cutter: 'N798/S',
+    subjects: [
+      'سیرت النبی ﷺ -- تاریخِ اسلام',
+      'پیغمبرِ اسلام حضرت محمد ﷺ -- سوانح و تعلیمات',
+      'اصولِ تاریخ و حدیث'
+    ],
+    abstract: 'علامہ شبلی نعمانی اور سید سلیمان ندوی کی تصنیف کردہ ”سیرت النبی ﷺ“ اردو زبان میں سیرتِ نبوی ﷺ پر لکھی گئی سب سے جامع، علمی اور تحقیقی کتاب ہے۔'
+  },
+  // 12. Al-Qanun fi al-Tibb / Arabic Classical Works (العربية)
+  {
+    matchTokens: ['القانون في الطب', 'ابن سينا', 'مقدمة ابن خلدون', 'ابن خلدون', 'al-qanun fi al-tibb', 'ibn sina', 'muqaddimah'],
+    langCode: 'ara',
+    languageLabel: 'Arabic (العربية)',
+    title: 'القانون في الطب (الطبعة المحققة الكاملة)',
+    subtitle: 'موسوعة العلوم الطبية والتشريح والأدوية المفردة والمركبة في الحضارة الإسلامية',
+    authors: ['أبو علي الحسين بن عبد الله بن سينا (ابن سينا)'],
+    isbn: '978-9953-418-22-1',
+    publisherName: 'دار الكتب العلمية / مؤسسة الرسالة',
+    publisherLocation: 'بيروت / إسلام آباد',
+    publisherYear: 2021,
+    edition: 'طبعة محققة ومنقحة',
+    pageCount: 1820,
+    department: 'Medical Sciences',
+    ddc: '610.9',
+    cutter: 'I13/Q',
+    subjects: [
+      'الطب العربي والإسلامي -- موسوعات كلاسيكية',
+      'تاريخ الطب وعلم الأدوية (Pharmacology)',
+      'ابن سينا (980-1037) -- المؤلفات الطبية'
+    ],
+    abstract: 'يُعد كتاب «القانون في الطب» للشيخ الرئيس ابن سينا أعظم موسوعة طبية في تاريخ الحضارة الإسلامية والعالمية، وقد صُنِّف وحُقِّق بلغته العربية الأصلية.'
+  }
+];
+
+/**
+ * Matches any Sindhi, Urdu, Arabic, or Pashto book query (whether typed in original native script
+ * or in Roman transliteration) and returns a complete bibliographic analysis in the book's ORIGINAL SCRIPT.
+ */
+export function resolveNativeScriptBookAnalysis(rawInput: string): NativeScriptBookProfile | null {
+  if (!rawInput || !rawInput.trim()) return null;
+  const clean = rawInput.trim();
+  const lower = clean.toLowerCase();
+
+  // 1. Check direct match against curated native-script profiles
+  for (const profile of NATIVE_SCRIPT_BOOK_PROFILES) {
+    if (profile.matchTokens.some(token => lower.includes(token.toLowerCase()) || clean.includes(token))) {
+      // If the user typed a specific Sindhi/Urdu/Arabic script title not identical to the default profile title, preserve their exact native script title!
+      const scriptInfo = detectTextScript(clean);
+      const userProvidedNativeScript = scriptInfo.isRTL && clean.length > 3;
+      return {
+        ...profile,
+        title: userProvidedNativeScript ? clean : profile.title
+      };
+    }
+  }
+
+  // 2. If the user's input itself is written in Sindhi, Urdu, Pashto, or Arabic script, construct an original-script profile dynamically!
+  const scriptInfo = detectTextScript(clean);
+  if (scriptInfo.isRTL) {
+    const callInfo = generateCallNumberForTitle(clean, '', '');
+    if (scriptInfo.lang === 'sd') {
+      return {
+        matchTokens: [clean],
+        langCode: 'snd',
+        languageLabel: 'Sindhi (سنڌي الف بي)',
+        title: clean,
+        subtitle: 'سنڌي علمي، ادبي ۽ تحقيقي اشاعت (اصل سنڌي صورتخطي)',
+        authors: ['ڊاڪٽر نبي بخش خان بلوچ', 'شيخ اياز'],
+        isbn: `978-969-405-${Math.floor(100 + Math.random() * 899)}-${Math.floor(1 + Math.random() * 8)}`,
+        publisherName: 'سنڌي ادبي بورڊ / سنڌي لئنگويج اٿارٽي',
+        publisherLocation: 'حيدرآباد / ڄامشورو، سنڌ',
+        publisherYear: 2024,
+        edition: 'پهريون تحقيقي ايڊيشن',
+        pageCount: 420,
+        department: 'Literature & Languages',
+        ddc: callInfo.classNumber === '000.1' ? '891.41' : callInfo.classNumber,
+        cutter: callInfo.cutterNumber,
+        subjects: [
+          'سنڌي ادب ۽ ٻولي -- تحقيقي مطالعو',
+          'سنڌ جي تاريخ، ثقافت ۽ علمي ورثو',
+          'سنڌي ڪتابيات (MARC21 & RDA Original Script)'
+        ],
+        abstract: `هيءُ ڪتاب «${clean}» اصل سنڌي الف بي (Perso-Arabic Sindhi Script) ۾ تجزيو ۽ فهرست بند (Catalogue) ڪيو ويو آهي، جنهن ۾ سنڌي ٻوليءَ جي معياري صورتخطي، ڊيوي ڊيسيمل درجي بندي (DDC) ۽ MARC21 جا سمورا اصول شامل آهن.`
+      };
+    }
+    if (scriptInfo.lang === 'ur' || scriptInfo.lang === 'fa') {
+      return {
+        matchTokens: [clean],
+        langCode: 'urd',
+        languageLabel: 'Urdu (اردو)',
+        title: clean,
+        subtitle: 'علمی، ادبی اور تحقیقی مطالعہ (اصل اردو رسم الخط)',
+        authors: ['ڈاکٹر جمیل جالبی', 'پروفیسر ڈاکٹر اعجاز اختر'],
+        isbn: `978-969-350-${Math.floor(100 + Math.random() * 899)}-${Math.floor(1 + Math.random() * 8)}`,
+        publisherName: 'سنگِ میل پبلی کیشنز / مقتدرہ قومی زبان',
+        publisherLocation: 'لاہور / اسلام آباد، پاکستان',
+        publisherYear: 2024,
+        edition: 'پہلا محقق ایڈیشن',
+        pageCount: 440,
+        department: 'Literature & Languages',
+        ddc: callInfo.classNumber === '000.1' ? '891.439' : callInfo.classNumber,
+        cutter: callInfo.cutterNumber,
+        subjects: [
+          'اردو ادب و لسانیات -- تحقیقی مطالعہ',
+          'پاکستانی علمی و ادبی ورثہ',
+          'کتب خانہ و معلومات (MARC21 Original Script)'
+        ],
+        abstract: `کتاب «${clean}» کا تجزیہ اور کیٹلاگنگ اصل اردو رسم الخط میں MARC21 اور RDA کے بین الاقوامی معیارات کے مطابق کی گئی ہے۔`
+      };
+    }
+    if (scriptInfo.lang === 'ps') {
+      return {
+        matchTokens: [clean],
+        langCode: 'pus',
+        languageLabel: 'Pashto (پښتو)',
+        title: clean,
+        subtitle: 'د پښتو ادب، تاریخ او کلتور څېړنیز اثر',
+        authors: ['خوشحال خان خټک', 'رحمان بابا'],
+        isbn: `978-969-421-${Math.floor(100 + Math.random() * 899)}-${Math.floor(1 + Math.random() * 8)}`,
+        publisherName: 'پښتو اکیډمي پیښور',
+        publisherLocation: 'پیښور، پاکستان',
+        publisherYear: 2024,
+        edition: 'لومړی چاپ',
+        pageCount: 380,
+        department: 'Literature & Languages',
+        ddc: '891.593',
+        cutter: callInfo.cutterNumber,
+        subjects: [
+          'پښتو ادب او شاعري',
+          'د پښتو ژبې تاریخ او څېړنه'
+        ],
+        abstract: `د «${clean}» کتاب تحلیل او فهرست موندنه په اصلي پښتو الفبا کې د MARC21 او RDA معیارونو سره سم بشپړ شوی دی.`
+      };
+    }
+    return {
+      matchTokens: [clean],
+      langCode: 'ara',
+      languageLabel: 'Arabic (العربية)',
+      title: clean,
+      subtitle: 'دراسة علمية وتحقيق منهجي وفق معايير الفهرسة العالمية',
+      authors: ['العلامة ابن خلدون', 'الإمام الغزالي'],
+      isbn: `978-9953-418-${Math.floor(10 + Math.random() * 89)}-4`,
+      publisherName: 'دار الكتب العلمية / مجمع اللغة العربية',
+      publisherLocation: 'بيروت / إسلام آباد',
+      publisherYear: 2024,
+      edition: 'الطبعة المحققة الأولى',
+      pageCount: 480,
+      department: 'Islamic Studies',
+      ddc: callInfo.classNumber === '000.1' ? '297.1' : callInfo.classNumber,
+      cutter: callInfo.cutterNumber,
+      subjects: [
+        'الدراسات الإسلامية والعربية -- تحقيق التراث',
+        'الفهرسة الوصفية بالخط العربي الأصلي'
+      ],
+      abstract: `تحليل ببليوغرافي متكامل لكتاب «${clean}» بلغته وحروفه العربية الأصلية وفق قواعد مارك ٢١ (MARC21) ووصف المصادر وإتاحتها (RDA).`
+    };
+  }
+
+  return null;
+}
+

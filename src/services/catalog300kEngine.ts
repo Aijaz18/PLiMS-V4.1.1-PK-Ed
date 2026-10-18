@@ -205,25 +205,55 @@ const SUBJECT_DOMAINS: {
     subjects: ['Civil Engineering', 'Electrical Engineering', 'Mechanical Design', 'Control Systems']
   },
   {
-    ddc: '800',
-    dept: 'Literature & Urdu Adab',
+    ddc: '891',
+    dept: 'سنڌي ادب ۽ شاعري (Sindhi Literature)',
     topics: [
-      'Kulliyat-e-Iqbal with Comprehensive Annotations', 'Diwan-e-Ghalib: Textual and Critical Study',
-      'Nuskha-ha-e-Wafa: The Complete Works of Faiz', 'The Art and Technique of the Urdu Novel',
-      'Classical Urdu Ghazal: Tradition and Evolution', 'Afsana Nigari in 20th Century South Asia',
-      'Shakespearean Tragedies: Text and Criticism', 'Modern Urdu Nazm: From N. M. Rashid to Meeraji',
-      'Anthology of Contemporary Pakistani English Fiction'
+      'شاهه جو رسالو : مستند متن، معنيٰ ۽ تحقيقي شرح',
+      'ڪپر ٿو ڪن ڪري : شيخ اياز جي جديد سنڌي شاعري',
+      'رسالو سچل سرمست : صوفيانه ڪافيون ۽ بيت',
+      'جامع سنڌي لغات : سنڌي ٻوليءَ جي مستند لغت',
+      'سنڌ جي تاريخ ۽ تهذيب : چچ نامو ۽ تاريخِ سنڌ',
+      'سنڌي ادب جي مختصر تاريخ ۽ تنقيدي جائزو',
+      'زينت : سنڌيءَ جو ڪلاسيڪي سماجي ناول',
+      'ساميءَ جا سلوڪ : ويدانتي ۽ اخلاقي شاعري',
+      'سنڌي ٻوليءَ جو بڻياد ۽ لساني ارتقا',
+      'سنڌي لوڪ ادب ۽ داستانن جو تحقيقي مطالعو'
     ],
     authors: [
-      'Iqbal, Allama Muhammad', 'Ghalib, Mirza Asadullah Khan', 'Faiz, Faiz Ahmed', 'Farooqi, Shamsur Rahman',
-      'Manto, Saadat Hasan', 'Mir Taqi Mir', 'Hali, Altaf Hussain', 'Barlas, Mirza Adib',
-      'Siddiqi, Dr. Abul Lais', 'Narayan, R. K.', 'Sidwa, Bapsi', 'Hamid, Mohsin', 'Hanif, Mohammed'
+      'شاهه عبداللطيف ڀٽائي', 'شيخ اياز', 'حضرت سچل سرمست', 'ڊاڪٽر نبي بخش خان بلوچ',
+      'شمس العلماء مرزا قليچ بيگ', 'ڊاڪٽر عبدالجبار جوڻيجو', 'علامه آءِ آءِ قاضي',
+      'ڊاڪٽر عمر بن محمد دائودپوٽو', 'حسام الدين راشدي', 'محمد ابراهيم جويو'
     ],
     publishers: [
-      'Sang-e-Meel Publications Lahore', 'Al-Waqar Publications', 'Oxford University Press Pakistan',
-      'Majlis-e-Taraqqi-e-Adab', 'Maktaba-e-Danyal Karachi', 'National Book Foundation', 'Ferozsons Lahore'
+      'سنڌي ادبي بورڊ ڄامشورو', 'سنڌي لئنگويج اٿارٽي حيدرآباد', 'ثقافت ۽ سياحت کاتو سنڌ',
+      'انسٽيٽيوٽ آف سنڌالاجي ڄامشورو', 'شاهه عبداللطيف ڀٽائي چيئر ڪراچي يونيورسٽي'
     ],
-    subjects: ['Urdu Poetry', 'Classical Literature', 'Urdu Fiction', 'Literary Criticism']
+    subjects: ['سنڌي شاعري', 'سنڌي ادب', 'سنڌي ٻولي ۽ لغت', 'سنڌ جي تاريخ ۽ ثقافت']
+  },
+  {
+    ddc: '800',
+    dept: 'Literature & Urdu Adab (اردو ادب)',
+    topics: [
+      'کلیاتِ اقبال (اردو) : بانگِ درا، بالِ جبریل اور ضربِ کلیم کا تحقیقی مطالعہ',
+      'دیوانِ غالب : متداول و غیر متداول غزلیات کی مستند شرح',
+      'نسخہ ہائے وفا : کلیاتِ فیض احمد فیض',
+      'آبِ حیات : کلاسیکی اردو شاعری اور زبان کی تاریخ',
+      'اردو ناول کا فن اور بیسویں صدی کی روایت',
+      'کلاسیکی اردو غزل : میر تقی میر سے غالب تک',
+      'جدید اردو افسانہ : منٹو، بیدی اور عصمت چغتائی کا تنقیدی مطالعہ',
+      'تاریخِ ادبِ اردو : قدیم دور سے عہدِ جدید تک',
+      'کلیاتِ میر تقی میر (مکمل چھ دواوین)'
+    ],
+    authors: [
+      'علامہ محمد اقبال', 'مرزا اسد اللہ خان غالب', 'فیض احمد فیض', 'شمس الرحمٰن فاروقی',
+      'سعادت حسن منٹو', 'میر تقی میر', 'مولانا الطاف حسین حالی', 'مولانا محمد حسین آزاد',
+      'ڈاکٹر جمیل جالبی', 'ڈاکٹر ابو اللیث صدیقی', 'بانو قدسیہ', 'اشفاق احمد'
+    ],
+    publishers: [
+      'سنگِ میل پبلی کیشنز لاہور', 'اقبال اکادمی پاکستان', 'مجلسِ ترقیٔ ادب لاہور',
+      'انجمن ترقی اردو پاکستان کراچی', 'مکتبۂ دانیال کراچی', 'نیشنل بک فاؤنڈیشن اسلام آباد'
+    ],
+    subjects: ['اردو شاعری', 'کلاسیکی اردو ادب', 'اردو افسانہ و ناول', 'تنقید و تحقیق']
   },
   {
     ddc: '900',
@@ -284,8 +314,12 @@ export function generateCatalogBookAtIndex(index: number): BookRecord {
 
   const prefix = TITLE_PREFIXES[prefixIdx];
   const topic = domain.topics[topicIdx];
-  const volumeSuffix = (index % 12) > 0 ? ` : Vol. ${((index % 5) + 1)}` : '';
-  const title = `${prefix} ${topic}${volumeSuffix}`;
+  const isNativeRtlTopic = /[\u0600-\u06FF]/.test(topic);
+  const volumeNum = (index % 5) + 1;
+  const volumeSuffix = (index % 12) > 0
+    ? (domain.ddc === '891' ? ` (جلد ${volumeNum})` : isNativeRtlTopic ? ` (جلد ${volumeNum})` : ` : Vol. ${volumeNum}`)
+    : '';
+  const title = isNativeRtlTopic ? `${topic}${volumeSuffix}` : `${prefix} ${topic}${volumeSuffix}`;
 
   const authors = (index % 3 === 0)
     ? [domain.authors[authorIdx], domain.authors[author2Idx]]

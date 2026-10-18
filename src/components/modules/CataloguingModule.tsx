@@ -63,7 +63,7 @@ import {
 } from 'lucide-react';
 import { BookRecord, BookCopy, UserProfile, InterLibraryTransfer, SystemSettings, LibraryScheme } from '../../types/alims';
 import { generateAiCataloguing, generateAiCataloguingFromImage, normalizeBookCoverImage, parseVoiceToMarc21, AiCataloguingResult, formatMarcSubfields } from '../../services/geminiService';
-import { generateCallNumberForTitle, detectTextScript } from '../../utils/classificationEngine';
+import { generateCallNumberForTitle, detectTextScript, resolveNativeScriptBookAnalysis } from '../../utils/classificationEngine';
 import {
   queryCatalog300k,
   setCustomCatalogBooks,
@@ -603,6 +603,12 @@ export const CataloguingModule: React.FC<CataloguingModuleProps> = ({
       text: 'Physical verification: Minor shelf wear on outer corners; archival acid-free preservation cover applied. Fitted with ultra-high-frequency RFID asset chip and spine barcode.'
     },
     {
+      label: 'سنڌي ادب خلاصو (Sindhi Abstract)',
+      badge: 'سنڌي 520',
+      field: 'description',
+      text: 'سنڌي ادب، ڪلاسيڪل شاعري ۽ لسانيات جو مستند تحقيقي اڀياس. هن ڪتاب ۾ سنڌي الف بي، لوڪ ادب ۽ صوفيانه فڪر جو تفصيلي جائزو پيش ڪيل آهي.'
+    },
+    {
       label: 'Urdu Literature Abstract',
       badge: 'اردو 520',
       field: 'description',
@@ -632,8 +638,23 @@ export const CataloguingModule: React.FC<CataloguingModuleProps> = ({
   const voiceToMarcTimerRef = useRef<any>(null);
   const voiceToMarcRecRef = useRef<any>(null);
 
-  // Spoken dictation test presets for librarians
+  // Spoken dictation test presets for librarians (Includes Original Sindhi Alphabet سنڌي الف بي, Urdu اردو, Arabic العربية & English)
   const voiceDictationPresets = [
+    {
+      label: 'سنڌي: شاهه جو رسالو (شاهه عبداللطيف ڀٽائي)',
+      badge: 'سنڌي الف بي',
+      transcript: 'عنوان: شاهه جو رسالو : مستند متن، معنيٰ ۽ تحقيقي شرح. مصنف: شاهه عبداللطيف ڀٽائي، محقق علامه آءِ آءِ قاضي. آءِ ايس بي اين: 978-969-405-112-8. پبلشر: سنڌي ادبي بورڊ ڄامشورو. سال: 2021. شعبو: سنڌي ادب ۽ شاعري.'
+    },
+    {
+      label: 'سنڌي لغت: جامع سنڌي لغات (ڊاڪٽر نبي بخش بلوچ)',
+      badge: 'سنڌي لسانيات',
+      transcript: 'عنوان: جامع سنڌي لغات : سنڌي ٻوليءَ جو تاريخي ۽ تحقيقي خزانو. مصنف: ڊاڪٽر نبي بخش خان بلوچ. آءِ ايس بي اين: 978-969-405-204-0. پبلشر: سنڌي ادبي بورڊ ڄامشورو. سال: 2019. شعبو: سنڌي لسانيات ۽ لغت.'
+    },
+    {
+      label: 'اردو: کلیاتِ اقبال (علامہ محمد اقبال)',
+      badge: 'اردو ادب',
+      transcript: 'عنوان: کلیاتِ اقبال اردو : بانگِ درا، بالِ جبریل، ضربِ کلیم اور ارمغانِ حجاز۔ مصنف: علامہ ڈاکٹر محمد اقبال۔ آئی ایس بی این: 978-9693500349۔ ناشر: شیخ غلام علی اینڈ سنز لاہور۔ سال: 2021۔ شعبہ: اردو ادب و شاعری۔'
+    },
     {
       label: 'Software Engineering (Robert C. Martin)',
       badge: 'CS & AI',
@@ -643,16 +664,6 @@ export const CataloguingModule: React.FC<CataloguingModuleProps> = ({
       label: 'Constitutional Law of Pakistan (Hamid Khan)',
       badge: 'Law',
       transcript: 'Title: Constitutional and Political History of Pakistan. Author: Hamid Khan, Senior Advocate Supreme Court. ISBN: 978-0199401799. Publisher: Oxford University Press Pakistan. Year: 2021. Edition: Third Edition. Department: Law & Humanities.'
-    },
-    {
-      label: 'Medical Pathology (Kumar & Abbas)',
-      badge: 'Medicine',
-      transcript: 'Title: Robbins and Cotran Pathologic Basis of Disease. Authors: Vinay Kumar, Abul K. Abbas, and Jon C. Aster. ISBN: 978-1455726134. Publisher: Elsevier Saunders. Year: 2020. Edition: Tenth Edition. Department: Medical Sciences.'
-    },
-    {
-      label: 'Database Systems (Silberschatz & Korth)',
-      badge: 'Databases',
-      transcript: 'Title: Database System Concepts. Authors: Abraham Silberschatz, Henry F. Korth, and S. Sudarshan. ISBN: 978-0078022159. Publisher: McGraw-Hill Education. Year: 2020. Edition: Seventh Edition. Department: Information Technology.'
     }
   ];
 
@@ -806,7 +817,29 @@ export const CataloguingModule: React.FC<CataloguingModuleProps> = ({
       }, 1400);
 
       const result = await parseVoiceToMarc21(rawText, voiceToMarcLang);
-      setVoiceToMarcResult(result);
+      const nativeResolved = resolveNativeScriptBookAnalysis(
+        `${rawText} ${result.title || ''} ${(result.authors || []).join(' ')}`,
+        voiceToMarcLang
+      );
+      if (nativeResolved) {
+        setVoiceToMarcResult({
+          ...result,
+          title: nativeResolved.title,
+          subtitle: nativeResolved.subtitle,
+          authors: nativeResolved.authors,
+          publisherName: nativeResolved.publisherName,
+          publisherLocation: nativeResolved.publisherLocation,
+          department: nativeResolved.department,
+          ddcClassification: nativeResolved.ddcClassification,
+          cutterNumber: nativeResolved.cutterNumber,
+          callNumber: nativeResolved.callNumber,
+          subjects: nativeResolved.subjects,
+          abstract: nativeResolved.abstract,
+          rdaGuidelines: nativeResolved.rdaGuidelines
+        });
+      } else {
+        setVoiceToMarcResult(result);
+      }
     } catch (err: any) {
       console.error('Voice-to-MARC parsing error:', err);
       setVoiceToMarcError(`AI parsing error: ${err?.message || 'Could not parse voice transcript into MARC21'}`);
@@ -972,8 +1005,36 @@ export const CataloguingModule: React.FC<CataloguingModuleProps> = ({
   const cameraStreamRef = useRef<MediaStream | null>(null);
   const marcFormRef = useRef<HTMLFormElement | null>(null);
 
-  // Sample Book Covers for 1-Click Testing & Verification
+  // Sample Book Covers for 1-Click Testing & Verification (Includes Original Script Sindhi, Urdu, Arabic & English)
   const sampleBookCovers = [
+    {
+      title: 'شاهه جو رسالو : مستند متن، معنيٰ ۽ تحقيقي شرح',
+      author: 'شاهه عبداللطيف ڀٽائي (محقق: علامه آءِ آءِ قاضي)',
+      dept: 'سنڌي ادب ۽ شاعري (Sindhi Literature)',
+      coverUrl: 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=500&auto=format&fit=crop&q=80',
+      badge: 'سنڌي الف بي (891.411)'
+    },
+    {
+      title: 'جامع سنڌي لغات (پنج جلد) : سنڌي ٻوليءَ جو تاريخي خزانو',
+      author: 'ڊاڪٽر نبي بخش خان بلوچ',
+      dept: 'سنڌي لسانيات ۽ لغت (Sindhi Linguistics)',
+      coverUrl: 'https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=500&auto=format&fit=crop&q=80',
+      badge: 'سنڌي لغت (491.413)'
+    },
+    {
+      title: 'کلیاتِ اقبال (اردو) : بانگِ درا، بالِ جبریل، ضربِ کلیم',
+      author: 'علامہ محمد اقبال',
+      dept: 'اردو ادب و شاعری (Urdu Literature)',
+      coverUrl: 'https://images.unsplash.com/photo-1512820790803-83ca734da794?w=500&auto=format&fit=crop&q=80',
+      badge: 'اردو ادب (891.439)'
+    },
+    {
+      title: 'الرحيق المختوم : بحث في السيرة النبوية على صاحبها أفضل الصلاة والسلام',
+      author: 'صفي الرحمن المباركفوري',
+      dept: 'الدراسات الإسلامية (Islamic Studies)',
+      coverUrl: 'https://images.unsplash.com/photo-1585829365295-ab7cd400c167?w=500&auto=format&fit=crop&q=80',
+      badge: 'العربية (297.63)'
+    },
     {
       title: 'Modern AI in Library Systems',
       author: 'Prof. Dr. Aijaz Akhter',
@@ -982,75 +1043,86 @@ export const CataloguingModule: React.FC<CataloguingModuleProps> = ({
       badge: 'AI & CS'
     },
     {
-      title: 'Principles of Medical Physiology',
-      author: 'Dr. John E. Hall & Dr. M. Qasim',
-      dept: 'Medical & Health Sciences',
-      coverUrl: 'https://images.unsplash.com/photo-1532012164546-f432f2e3edd3?w=500&auto=format&fit=crop&q=80',
-      badge: 'Medicine'
-    },
-    {
       title: 'Constitutional Law of Pakistan',
       author: 'Hamid Khan, Senior Advocate',
       dept: 'Law & Humanities',
       coverUrl: 'https://images.unsplash.com/photo-1589829545856-d10d557cf95f?w=500&auto=format&fit=crop&q=80',
       badge: 'Law'
-    },
-    {
-      title: 'Islamic Jurisprudence & Usul al-Fiqh',
-      author: 'Prof. Dr. Imran Ahsan Khan Nyazee',
-      dept: 'Islamic Studies',
-      coverUrl: 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=500&auto=format&fit=crop&q=80',
-      badge: 'Islamic Studies'
     }
   ];
 
   // Apply an AiCataloguingResult to marcForm, aiVisionAnalysis, liveCaptionMeta, and aiMarcPreview
+  // Enforces original native script (e.g., Sindhi in سنڌي الف بي, Urdu in اردو, Arabic in العربية)
   const applyVisionCataloguingResult = useCallback((res: AiCataloguingResult, coverDataUrl?: string) => {
-    setAiVisionAnalysis(res);
+    const nativeResolved = resolveNativeScriptBookAnalysis(
+      `${res.title || ''} ${(Array.isArray(res.authors) ? res.authors.join(' ') : res.authors || '')} ${res.detectedText || ''}`
+    );
 
-    const authorsStr = Array.isArray(res.authors) ? res.authors.join(', ') : (res.authors || 'Unknown Author');
-    const subjectsStr = Array.isArray(res.subjects) ? res.subjects.join(', ') : (res.subjects || '');
+    const enrichedRes: AiCataloguingResult = nativeResolved
+      ? {
+          ...res,
+          title: nativeResolved.title,
+          subtitle: nativeResolved.subtitle,
+          authors: nativeResolved.authors,
+          publisherName: nativeResolved.publisherName,
+          publisherLocation: nativeResolved.publisherLocation,
+          department: nativeResolved.department,
+          ddcClassification: nativeResolved.ddcClassification,
+          cutterNumber: nativeResolved.cutterNumber,
+          callNumber: nativeResolved.callNumber,
+          subjects: nativeResolved.subjects,
+          abstract: nativeResolved.abstract,
+          rdaGuidelines: nativeResolved.rdaGuidelines,
+          detectedText: `${nativeResolved.title} — ${nativeResolved.authors.join('، ')}`
+        }
+      : res;
+
+    setAiVisionAnalysis(enrichedRes);
+
+    const joinSep = nativeResolved ? '، ' : ', ';
+    const authorsStr = Array.isArray(enrichedRes.authors) ? enrichedRes.authors.join(joinSep) : (enrichedRes.authors || 'Unknown Author');
+    const subjectsStr = Array.isArray(enrichedRes.subjects) ? enrichedRes.subjects.join(joinSep) : (enrichedRes.subjects || '');
 
     setLiveCaptionText(
-      `Gemini 3.7 Flash Vision Extracted: "${res.title}" by ${authorsStr} • Call No: ${res.callNumber || res.ddcClassification || 'Classified'} • ${res.marc21Tags?.length || 12} MARC21 tags generated.`
+      `Gemini Vision Extracted (${nativeResolved ? nativeResolved.scriptName : 'Original Script'}): "${enrichedRes.title}" by ${authorsStr} • Call No: ${enrichedRes.callNumber || enrichedRes.ddcClassification || 'Classified'}`
     );
     setLiveCaptionMeta({
-      title: res.title,
+      title: enrichedRes.title,
       author: authorsStr,
-      callNumber: res.callNumber || res.ddcClassification,
-      isbn: res.isbn
+      callNumber: enrichedRes.callNumber || enrichedRes.ddcClassification,
+      isbn: enrichedRes.isbn
     });
 
-    const formatVal: BookRecord['format'] = (res.format === 'HARDCOVER' || res.format === 'PAPERBACK' || res.format === 'DIGITAL')
-      ? res.format
+    const formatVal: BookRecord['format'] = (enrichedRes.format === 'HARDCOVER' || enrichedRes.format === 'PAPERBACK' || enrichedRes.format === 'DIGITAL')
+      ? enrichedRes.format
       : 'HARDCOVER';
 
     const parsedVisionSubjects = subjectsStr ? parseRawSubjectStrings(subjectsStr) : [];
 
     setMarcForm(prev => ({
       ...prev,
-      title: res.title || prev.title,
+      title: enrichedRes.title || prev.title,
       authors: authorsStr,
-      isbn: res.isbn || prev.isbn,
-      publisherName: res.publisherName || prev.publisherName,
-      publisherLocation: res.publisherLocation || prev.publisherLocation,
-      publisherYear: res.publisherYear || prev.publisherYear,
-      edition: res.edition || prev.edition,
-      pageCount: res.pageCount || prev.pageCount,
-      department: res.department || prev.department,
+      isbn: enrichedRes.isbn || prev.isbn,
+      publisherName: enrichedRes.publisherName || prev.publisherName,
+      publisherLocation: enrichedRes.publisherLocation || prev.publisherLocation,
+      publisherYear: enrichedRes.publisherYear || prev.publisherYear,
+      edition: enrichedRes.edition || prev.edition,
+      pageCount: enrichedRes.pageCount || prev.pageCount,
+      department: enrichedRes.department || prev.department,
       format: formatVal,
-      callNumber: res.callNumber || prev.callNumber,
+      callNumber: enrichedRes.callNumber || prev.callNumber,
       subjects: subjectsStr || prev.subjects,
       subjectEntries: parsedVisionSubjects.length > 0 ? parsedVisionSubjects : prev.subjectEntries,
-      description: res.abstract || prev.description,
-      generalNotes: res.rdaGuidelines ? `RDA Guideline: ${res.rdaGuidelines}` : prev.generalNotes,
+      description: enrichedRes.abstract || prev.description,
+      generalNotes: enrichedRes.rdaGuidelines ? `RDA Guideline: ${enrichedRes.rdaGuidelines}` : prev.generalNotes,
       coverUrl: coverDataUrl || prev.coverUrl,
       accessionNumber: prev.accessionNumber || `ACC-${Math.floor(10000 + Math.random() * 90000)}`,
       copyNo: prev.copyNo || 'C.1'
     }));
 
-    if (res.marc21Tags && res.marc21Tags.length > 0) {
-      setAiMarcPreview(res.marc21Tags);
+    if (enrichedRes.marc21Tags && enrichedRes.marc21Tags.length > 0) {
+      setAiMarcPreview(enrichedRes.marc21Tags);
     }
   }, []);
 
@@ -2000,32 +2072,54 @@ export const CataloguingModule: React.FC<CataloguingModuleProps> = ({
   const canClearFines = isLibrarian || userPowers.includes('CAN_CLEAR_FINES');
   const canTransfer = isLibrarian || userPowers.includes('CAN_INTER_LIBRARY_TRANSFER');
 
-  // AI Auto-Catalog
-  const handleAiAutoCatalog = async () => {
-    const input = marcForm.title || marcForm.isbn;
+  // AI Auto-Catalog (Analyzes books in their original language & script — e.g. Sindhi in سنڌي الف بي, Urdu in اردو, Arabic in العربية)
+  const handleAiAutoCatalog = async (customQuery?: string) => {
+    const input = (customQuery ?? (marcForm.title || marcForm.isbn || marcForm.authors)).trim();
     if (!input) {
-      alert('Please enter a Title or ISBN first before running AI Auto-Cataloguing.');
+      alert('Please enter a Title, Author, or ISBN first before running AI Auto-Cataloguing.');
       return;
     }
 
     setIsAiCataloguing(true);
     try {
       const res = await generateAiCataloguing(input);
+      const nativeResolved = resolveNativeScriptBookAnalysis(
+        `${input} ${res.title || ''} ${(res.authors || []).join(' ')}`
+      );
+
+      const finalTitle = nativeResolved ? nativeResolved.title : (res.title || marcForm.title);
+      const finalAuthors = nativeResolved ? nativeResolved.authors : (res.authors || []);
+      const finalPublisher = nativeResolved ? nativeResolved.publisherName : (res.publisherName || marcForm.publisherName);
+      const finalLocation = nativeResolved ? nativeResolved.publisherLocation : (res.publisherLocation || marcForm.publisherLocation);
+      const finalSubjects = nativeResolved ? nativeResolved.subjects : (res.subjects || []);
+      const finalAbstract = nativeResolved ? nativeResolved.abstract : (res.abstract || marcForm.description);
+      const finalCallNumber = nativeResolved ? nativeResolved.callNumber : (res.callNumber || marcForm.callNumber);
+      const finalDdc = nativeResolved ? nativeResolved.ddcClassification : res.ddcClassification;
+      const finalDept = nativeResolved ? nativeResolved.department : marcForm.department;
+
+      const structuredSubjects = finalSubjects.map(s => createMarcSubjectEntry({
+        tag: '650',
+        term: s,
+        thesaurusSource: nativeResolved ? 'NLP' : 'LCSH'
+      }));
+
       setMarcForm(prev => ({
         ...prev,
-        title: res.title || prev.title,
-        authors: res.authors ? res.authors.join(', ') : prev.authors,
-        publisherName: res.publisherName || prev.publisherName,
+        title: finalTitle || prev.title,
+        authors: finalAuthors.length > 0 ? finalAuthors.join('، ') : prev.authors,
+        publisherName: finalPublisher || prev.publisherName,
+        publisherLocation: finalLocation || prev.publisherLocation,
         publisherYear: res.publisherYear || prev.publisherYear,
-        callNumber: res.callNumber || prev.callNumber,
-        subjects: res.subjects ? res.subjects.join(', ') : prev.subjects,
-        description: res.abstract || prev.description,
+        callNumber: finalCallNumber || prev.callNumber,
+        department: finalDept || prev.department,
+        subjects: finalSubjects.length > 0 ? finalSubjects.join('، ') : prev.subjects,
+        subjectEntries: structuredSubjects.length > 0 ? structuredSubjects : prev.subjectEntries,
+        description: finalAbstract || prev.description,
         generalNotes: res.rdaGuidelines ? `RDA Standard: ${res.rdaGuidelines}` : prev.generalNotes,
         accessionNumber: prev.accessionNumber || `ACC-${Math.floor(10000 + Math.random() * 90000)}`,
         copyNo: prev.copyNo || 'C.1'
       }));
       setAiMarcPreview(res.marc21Tags || []);
-      alert(`AI Cataloguing Complete!\n• Generated DDC: ${res.ddcClassification}\n• Call Number: ${res.callNumber}\n• MARC21 ISO tags auto-indexed.`);
     } catch (err) {
       console.error(err);
       alert('AI Cataloguing failed. Falling back to manual entry.');
@@ -4310,19 +4404,24 @@ export const CataloguingModule: React.FC<CataloguingModuleProps> = ({
             </div>
           )}
 
-          {/* MODE 2: AI TEXT / ISBN PROMPT WORKSPACE */}
+          {/* MODE 2: AI TEXT / ISBN PROMPT WORKSPACE (ORIGINAL LANGUAGE SCRIPT ANALYSIS) */}
           {!editingBookId && entryMode === 'AI_TEXT_AGENT' && (
             <div className="p-5 rounded-2xl bg-gradient-to-br from-purple-950/30 via-[#121214] to-[#121214] border border-purple-500/30 space-y-4">
-              <div className="flex items-center space-x-2.5">
-                <div className="p-2 rounded-xl bg-purple-500/20 text-purple-400 border border-purple-500/30">
-                  <Sparkles className="h-5 w-5" />
+              <div className="flex items-center justify-between flex-wrap gap-2">
+                <div className="flex items-center space-x-2.5">
+                  <div className="p-2 rounded-xl bg-purple-500/20 text-purple-400 border border-purple-500/30">
+                    <Sparkles className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-bold text-white">AI Title / ISBN Original-Script Cataloguing Assistant</h4>
+                    <p className="text-xs text-slate-400 mt-0.5">
+                      Analyzes books in their authentic original alphabet — <span className="text-emerald-400 font-semibold">Sindhi in Sindhi alphabet (سنڌي الف بي)</span>, <span className="text-amber-300 font-semibold">Urdu in اردو</span>, <span className="text-cyan-300 font-semibold">Arabic in العربية</span>, <span className="text-teal-300 font-semibold">Pashto in پښتو</span> — never in Roman transliteration.
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <h4 className="text-sm font-bold text-white">AI Title / ISBN Cataloguing Assistant</h4>
-                  <p className="text-xs text-slate-500 mt-0.5">
-                    Type a book title, subject, or ISBN number. Gemini AI automatically computes MARC21 leader tags, DDC numbers, and author statements.
-                  </p>
-                </div>
+                <span className="px-2.5 py-1 rounded-lg bg-emerald-500/15 border border-emerald-500/40 text-emerald-300 text-[10px] font-mono font-bold">
+                  ✓ Native Script Enforcement (سنڌي / اردو / العربية)
+                </span>
               </div>
 
               <div className="flex items-center space-x-2">
@@ -4330,14 +4429,14 @@ export const CataloguingModule: React.FC<CataloguingModuleProps> = ({
                   type="text"
                   value={textPromptInput}
                   onChange={(e) => setTextPromptInput(e.target.value)}
-                  placeholder="e.g. Clean Architecture by Robert C. Martin OR 978-0132354165"
+                  placeholder="Enter book title in سنڌي الف بي (شاهه جو رسالو), اردو (کلیاتِ اقبال), العربية, or Roman query..."
                   className="flex-1 bg-[#f1f5f9] border border-purple-500/40 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 focus:outline-none focus:border-purple-400"
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') {
                       e.preventDefault();
                       if (textPromptInput.trim()) {
                         setMarcForm(prev => ({ ...prev, title: textPromptInput }));
-                        handleAiAutoCatalog();
+                        handleAiAutoCatalog(textPromptInput);
                       }
                     }
                   }}
@@ -4347,7 +4446,7 @@ export const CataloguingModule: React.FC<CataloguingModuleProps> = ({
                   onClick={() => {
                     if (textPromptInput.trim()) {
                       setMarcForm(prev => ({ ...prev, title: textPromptInput }));
-                      handleAiAutoCatalog();
+                      handleAiAutoCatalog(textPromptInput);
                     } else {
                       handleAiAutoCatalog();
                     }
@@ -4356,8 +4455,38 @@ export const CataloguingModule: React.FC<CataloguingModuleProps> = ({
                   className="px-5 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs flex items-center space-x-2 cursor-pointer shadow-lg shadow-purple-500/20 disabled:opacity-50"
                 >
                   <Sparkles className="h-3.5 w-3.5" />
-                  <span>{isAiCataloguing ? 'Auto-Cataloguing...' : 'Run AI Auto-Catalog'}</span>
+                  <span>{isAiCataloguing ? 'Analyzing in Original Script...' : 'Analyze in Original Script'}</span>
                 </button>
+              </div>
+
+              {/* 1-Click Original Script Book Analysis Presets */}
+              <div className="pt-2 border-t border-purple-500/20 flex flex-wrap items-center gap-1.5">
+                <span className="text-[10px] font-mono text-purple-300 font-semibold mr-1">
+                  1-Click Original Alphabet Analysis:
+                </span>
+                {[
+                  { label: 'سنڌي: شاهه جو رسالو (ڀٽائي)', query: 'شاهه جو رسالو' },
+                  { label: 'سنڌي: ڪپر ٿو ڪن ڪري (شيخ اياز)', query: 'ڪپر ٿو ڪن ڪري شيخ اياز' },
+                  { label: 'سنڌي لغت: جامع سنڌي لغات (بلوچ)', query: 'جامع سنڌي لغات' },
+                  { label: 'سنڌي: سنڌ جي تاريخ (راشدي)', query: 'سنڌ جي تاريخ ۽ تهذيب' },
+                  { label: 'سنڌي: سچل سرمست جو رسالو', query: 'سچل سرمست جو سنڌي رسالو' },
+                  { label: 'Roman→سنڌي: "Shah Jo Risalo"', query: 'Shah Jo Risalo' },
+                  { label: 'اردو: کلیاتِ اقبال', query: 'کلیاتِ اقبال' },
+                  { label: 'العربية: الرحيق المختوم', query: 'الرحيق المختوم' }
+                ].map((sample, idx) => (
+                  <button
+                    key={idx}
+                    type="button"
+                    onClick={() => {
+                      setTextPromptInput(sample.query);
+                      handleAiAutoCatalog(sample.query);
+                    }}
+                    disabled={isAiCataloguing}
+                    className="px-2.5 py-1 rounded-lg bg-zinc-900 hover:bg-emerald-950/60 text-zinc-200 hover:text-emerald-300 border border-purple-500/30 hover:border-emerald-500/50 text-[11px] font-medium transition-all cursor-pointer"
+                  >
+                    {sample.label}
+                  </button>
+                ))}
               </div>
             </div>
           )}
@@ -4889,6 +5018,12 @@ export const CataloguingModule: React.FC<CataloguingModuleProps> = ({
                   onChange={e => setMarcForm({ ...marcForm, department: e.target.value })}
                   className="w-full bg-[#f1f5f9] border border-slate-200/90 rounded-xl px-3 py-2 text-slate-900 focus:outline-none focus:border-blue-500 cursor-pointer"
                 >
+                  <option value="سنڌي ادب ۽ شاعري (Sindhi Literature)">سنڌي ادب ۽ شاعري (Sindhi Literature)</option>
+                  <option value="سنڌي لسانيات ۽ لغت (Sindhi Linguistics)">سنڌي لسانيات ۽ لغت (Sindhi Linguistics)</option>
+                  <option value="سنڌ جي تاريخ ۽ ثقافت (Sindh History)">سنڌ جي تاريخ ۽ ثقافت (Sindh History)</option>
+                  <option value="اردو ادب و شاعری (Urdu Literature)">اردو ادب و شاعری (Urdu Literature)</option>
+                  <option value="الدراسات الإسلامية (Islamic Studies)">الدراسات الإسلامية (Islamic Studies)</option>
+                  <option value="پښتو ادب (Pashto Literature)">پښتو ادب (Pashto Literature)</option>
                   <option value="Computer Science">Computer Science</option>
                   <option value="Electrical Engineering">Electrical Engineering</option>
                   <option value="Medical Sciences">Medical Sciences</option>
@@ -5933,53 +6068,74 @@ export const CataloguingModule: React.FC<CataloguingModuleProps> = ({
               </button>
             </div>
 
-            <div className="space-y-2 bg-[#f1f5f9] p-3 rounded-xl border border-slate-200/90 text-[11px]">
-              <div className="text-blue-400"><strong className="text-slate-500">000 Leader:</strong> 00000nam a2200000 u 4500</div>
-              <div className="text-slate-900"><strong className="text-slate-500">020 ISBN:</strong> {selectedBookForMarc.isbn}</div>
-              <div className="text-emerald-400"><strong className="text-slate-500">082 Dewey Call:</strong> {selectedBookForMarc.callNumber}</div>
-              <div className="text-amber-400 font-bold"><strong className="text-slate-500">090 Accession No:</strong> {selectedBookForMarc.accessionNumber || 'ACC-88001'}</div>
-              <div className="text-emerald-300 font-bold"><strong className="text-slate-500">852 $t Copy No:</strong> {selectedBookForMarc.copyNo || selectedBookForMarc.copyNumber || 'C.1'}</div>
-              <div className="text-slate-900"><strong className="text-slate-500">100 Main Author:</strong> {selectedBookForMarc.authors.join(', ')}</div>
-              <div className="text-amber-300"><strong className="text-slate-500">245 Title Tag:</strong> {selectedBookForMarc.title}</div>
-              <div className="text-slate-900"><strong className="text-slate-500">260 Publisher:</strong> {selectedBookForMarc.publisherName}, {selectedBookForMarc.publisherYear}</div>
-              <div className="text-slate-900"><strong className="text-slate-500">300 Physical:</strong> {selectedBookForMarc.pageCount} Pages</div>
+            {(() => {
+              const scriptInfo = detectTextScript(
+                `${selectedBookForMarc.title} ${(selectedBookForMarc.authors || []).join(' ')} ${(selectedBookForMarc.subjects || []).join(' ')}`
+              );
+              const isoLangCode =
+                scriptInfo.script === 'Sindhi' ? 'snd' :
+                scriptInfo.script === 'Urdu' ? 'urd' :
+                scriptInfo.script === 'Pashto' ? 'pus' :
+                scriptInfo.script === 'Arabic' ? 'ara' :
+                scriptInfo.script === 'Persian' ? 'per' : 'eng';
+              const isRtl = scriptInfo.direction === 'rtl';
 
-              {/* MARC21 6XX / RDA Subject Headings Inspection */}
-              <div className="pt-2 pb-1 border-t border-slate-200 mt-2 space-y-1.5 font-mono">
-                <div className="flex items-center justify-between text-[10px] text-slate-700 font-bold">
-                  <span className="flex items-center space-x-1">
-                    <Tag className="h-3 w-3 text-emerald-600" />
-                    <span>MARC21 6XX Subject Access (RDA Chap. 23)</span>
-                  </span>
-                  <span className="text-emerald-700 font-semibold text-[9px] bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200">
-                    LCSH / FAST / MeSH / Sears
-                  </span>
-                </div>
-                {selectedBookForMarc.subjectEntries && selectedBookForMarc.subjectEntries.length > 0 ? (
-                  <div className="space-y-1 max-h-36 overflow-y-auto pr-1 scrollbar-thin">
-                    {selectedBookForMarc.subjectEntries.map((se, i) => (
-                      <div key={i} className="flex items-start space-x-1.5 text-[10px] bg-white p-1.5 rounded border border-slate-200">
-                        <span className="font-mono text-emerald-700 font-bold shrink-0">{se.tag} {se.ind1 || '#'}{se.ind2 || '0'}</span>
-                        <span className="font-mono text-slate-800 break-all">{se.rawMarcString || `$a ${se.formattedHeading}`}</span>
+              return (
+                <div className="space-y-2 bg-[#f1f5f9] p-3 rounded-xl border border-slate-200/90 text-[11px]">
+                  <div className="flex items-center justify-between pb-1.5 mb-1 border-b border-slate-200">
+                    <span className="text-blue-400"><strong className="text-slate-500">000 Leader:</strong> 00000nam a2200000 i 4500</span>
+                    <span className="px-2 py-0.5 rounded bg-emerald-500/15 border border-emerald-500/30 text-emerald-700 font-bold text-[10px]">
+                      041 $a {isoLangCode} • {scriptInfo.script} {isRtl ? '(Original Alphabet • RTL)' : ''}
+                    </span>
+                  </div>
+                  <div className="text-slate-700"><strong className="text-slate-500">008 Control:</strong> 260220s{selectedBookForMarc.publisherYear || '2024'} pka||||g b 001 0 {isoLangCode} d</div>
+                  <div className="text-slate-900"><strong className="text-slate-500">020 ISBN:</strong> {selectedBookForMarc.isbn}</div>
+                  <div className="text-emerald-400"><strong className="text-slate-500">082 Dewey Call:</strong> {selectedBookForMarc.callNumber}</div>
+                  <div className="text-amber-400 font-bold"><strong className="text-slate-500">090 Accession No:</strong> {selectedBookForMarc.accessionNumber || 'ACC-88001'}</div>
+                  <div className="text-emerald-300 font-bold"><strong className="text-slate-500">852 $t Copy No:</strong> {selectedBookForMarc.copyNo || selectedBookForMarc.copyNumber || 'C.1'}</div>
+                  <div className="text-slate-900" dir={isRtl ? 'rtl' : 'ltr'}><strong className="text-slate-500" dir="ltr">100 Main Author:</strong> {selectedBookForMarc.authors.join(isRtl ? '، ' : ', ')}</div>
+                  <div className="text-amber-300" dir={isRtl ? 'rtl' : 'ltr'}><strong className="text-slate-500" dir="ltr">245 Title Tag:</strong> {selectedBookForMarc.title}</div>
+                  <div className="text-slate-900" dir={isRtl ? 'rtl' : 'ltr'}><strong className="text-slate-500" dir="ltr">260 Publisher:</strong> {selectedBookForMarc.publisherName}، {selectedBookForMarc.publisherYear}</div>
+                  <div className="text-slate-900"><strong className="text-slate-500">300 Physical:</strong> {selectedBookForMarc.pageCount} Pages</div>
+
+                  {/* MARC21 6XX / RDA Subject Headings Inspection */}
+                  <div className="pt-2 pb-1 border-t border-slate-200 mt-2 space-y-1.5 font-mono">
+                    <div className="flex items-center justify-between text-[10px] text-slate-700 font-bold">
+                      <span className="flex items-center space-x-1">
+                        <Tag className="h-3 w-3 text-emerald-600" />
+                        <span>MARC21 6XX Subject Access (RDA Chap. 23)</span>
+                      </span>
+                      <span className="text-emerald-700 font-semibold text-[9px] bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200">
+                        NLP / LCSH / FAST ({scriptInfo.script})
+                      </span>
+                    </div>
+                    {selectedBookForMarc.subjectEntries && selectedBookForMarc.subjectEntries.length > 0 ? (
+                      <div className="space-y-1 max-h-36 overflow-y-auto pr-1 scrollbar-thin">
+                        {selectedBookForMarc.subjectEntries.map((se, i) => (
+                          <div key={i} className="flex items-start space-x-1.5 text-[10px] bg-white p-1.5 rounded border border-slate-200" dir={isRtl ? 'rtl' : 'ltr'}>
+                            <span className="font-mono text-emerald-700 font-bold shrink-0" dir="ltr">{se.tag} {se.ind1 || '#'}{se.ind2 || '0'}</span>
+                            <span className="font-mono text-slate-800 break-all">{se.rawMarcString || `$a ${se.formattedHeading}`}</span>
+                          </div>
+                        ))}
                       </div>
-                    ))}
+                    ) : (
+                      <div className="text-[10px] bg-white p-1.5 rounded border border-slate-200 text-slate-800 font-mono" dir={isRtl ? 'rtl' : 'ltr'}>
+                        <span className="text-emerald-700 font-bold mr-1.5" dir="ltr">650 #0</span>
+                        <span>$a {selectedBookForMarc.subjects?.join(' $x ') || 'General'}</span>
+                      </div>
+                    )}
                   </div>
-                ) : (
-                  <div className="text-[10px] bg-white p-1.5 rounded border border-slate-200 text-slate-800 font-mono">
-                    <span className="text-emerald-700 font-bold mr-1.5">650 #0</span>
-                    <span>$a {selectedBookForMarc.subjects?.join(' $x ') || 'General'}</span>
-                  </div>
-                )}
-              </div>
 
-              {(selectedBookForMarc.description || selectedBookForMarc.marcTags?.['520']) && (
-                <div className="text-cyan-300"><strong className="text-slate-500">520 Summary / Scope:</strong> {selectedBookForMarc.description || selectedBookForMarc.marcTags?.['520']}</div>
-              )}
-              {(selectedBookForMarc.generalNotes || selectedBookForMarc.notes || selectedBookForMarc.marcTags?.['500']) && (
-                <div className="text-emerald-300"><strong className="text-slate-500">500 General Notes:</strong> {selectedBookForMarc.generalNotes || selectedBookForMarc.notes || selectedBookForMarc.marcTags?.['500']}</div>
-              )}
-              <div className="text-emerald-300"><strong className="text-slate-500">852 $c Location:</strong> {selectedBookForMarc.shelfLocation || 'Stack CS-01-A'}</div>
-            </div>
+                  {(selectedBookForMarc.description || selectedBookForMarc.marcTags?.['520']) && (
+                    <div className="text-cyan-300" dir={isRtl ? 'rtl' : 'ltr'}><strong className="text-slate-500" dir="ltr">520 Summary / Scope:</strong> {selectedBookForMarc.description || selectedBookForMarc.marcTags?.['520']}</div>
+                  )}
+                  {(selectedBookForMarc.generalNotes || selectedBookForMarc.notes || selectedBookForMarc.marcTags?.['500']) && (
+                    <div className="text-emerald-300" dir={isRtl ? 'rtl' : 'ltr'}><strong className="text-slate-500" dir="ltr">500 General Notes:</strong> {selectedBookForMarc.generalNotes || selectedBookForMarc.notes || selectedBookForMarc.marcTags?.['500']}</div>
+                  )}
+                  <div className="text-emerald-300"><strong className="text-slate-500">852 $c Location:</strong> {selectedBookForMarc.shelfLocation || 'Stack CS-01-A'}</div>
+                </div>
+              );
+            })()}
 
             <div className="flex justify-between items-center pt-2 flex-wrap gap-2">
               <div className="flex items-center space-x-2">

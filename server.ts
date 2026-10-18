@@ -4,6 +4,7 @@ import path from 'path';
 import crypto from 'crypto';
 import { createServer as createViteServer } from 'vite';
 import { GoogleGenAI } from '@google/genai';
+import { resolveNativeScriptBookAnalysis, detectTextScript } from './src/utils/classificationEngine';
 
 const rootDir = process.cwd();
 
@@ -113,6 +114,60 @@ function sanitizeAiResult(res: any) {
 function generateServerIntelligentCataloguingRecord(opts: { titleOrIsbn?: string; isCover?: boolean; fileHint?: string }) {
   const rawHint = (opts.titleOrIsbn || opts.fileHint || '').replace(/\.[^/.]+$/, '').replace(/[-_]+/g, ' ').trim();
   const input = rawHint;
+
+  // Check if book is Sindhi (سنڌي), Urdu (اردو), Arabic (العربية), or Pashto (پښتو) — always analyze in original native script, never Roman!
+  const nativeProfile = resolveNativeScriptBookAnalysis(input);
+  if (nativeProfile) {
+    const callNumber = `${nativeProfile.ddc} ${nativeProfile.cutter} ${nativeProfile.publisherYear}`;
+    return {
+      title: nativeProfile.title,
+      subtitle: nativeProfile.subtitle,
+      authors: nativeProfile.authors,
+      isbn: nativeProfile.isbn,
+      publisherName: nativeProfile.publisherName,
+      publisherLocation: nativeProfile.publisherLocation,
+      publisherYear: nativeProfile.publisherYear,
+      edition: nativeProfile.edition,
+      pageCount: nativeProfile.pageCount,
+      department: nativeProfile.department,
+      format: 'HARDCOVER',
+      callNumber,
+      ddcClassification: nativeProfile.ddc,
+      cutterNumber: nativeProfile.cutter,
+      leader000: '01842nam a2200421 i 4500',
+      control008: `250101s${nativeProfile.publisherYear}    pka||||g b    001 0 ${nativeProfile.langCode} d`,
+      subjects: nativeProfile.subjects,
+      abstract: nativeProfile.abstract,
+      detectedText: `${nativeProfile.title} — ${nativeProfile.authors.join(' ، ')}`,
+      confidenceScore: 99,
+      marc21Tags: [
+        { tag: '000', ind1: '#', ind2: '#', subfields: '$a 01842nam a2200421 i 4500 (RDA Leader)' },
+        { tag: '008', ind1: '#', ind2: '#', subfields: `$a 250101s${nativeProfile.publisherYear}    pka||||g b    001 0 ${nativeProfile.langCode} d` },
+        { tag: '020', ind1: '#', ind2: '#', subfields: `$a ${nativeProfile.isbn} (hardcover)` },
+        { tag: '040', ind1: '#', ind2: '#', subfields: `$a PK-ISB $b ${nativeProfile.langCode} $c PK-ISB $e rda` },
+        { tag: '041', ind1: '0', ind2: '#', subfields: `$a ${nativeProfile.langCode}` },
+        { tag: '082', ind1: '0', ind2: '4', subfields: `$a ${nativeProfile.ddc} $2 23` },
+        { tag: '100', ind1: '1', ind2: '#', subfields: `$a ${nativeProfile.authors[0]}، $e مصنف.` },
+        { tag: '245', ind1: '1', ind2: '0', subfields: `$a ${nativeProfile.title} : $b ${nativeProfile.subtitle} / $c ${nativeProfile.authors.join(' ، ')}.` },
+        { tag: '250', ind1: '#', ind2: '#', subfields: `$a ${nativeProfile.edition}.` },
+        { tag: '264', ind1: '#', ind2: '1', subfields: `$a ${nativeProfile.publisherLocation} : $b ${nativeProfile.publisherName}، $c ${nativeProfile.publisherYear}.` },
+        { tag: '300', ind1: '#', ind2: '#', subfields: `$a ${nativeProfile.pageCount} صفحا : $b تصويرون ; $c 24 سم.` },
+        { tag: '336', ind1: '#', ind2: '#', subfields: '$a text $b txt $2 rdacontent' },
+        { tag: '337', ind1: '#', ind2: '#', subfields: '$a unmediated $b n $2 rdamedia' },
+        { tag: '338', ind1: '#', ind2: '#', subfields: '$a volume $b nc $2 rdacarrier' },
+        { tag: '520', ind1: '3', ind2: '#', subfields: `$a ${nativeProfile.abstract}` },
+        ...nativeProfile.subjects.map(subj => ({
+          tag: '650',
+          ind1: '#',
+          ind2: '0',
+          subfields: `$a ${subj}.`
+        })),
+        { tag: '852', ind1: '4', ind2: '#', subfields: `$b Central Academic Library $h ${callNumber}` }
+      ],
+      rdaGuidelines: `RDA Leader 000 (01842nam a2200421 i 4500) & Original Script (${nativeProfile.languageLabel}) verified: Title proper (2.3.2), Statement of responsibility (2.4.2), Language code 041 (${nativeProfile.langCode}), DDC (${nativeProfile.ddc}).`
+    };
+  }
+
   const lower = input.toLowerCase();
 
   let title = 'Advanced Library Automation, MARC21 RDA Protocols & AI Systems';
@@ -168,11 +223,13 @@ function generateServerIntelligentCataloguingRecord(opts: { titleOrIsbn?: string
     dept = 'Business Administration';
     subjects = ['Financial management -- Textbooks', 'Corporations -- Finance', 'Macroeconomics'];
   } else if (input.length > 3) {
-    title = input.replace(/\b\w/g, c => c.toUpperCase());
+    const scriptInfo = detectTextScript(input);
+    title = scriptInfo.isRTL ? input : input.replace(/\b\w/g, c => c.toUpperCase());
   }
 
   const isbn = `978-969-${Math.floor(1000000 + Math.random() * 9000000)}`;
   const pubYear = 2025;
+  const scriptInfo = detectTextScript(title);
 
   return {
     title,
@@ -191,13 +248,13 @@ function generateServerIntelligentCataloguingRecord(opts: { titleOrIsbn?: string
     cutterNumber: cutter,
     subjects,
     abstract: `A comprehensive academic treatise addressing bibliographic classification, descriptive metadata, and institutional information systems for "${title}", prepared in compliance with RDA and ISO 2709 standard cataloguing practices.`,
-    detectedText: input.length > 2 ? `${title.toUpperCase()} — ${authors.join(', ')}` : (opts.isCover ? 'ACADEMIC MONOGRAPH — PLiMS AUTOMATION RECORD' : input),
+    detectedText: input.length > 2 ? `${title} — ${authors.join(', ')}` : (opts.isCover ? 'ACADEMIC MONOGRAPH — PLiMS AUTOMATION RECORD' : input),
     confidenceScore: 98,
     marc21Tags: [
       { tag: '000', ind1: '#', ind2: '#', subfields: '$a 01842nam a2200421 i 4500 (RDA Leader)' },
-      { tag: '008', ind1: '#', ind2: '#', subfields: `$a 250101s${pubYear}    pka||||g b    001 0 eng d` },
+      { tag: '008', ind1: '#', ind2: '#', subfields: `$a 250101s${pubYear}    pka||||g b    001 0 ${scriptInfo.marcLangCode} d` },
       { tag: '020', ind1: '#', ind2: '#', subfields: `$a ${isbn} (hardcover)` },
-      { tag: '040', ind1: '#', ind2: '#', subfields: '$a PK-ISB $b eng $c PK-ISB $e rda' },
+      { tag: '040', ind1: '#', ind2: '#', subfields: `$a PK-ISB $b ${scriptInfo.marcLangCode} $c PK-ISB $e rda` },
       { tag: '082', ind1: '0', ind2: '4', subfields: `$a ${ddc} $2 23` },
       { tag: '100', ind1: '1', ind2: '#', subfields: `$a ${authors[0].split(' ').pop()}, ${authors[0]}, $e author.` },
       { tag: '245', ind1: '1', ind2: '0', subfields: `$a ${title} : $b System Architectures and RDA Standards / $c ${authors.join(' and ')}.` },
@@ -218,6 +275,10 @@ function generateServerIntelligentCataloguingRecord(opts: { titleOrIsbn?: string
 
 function parseVoiceTranscriptIntelligently(rawText: string) {
   const text = (rawText || '').trim();
+  const nativeVoiceMatch = resolveNativeScriptBookAnalysis(text);
+  if (nativeVoiceMatch) {
+    return generateServerIntelligentCataloguingRecord({ titleOrIsbn: text });
+  }
   const lower = text.toLowerCase();
 
   // 1. Spoken digits cleanup for ISBN (e.g. "nine seven eight" -> "978")
@@ -448,18 +509,16 @@ async function callGeminiWithRetryAndFallback(
     fallbackModels?: string[];
   }
 ): Promise<{ text: string; modelUsed: string } | null> {
-  // Prioritize ultra-fast gemini-3.1-flash-lite (~0.6s - 2.2s response time for Vision & MARC21 JSON)
-  // with strict per-model timeout so stalled endpoints never hang requests.
   const requestedModels = [
-    'gemini-3.1-flash-lite',
-    params.primaryModel || 'gemini-3.8-flash',
-    ...(params.fallbackModels || ['gemini-flash-latest'])
+    'gemini-3-flash-preview',
+    'gemini-3.1-flash-lite-preview',
+    ...(params.fallbackModels || [])
   ];
   const modelsToTry = Array.from(new Set(requestedModels));
 
   for (const model of modelsToTry) {
     try {
-      const timeoutMs = model === 'gemini-3.1-flash-lite' ? 9000 : 6000;
+      const timeoutMs = 10000;
       const response = await Promise.race([
         client.models.generateContent({
           model,
@@ -747,53 +806,61 @@ async function startServer() {
         text: `You are a Senior Library & Information Science (LIS) Cataloguer specializing in MARC21 (ISO 2709), Resource Description & Access (RDA), Dewey Decimal Classification (DDC 23rd Edition), and Library of Congress Subject Headings (LCSH).
 
 Analyze this uploaded image of a book cover, title page, book jacket, or spine.${hintContext}
-Perform optical character recognition (OCR) and cataloguing extraction. Extract all visible typography (including English, Urdu, Arabic, or other scripts) and intelligently infer complete bibliographic attributes. If the image shows a book cover without text or a stylized academic cover, infer the most appropriate scholarly title, author, DDC classification, and MARC21 record from the visual subject matter and any hint provided.
+Perform optical character recognition (OCR) and cataloguing extraction.
+
+CRITICAL ORIGINAL SCRIPT RULE (NO ROMANIZATION):
+- You MUST analyze and catalogue every book in its ORIGINAL LANGUAGE and NATIVE ALPHABET/SCRIPT, NEVER in Roman/Latin transliteration!
+- Specifically: If the book is in Sindhi (سنڌي), or the cover/hint refers to a Sindhi book/author (even if hinted in Roman script like "Shah Jo Risalo" or "Sindhi"), you MUST output "title", "subtitle", "authors", "publisherName", "publisherLocation", "edition", "subjects", "abstract", "detectedText", and "marc21Tags" (100, 245, 250, 264, 520, 650) in the authentic 52-letter Perso-Arabic Sindhi alphabet (سنڌي الف بي — e.g. ٻ، ٺ، ٽ، ٿ، ڀ، ڃ، ڄ، ڇ، ڌ، ڏ، ڊ، ڍ، ڙ، ڦ، ڪ، ک، گ، ڳ، ڱ، ڻ), NEVER in Roman alphabet!
+- Likewise, Urdu books must be analyzed in original Urdu script (اردو), Pashto in Pashto script (پښتو), Arabic in Arabic script (العربية), and Persian in Persian script (فارسی).
+- Set MARC21 008/040/041 language code to "snd" for Sindhi, "urd" for Urdu, "pus" for Pashto, "ara" for Arabic, "per" for Persian, or "eng" for English.
 
 Return a valid, strict JSON object (and nothing else) with these exact keys:
 {
-  "title": "Title Proper of the book without author (Multilingual/Unicode supported)",
-  "subtitle": "Subtitle or secondary title if visible or relevant, otherwise scholarly subtitle",
-  "authors": ["Full Author 1 Name", "Full Author 2 Name"],
+  "title": "Title Proper of the book in its ORIGINAL NATIVE SCRIPT (e.g. سنڌي الف بي for Sindhi, اردو for Urdu, never Romanized)",
+  "subtitle": "Subtitle or secondary title in the book's original script",
+  "authors": ["Full Author 1 Name in original script", "Full Author 2 Name in original script"],
   "isbn": "10 or 13 digit ISBN if visible or standard format (e.g. 978-...)",
-  "publisherName": "Identified or inferred scholarly/trade publisher",
-  "publisherLocation": "Publication city/country (e.g. New York / London / Islamabad / Cambridge)",
+  "publisherName": "Identified or inferred scholarly/trade publisher in original script",
+  "publisherLocation": "Publication city/country in original script",
   "publisherYear": 2024,
-  "edition": "Identified edition (e.g. '1st Edition', '2nd Edition', 'Revised Edition')",
+  "edition": "Identified edition in original script",
   "pageCount": 350,
-  "department": "Academic Department (e.g. Computer Science, Electrical Engineering, Medical Sciences, Law & Humanities, Business Administration, Islamic Studies, Literature, General Science)",
+  "department": "Academic Department (e.g. Literature & Languages, Computer Science, Medical Sciences, Law & Humanities, Islamic Studies, History & Pakistan Studies)",
   "format": "HARDCOVER" | "PAPERBACK" | "SPIRAL" | "JOURNAL_VOLUME" | "THESIS_REPORT",
-  "callNumber": "Computed LIS call number (e.g. '005.133 MAR 2024')",
-  "ddcClassification": "Dewey Decimal 3-digit class with decimal (e.g. '005.133' or '610.28')",
-  "cutterNumber": "Cutter-Sanborn 3-character code (e.g. 'M381')",
-  "subjects": ["LCSH Subject Heading 1", "LCSH Subject Heading 2", "LCSH Subject Heading 3"],
-  "abstract": "Scholarly summary / scope note of this book in 100-150 words",
-  "detectedText": "All key headline OCR text detected directly on the cover/page",
-  "confidenceScore": 97,
+  "callNumber": "Computed LIS call number (e.g. '891.411 B475/S 2023')",
+  "ddcClassification": "Dewey Decimal 3-digit class with decimal (e.g. '891.411' for Sindhi Poetry, '491.41' for Sindhi Language, '954.918' for Sindh History)",
+  "cutterNumber": "Cutter-Sanborn code (e.g. 'B475/S')",
+  "subjects": ["Subject Heading 1 in original script", "Subject Heading 2 in original script", "Subject Heading 3 in original script"],
+  "abstract": "Scholarly summary / scope note of this book in 100-150 words written in the book's original language and script",
+  "detectedText": "All key headline OCR text detected directly on the cover/page in original script",
+  "confidenceScore": 98,
   "marc21Tags": [
     { "tag": "000", "ind1": "#", "ind2": "#", "subfields": "$a 01842nam a2200421 i 4500 (RDA Leader)" },
+    { "tag": "008", "ind1": "#", "ind2": "#", "subfields": "$a 250101s2024    pka||||g b    001 0 snd d" },
     { "tag": "020", "ind1": "#", "ind2": "#", "subfields": "$a 978..." },
-    { "tag": "040", "ind1": "#", "ind2": "#", "subfields": "$a PK-ISB $b eng $c PK-ISB $e rda" },
+    { "tag": "040", "ind1": "#", "ind2": "#", "subfields": "$a PK-ISB $b snd $c PK-ISB $e rda" },
+    { "tag": "041", "ind1": "0", "ind2": "#", "subfields": "$a snd" },
     { "tag": "082", "ind1": "0", "ind2": "4", "subfields": "$a [DDC] $2 23" },
-    { "tag": "100", "ind1": "1", "ind2": "#", "subfields": "$a [Author Surname, Given], $e author." },
-    { "tag": "245", "ind1": "1", "ind2": "0", "subfields": "$a [Title] : $b [Subtitle] / $c [Authors]." },
-    { "tag": "250", "ind1": "#", "ind2": "#", "subfields": "$a [Edition]." },
-    { "tag": "264", "ind1": "#", "ind2": "1", "subfields": "$a [Place] : $b [Publisher], $c [Year]." },
-    { "tag": "300", "ind1": "#", "ind2": "#", "subfields": "$a xxiv, [pages] pages : $b illustrations ; $c 24 cm." },
+    { "tag": "100", "ind1": "1", "ind2": "#", "subfields": "$a [Author Name in Original Script], $e author." },
+    { "tag": "245", "ind1": "1", "ind2": "0", "subfields": "$a [Title in Original Script] : $b [Subtitle in Original Script] / $c [Authors in Original Script]." },
+    { "tag": "250", "ind1": "#", "ind2": "#", "subfields": "$a [Edition in Original Script]." },
+    { "tag": "264", "ind1": "#", "ind2": "1", "subfields": "$a [Place in Original Script] : $b [Publisher in Original Script], $c [Year]." },
+    { "tag": "300", "ind1": "#", "ind2": "#", "subfields": "$a [pages] pages : $b illustrations ; $c 24 cm." },
     { "tag": "336", "ind1": "#", "ind2": "#", "subfields": "$a text $b txt $2 rdacontent" },
     { "tag": "337", "ind1": "#", "ind2": "#", "subfields": "$a unmediated $b n $2 rdamedia" },
     { "tag": "338", "ind1": "#", "ind2": "#", "subfields": "$a volume $b nc $2 rdacarrier" },
-    { "tag": "520", "ind1": "3", "ind2": "#", "subfields": "$a [Abstract summary]" },
-    { "tag": "650", "ind1": "#", "ind2": "0", "subfields": "$a [Subject 1] $x [Subdivision]." },
+    { "tag": "520", "ind1": "3", "ind2": "#", "subfields": "$a [Abstract summary in Original Script]" },
+    { "tag": "650", "ind1": "#", "ind2": "0", "subfields": "$a [Subject 1 in Original Script]." },
     { "tag": "852", "ind1": "4", "ind2": "#", "subfields": "$b Central Academic Library $h [Call Number]" }
   ],
-  "rdaGuidelines": "RDA Leader 000 (01842nam a2200421 i 4500) & Core Elements verified: Title proper (2.3.2), Statement of responsibility (2.4.2), Publication statement (2.8), Carrier type (3.3), Content type (6.9)."
+  "rdaGuidelines": "RDA Leader 000 (01842nam a2200421 i 4500) & Original Native Script Core Elements verified: Title proper (2.3.2), Statement of responsibility (2.4.2), Publication statement (2.8)."
 }`
       };
 
       const geminiRes = await callGeminiWithRetryAndFallback(client, {
         contents: { parts: [imagePart, textPart] },
-        primaryModel: 'gemini-3.1-flash-lite',
-        fallbackModels: ['gemini-3.8-flash', 'gemini-flash-latest']
+        primaryModel: 'gemini-3-flash-preview',
+        fallbackModels: ['gemini-3.1-flash-lite-preview']
       });
 
       if (geminiRes && geminiRes.text) {
@@ -801,7 +868,6 @@ Return a valid, strict JSON object (and nothing else) with these exact keys:
         if (parsed) {
           const sanitized = sanitizeAiResult(parsed);
           if (sanitized) {
-            // Ensure 000 RDA Leader is present in marc21Tags
             if (!sanitized.marc21Tags.some((t: any) => t.tag === '000' || t.tag === 'LDR')) {
               sanitized.marc21Tags.unshift({
                 tag: '000',
@@ -842,6 +908,9 @@ Return a valid, strict JSON object (and nothing else) with these exact keys:
         return res.status(400).json({ error: 'titleOrIsbn is required' });
       }
 
+      // If the input matches a known Sindhi/Urdu/Arabic work (even if typed in Roman script), check native profile
+      const nativeMatch = resolveNativeScriptBookAnalysis(titleOrIsbn);
+
       const client = getAiClient();
       if (!client) {
         const fallbackRecord = generateServerIntelligentCataloguingRecord({ titleOrIsbn });
@@ -852,31 +921,38 @@ Return a valid, strict JSON object (and nothing else) with these exact keys:
       }
 
       const geminiRes = await callGeminiWithRetryAndFallback(client, {
-        contents: `You are an expert Library & Information Science (LIS) cataloguer specializing in MARC21, RDA, DDC 23rd Edition, and LCSH.
-Analyze the following book title or ISBN: "${titleOrIsbn}".
+        contents: `You are an expert Library & Information Science (LIS) cataloguer specializing in MARC21, RDA, DDC 23rd Edition, and multilingual original-script cataloguing (Sindhi سنڌي, Urdu اردو, Pashto پښتو, Arabic العربية, Persian فارسی, English).
+Analyze the following book title, author, or ISBN: "${titleOrIsbn}".
+
+CRITICAL ORIGINAL SCRIPT RULE (NO ROMANIZATION):
+- Always analyze and output the book in its ORIGINAL LANGUAGE and NATIVE ALPHABET/SCRIPT, NEVER in Roman/Latin alphabet!
+- If the book is a Sindhi book or by a Sindhi author (e.g., Shah Abdul Latif Bhittai / Shah Jo Risalo / Shaikh Ayaz / Sachal Sarmast / Mirza Qalich Beg / Dr. Nabi Bakhsh Baloch / Sindhi literature or history), even if the user typed the query in Roman alphabet, you MUST write "title", "subtitle", "authors", "publisherName", "publisherLocation", "edition", "subjects", "abstract", and "marc21Tags" (100, 245, 250, 264, 520, 650) in the authentic 52-letter Perso-Arabic Sindhi alphabet (سنڌي الف بي — using proper Sindhi Unicode characters like ٻ، ٺ، ٽ، ٿ، ڀ، ڃ، ڄ، ڇ، ڌ، ڏ، ڊ، ڍ، ڙ، ڦ، ڪ، ک، گ، ڳ، ڱ، ڻ), NEVER in Roman script!
+- Likewise, if it is an Urdu book (e.g., Allama Iqbal, Mirza Ghalib, Umera Ahmed, Muhammad Hussain Azad, Shibli Nomani), output all fields in original Urdu script (اردو), NOT Roman Urdu!
+- Use DDC 891.41 / 891.411 for Sindhi literature, 491.41 for Sindhi language/dictionaries, 954.918 for History of Sindh, 891.439 for Urdu literature, and MARC language code "snd" for Sindhi, "urd" for Urdu, "ara" for Arabic, "pus" for Pashto.
+
 Return a strict JSON object with these fields:
-- title: string
-- subtitle: string
-- authors: array of strings
+- title: string (in ORIGINAL NATIVE SCRIPT, never Romanized)
+- subtitle: string (in ORIGINAL NATIVE SCRIPT)
+- authors: array of strings (in ORIGINAL NATIVE SCRIPT)
 - isbn: string (10 or 13 digits)
-- publisherName: string
-- publisherLocation: string
+- publisherName: string (in ORIGINAL NATIVE SCRIPT)
+- publisherLocation: string (in ORIGINAL NATIVE SCRIPT)
 - publisherYear: number
-- edition: string
+- edition: string (in ORIGINAL NATIVE SCRIPT)
 - pageCount: number
 - department: string
 - format: "HARDCOVER" | "PAPERBACK" | "SPIRAL" | "JOURNAL_VOLUME" | "THESIS_REPORT"
-- callNumber: string (e.g. "005.133 THO 2023")
-- ddcClassification: string (e.g. "005.133")
-- cutterNumber: string (e.g. "T481")
-- subjects: array of strings (Library of Congress Subject Headings)
-- abstract: string (100-150 words scholarly summary)
+- callNumber: string (e.g. "891.411 B475/S 2023")
+- ddcClassification: string (e.g. "891.411")
+- cutterNumber: string (e.g. "B475/S")
+- subjects: array of strings (Subject Headings in ORIGINAL NATIVE SCRIPT)
+- abstract: string (100-150 words scholarly summary in ORIGINAL NATIVE SCRIPT)
 - detectedText: string
 - confidenceScore: number
-- marc21Tags: array of objects with { tag, ind1, ind2, subfields }
+- marc21Tags: array of objects with { tag, ind1, ind2, subfields } (including 000, 008, 020, 040, 041, 082, 100, 245, 250, 264, 300, 520, 650, 852 in ORIGINAL NATIVE SCRIPT)
 - rdaGuidelines: string (RDA core elements statement)`,
-        primaryModel: 'gemini-3.8-flash',
-        fallbackModels: ['gemini-flash-latest', 'gemini-3.1-flash-lite']
+        primaryModel: 'gemini-3-flash-preview',
+        fallbackModels: ['gemini-3.1-flash-lite-preview']
       });
 
       if (geminiRes && geminiRes.text) {
@@ -884,6 +960,11 @@ Return a strict JSON object with these fields:
         if (parsed) {
           const sanitized = sanitizeAiResult(parsed);
           if (sanitized) {
+            // Verify that if this is a Sindhi/Urdu/Arabic book (nativeMatch is non-null), the returned title is actually in native RTL script and not Romanized!
+            if (nativeMatch && !detectTextScript(sanitized.title).isRTL) {
+              const nativeRecord = generateServerIntelligentCataloguingRecord({ titleOrIsbn });
+              return res.json({ result: sanitizeAiResult(nativeRecord), modelUsed: geminiRes.modelUsed });
+            }
             return res.json({ result: sanitized, modelUsed: geminiRes.modelUsed });
           }
         }
@@ -927,52 +1008,42 @@ Return a strict JSON object with these fields:
       }
 
       const prompt = `You are an expert Library & Information Science (LIS) cataloguing specialist and MARC21 metadata authority for the Pakistan Library Management System (PLiMS).
-A librarian has dictated bibliographic details through voice/microphone access:
+A librarian has dictated bibliographic details through voice/microphone access (audioLanguage: ${audioLanguage}):
 """
 ${cleanTranscript}
 """
 
-The librarian may have dictated details like Title, Subtitle, Author(s), ISBN (spoken as numbers or with hyphens), Publisher, Publication Year, Edition, Subject, or Department. Even if the dictation is conversational, fragmented, or in natural language, intelligently parse and deduce the bibliographic record.
+CRITICAL ORIGINAL SCRIPT RULE (NO ROMANIZATION):
+- Always output the book's metadata in its ORIGINAL LANGUAGE and NATIVE ALPHABET/SCRIPT!
+- If the book is in Sindhi (سنڌي) or audioLanguage is 'sd-PK', output title, subtitle, authors, publisherName, publisherLocation, subjects, abstract, and MARC21 tags in authentic Perso-Arabic Sindhi alphabet (سنڌي الف بي), NEVER in Roman alphabet!
+- If the book is in Urdu (اردو) or audioLanguage is 'ur-PK', output in authentic Urdu script (اردو), NEVER in Roman Urdu!
 
 Extract and return a STRICT JSON object with these EXACT keys:
-- title: string (the book title proper)
-- subtitle: string (subtitle if mentioned or appropriate)
-- authors: array of strings (e.g. ["Robert C. Martin"] or ["Prof. Dr. Aijaz Akhter"])
-- isbn: string (10 or 13 digits clean ISBN with hyphens, e.g. "978-0134494166". If spoken as words like 'nine seven eight', convert to digits)
-- publisherName: string (e.g. "Prentice Hall" or "Oxford University Press Pakistan")
-- publisherLocation: string (e.g. "Boston, MA" or "Islamabad, Pakistan")
+- title: string (the book title proper in original script)
+- subtitle: string (subtitle in original script)
+- authors: array of strings (in original script)
+- isbn: string (10 or 13 digits clean ISBN with hyphens, e.g. "978-969-405-112-3")
+- publisherName: string (in original script)
+- publisherLocation: string (in original script)
 - publisherYear: number (4 digit year, e.g. 2023)
-- edition: string (e.g. "1st Edition" or "7th Revised Edition")
+- edition: string (in original script)
 - pageCount: number (estimated or mentioned page count)
-- department: string (e.g. "Computer Science", "Law", "Medical Sciences", "Literature")
+- department: string (e.g. "Literature & Languages", "Computer Science", "Law", "Medical Sciences")
 - format: "HARDCOVER" | "PAPERBACK" | "SPIRAL" | "JOURNAL_VOLUME"
-- callNumber: string (complete call number, e.g. "005.133 MAR 2018")
-- ddcClassification: string (exact DDC 23rd Edition notation, e.g. "005.133")
-- cutterNumber: string (three or four character Cutter-Sanborn number, e.g. "M381")
-- subjects: array of strings (2-5 authoritative Library of Congress Subject Headings)
-- abstract: string (comprehensive 80-140 words cataloguer summary of the work)
-- detectedText: string (echo back the original speech transcript)
+- callNumber: string (complete call number, e.g. "891.411 B475/S 2023")
+- ddcClassification: string (exact DDC 23rd Edition notation, e.g. "891.411")
+- cutterNumber: string (three or four character Cutter-Sanborn number, e.g. "B475/S")
+- subjects: array of strings (2-5 authoritative Subject Headings in original script)
+- abstract: string (comprehensive 80-140 words cataloguer summary of the work in original script)
+- detectedText: string (echo back the speech transcript)
 - confidenceScore: number (80 to 99)
-- marc21Tags: array of objects with { tag: string, ind1: string, ind2: string, subfields: string } containing standard MARC21 fields:
-    * 020: ISBN ($a [isbn])
-    * 040: Cataloging Source ($a PK-ISB $b eng $c PK-ISB $e rda)
-    * 082: Dewey Decimal Classification ($a [ddc] $2 23)
-    * 100: Main Entry - Personal Name ($a [LastName, FirstName], $e author.)
-    * 245: Title Statement ($a [Title] : $b [Subtitle] / $c [Authors].)
-    * 250: Edition Statement ($a [Edition].)
-    * 264: Production/Publication/Distribution ($a [Location] : $b [Publisher], $c [Year].)
-    * 300: Physical Description ($a [pages] pages : $b illustrations ; $c 24 cm.)
-    * 500: General Note ($a Dictated via PLiMS Voice-to-MARC21 Speech Recognition Desk.)
-    * 520: Summary/Abstract ($a [Scholarly summary])
-    * 650: Subject Added Entry - Topical Term ($a [Subject 1].)
-    * 650: Subject Added Entry - Topical Term ($a [Subject 2].)
-    * 852: Location ($b Central Academic Library $h [callNumber])
-- rdaGuidelines: string (e.g. "RDA Core Elements verified: Title proper (2.3.2), Statement of responsibility (2.4.2), Publication (2.8)")`;
+- marc21Tags: array of objects with { tag: string, ind1: string, ind2: string, subfields: string }
+- rdaGuidelines: string`;
 
       const geminiRes = await callGeminiWithRetryAndFallback(client, {
         contents: prompt,
-        primaryModel: 'gemini-3.8-flash',
-        fallbackModels: ['gemini-flash-latest', 'gemini-3.1-flash-lite']
+        primaryModel: 'gemini-3-flash-preview',
+        fallbackModels: ['gemini-3.1-flash-lite-preview']
       });
 
       if (geminiRes && geminiRes.text) {

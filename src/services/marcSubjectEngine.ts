@@ -110,10 +110,16 @@ export const PAKISTANI_ACADEMIC_SUBJECT_PRESETS: SubjectPreset[] = [
   { discipline: 'Medical & Health Sciences', tag: '650', term: 'Public health', subdivisions: { geographic: 'Pakistan', chronological: '21st century' }, thesaurus: 'MESH' },
   { discipline: 'Medical & Health Sciences', tag: '650', term: 'Pharmacology, Clinical', subdivisions: { general: 'Dosage', form: 'Tables' }, thesaurus: 'MESH' },
 
-  // Urdu Literature & Linguistics (891.439)
-  { discipline: 'Urdu Literature', tag: '600', term: 'Iqbal, Muhammad, Sir, 1877-1938', subdivisions: { general: 'Poetry and philosophy', form: 'Criticism and interpretation' }, thesaurus: 'NLP' },
-  { discipline: 'Urdu Literature', tag: '650', term: 'Urdu poetry', subdivisions: { chronological: '20th century', form: 'History and criticism' }, thesaurus: 'LCSH' },
-  { discipline: 'Urdu Literature', tag: '650', term: 'Urdu language', subdivisions: { general: 'Grammar', form: 'Textbooks' }, thesaurus: 'NLP' },
+  // Sindhi Literature & Linguistics in Original Sindhi Alphabet (سنڌي ادب ۽ لسانيات - 891.41 / 491.41)
+  { discipline: 'Sindhi Literature (سنڌي ادب)', tag: '600', term: 'شاهه عبداللطيف ڀٽائي، 1689-1752', subdivisions: { general: 'مضمون ۽ تنقيدي اڀياس', form: 'صوفي شاعري' }, thesaurus: 'NLP' },
+  { discipline: 'Sindhi Literature (سنڌي ادب)', tag: '650', term: 'سنڌي شاعري', subdivisions: { chronological: 'ڪلاسيڪل ۽ جديد دور', form: 'تاريخ ۽ تنقيد' }, thesaurus: 'NLP' },
+  { discipline: 'Sindhi Literature (سنڌي ادب)', tag: '650', term: 'سنڌي ٻولي ۽ گرامر', subdivisions: { general: 'لغت نويسي ۽ صرف و نحو', form: 'لغتون' }, thesaurus: 'NLP' },
+  { discipline: 'Sindhi Literature (سنڌي ادب)', tag: '651', term: 'سنڌ (پاڪستان)', subdivisions: { general: 'تاريخ، تهذيب ۽ ثقافت' }, thesaurus: 'NLP' },
+
+  // Urdu Literature & Linguistics in Original Urdu Script (اردو ادب و لسانیات - 891.439)
+  { discipline: 'Urdu Literature (اردو ادب)', tag: '600', term: 'اقبال، علامہ محمد، 1877-1938', subdivisions: { general: 'فلسفہ اور شاعری', form: 'تنقید و تشریح' }, thesaurus: 'NLP' },
+  { discipline: 'Urdu Literature (اردو ادب)', tag: '650', term: 'اردو شاعری', subdivisions: { chronological: 'بیسویں صدی', form: 'تاریخ و تنقید' }, thesaurus: 'NLP' },
+  { discipline: 'Urdu Literature (اردو ادب)', tag: '650', term: 'اردو زبان و قواعد', subdivisions: { general: 'لسانیات', form: 'لغات' }, thesaurus: 'NLP' },
 
   // Pakistan Studies & History (954.91)
   { discipline: 'Pakistan Studies', tag: '651', term: 'Pakistan', subdivisions: { general: 'History', chronological: '1947-' }, thesaurus: 'LCSH' },
@@ -404,19 +410,60 @@ export function suggestRdaSubjects(title: string, ddc: string, description?: str
     }));
   }
 
-  // Literature & Urdu
-  if (text.includes('urdu') || text.includes('poet') || text.includes('literat') || text.includes('novel') || ddc.startsWith('8')) {
+  // Sindhi Literature, Language & Sindh History in Original Sindhi Script (سنڌي الف بي)
+  if (
+    /[ٻٺٿپڀڄڃچڇڌڏڊڍڙڦڪکگڳڱڻھ۽]/.test(text) ||
+    text.includes('سنڌ') ||
+    text.includes('شاهه') ||
+    text.includes('لطيف') ||
+    text.includes('اياز') ||
+    text.includes('sindh') ||
+    ddc.startsWith('891.41') ||
+    ddc.startsWith('491.41') ||
+    ddc.startsWith('954.918')
+  ) {
     suggestions.push(createMarcSubjectEntry({
       tag: '650',
-      term: 'Urdu literature',
-      subdivisions: { chronological: '20th century', form: 'History and criticism' },
+      term: 'سنڌي ادب ۽ شاعري',
+      subdivisions: { general: 'تاريخ ۽ تنقيد', geographic: 'سنڌ (پاڪستان)' },
       thesaurusSource: 'NLP'
     }));
     suggestions.push(createMarcSubjectEntry({
       tag: '600',
-      term: 'Iqbal, Muhammad, Sir, 1877-1938',
-      subdivisions: { general: 'Criticism and interpretation' },
-      thesaurusSource: 'LCSH'
+      term: 'شاهه عبداللطيف ڀٽائي، 1689-1752',
+      subdivisions: { general: 'صوفيانه فلسفو ۽ ڪلام جي شرح' },
+      thesaurusSource: 'NLP'
+    }));
+    suggestions.push(createMarcSubjectEntry({
+      tag: '650',
+      term: 'سنڌي ٻولي ۽ لسانيات',
+      subdivisions: { general: 'لغت ۽ گرامر', form: 'تحقيقي اڀياس' },
+      thesaurusSource: 'NLP'
+    }));
+  }
+
+  // Literature & Urdu in Original Urdu Script (اردو ادب)
+  if (
+    text.includes('اردو') ||
+    text.includes('اقبال') ||
+    text.includes('غالب') ||
+    text.includes('شاعری') ||
+    text.includes('افسانے') ||
+    text.includes('urdu') ||
+    ddc.startsWith('891.439') ||
+    ddc.startsWith('491.439')
+  ) {
+    suggestions.push(createMarcSubjectEntry({
+      tag: '650',
+      term: 'اردو ادب اور شاعری',
+      subdivisions: { chronological: 'بیسویں صدی', form: 'تاریخ و تنقید' },
+      thesaurusSource: 'NLP'
+    }));
+    suggestions.push(createMarcSubjectEntry({
+      tag: '600',
+      term: 'اقبال، علامہ محمد، 1877-1938',
+      subdivisions: { general: 'فکر و فلسفہ اور تشریح' },
+      thesaurusSource: 'NLP'
     }));
   }
 

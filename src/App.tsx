@@ -168,9 +168,17 @@ export function App() {
   });
   const [books, setBooks] = useState<BookRecord[]>(() => {
     const loaded = loadLocalData<BookRecord[]>('pslims_db_books', initialBooks);
-    const existingIds = new Set((loaded || []).map(b => b.id));
+    const initialMap = new Map(initialBooks.map(b => [b.id, b]));
+    const nativeScriptSeedIds = new Set(['bk_018', 'bk_019', 'bk_020', 'bk_027', 'bk_028', 'bk_029', 'bk_030', 'bk_031', 'bk_032', 'bk_033', 'bk_034']);
+    const upgraded = (loaded || []).map(b => {
+      if (nativeScriptSeedIds.has(b.id) && initialMap.has(b.id)) {
+        return initialMap.get(b.id)!;
+      }
+      return b;
+    });
+    const existingIds = new Set(upgraded.map(b => b.id));
     const missing = initialBooks.filter(b => !existingIds.has(b.id));
-    return [...(loaded || []), ...missing];
+    return [...upgraded, ...missing];
   });
   const [copies, setCopies] = useState<BookCopy[]>(() => {
     const loaded = loadLocalData<BookCopy[]>('pslims_db_copies', initialCopies);

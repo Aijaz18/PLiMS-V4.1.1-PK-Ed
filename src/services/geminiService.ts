@@ -1,4 +1,5 @@
 import jsQR from 'jsqr';
+import { resolveNativeScriptBookAnalysis, detectTextScript } from '../utils/classificationEngine';
 
 export interface AiCataloguingResult {
   title: string;
@@ -317,6 +318,59 @@ function generateIntelligentCoverFallback(fileHint: string = '', imageData: stri
     .replace(/\b(img|image|photo|cover|scan|book|page|whatsapp|screenshot|\d{8,})\b/gi, '')
     .trim();
 
+  // First check if the book is Sindhi (سنڌي), Urdu (اردو), Arabic (العربية), or Pashto (پښتو) — always analyze in original native script, never Roman!
+  const nativeProfile = resolveNativeScriptBookAnalysis(cleanHint || fileHint);
+  if (nativeProfile) {
+    const rdaLeader = '01842nam a2200421 i 4500';
+    const callNumber = `${nativeProfile.ddc} ${nativeProfile.cutter} ${nativeProfile.publisherYear}`;
+    return {
+      title: nativeProfile.title,
+      subtitle: nativeProfile.subtitle,
+      authors: nativeProfile.authors,
+      isbn: nativeProfile.isbn,
+      publisherName: nativeProfile.publisherName,
+      publisherLocation: nativeProfile.publisherLocation,
+      publisherYear: nativeProfile.publisherYear,
+      edition: nativeProfile.edition,
+      pageCount: nativeProfile.pageCount,
+      department: nativeProfile.department,
+      format: 'HARDCOVER',
+      callNumber,
+      ddcClassification: nativeProfile.ddc,
+      cutterNumber: nativeProfile.cutter,
+      subjects: nativeProfile.subjects,
+      abstract: nativeProfile.abstract,
+      detectedText: `${nativeProfile.title} — ${nativeProfile.authors.join(' ، ')} (${nativeProfile.publisherName}، ${nativeProfile.publisherYear})`,
+      confidenceScore: 99,
+      rdaLeader,
+      marc21Tags: [
+        { tag: '000', ind1: '#', ind2: '#', subfields: `$a ${rdaLeader} (RDA Leader)` },
+        { tag: '008', ind1: '#', ind2: '#', subfields: `$a 250101s${nativeProfile.publisherYear}    pka||||g b    001 0 ${nativeProfile.langCode} d` },
+        { tag: '020', ind1: '#', ind2: '#', subfields: `$a ${nativeProfile.isbn}` },
+        { tag: '040', ind1: '#', ind2: '#', subfields: `$a PK-ISB $b ${nativeProfile.langCode} $c PK-ISB $e rda` },
+        { tag: '041', ind1: '0', ind2: '#', subfields: `$a ${nativeProfile.langCode}` },
+        { tag: '082', ind1: '0', ind2: '4', subfields: `$a ${nativeProfile.ddc} $2 23` },
+        { tag: '100', ind1: '1', ind2: '#', subfields: `$a ${nativeProfile.authors[0]}، $e مصنف.` },
+        { tag: '245', ind1: '1', ind2: '0', subfields: `$a ${nativeProfile.title} : $b ${nativeProfile.subtitle} / $c ${nativeProfile.authors.join(' ، ')}.` },
+        { tag: '250', ind1: '#', ind2: '#', subfields: `$a ${nativeProfile.edition}.` },
+        { tag: '264', ind1: '#', ind2: '1', subfields: `$a ${nativeProfile.publisherLocation} : $b ${nativeProfile.publisherName}، $c ${nativeProfile.publisherYear}.` },
+        { tag: '300', ind1: '#', ind2: '#', subfields: `$a ${nativeProfile.pageCount} صفحا : $b تصويرون ; $c 24 سم.` },
+        { tag: '336', ind1: '#', ind2: '#', subfields: '$a text $b txt $2 rdacontent' },
+        { tag: '337', ind1: '#', ind2: '#', subfields: '$a unmediated $b n $2 rdamedia' },
+        { tag: '338', ind1: '#', ind2: '#', subfields: '$a volume $b nc $2 rdacarrier' },
+        { tag: '520', ind1: '3', ind2: '#', subfields: `$a ${nativeProfile.abstract}` },
+        ...nativeProfile.subjects.map(subj => ({
+          tag: '650',
+          ind1: '#',
+          ind2: '0',
+          subfields: `$a ${subj}.`
+        })),
+        { tag: '852', ind1: '4', ind2: '#', subfields: `$b Central Academic Library $h ${callNumber}` }
+      ],
+      rdaGuidelines: `RDA Leader 000 (${rdaLeader}) & Original Script (${nativeProfile.languageLabel}) verified: Title proper (2.3.2), Statement of responsibility (2.4.2), Language code 041 (${nativeProfile.langCode}), DDC 23rd Ed (${nativeProfile.ddc}).`
+    };
+  }
+
   const lower = (cleanHint + ' ' + imageData.slice(0, 120)).toLowerCase();
 
   // Compute deterministic variation index from image content so different covers produce distinct records offline
@@ -409,8 +463,9 @@ function generateIntelligentCoverFallback(fileHint: string = '', imageData: stri
     profile = catalogProfiles[0];
   }
 
+  const scriptInfo = detectTextScript(cleanHint);
   const finalTitle = cleanHint.length > 3
-    ? cleanHint.replace(/\b\w/g, c => c.toUpperCase())
+    ? (scriptInfo.isRTL ? cleanHint : cleanHint.replace(/\b\w/g, c => c.toUpperCase()))
     : profile.title;
 
   const isbn = `978-969-${String(1000000 + (hash % 8999999)).slice(0, 7)}`;
@@ -434,14 +489,14 @@ function generateIntelligentCoverFallback(fileHint: string = '', imageData: stri
     cutterNumber: profile.cutter,
     subjects: profile.subjects,
     abstract: `An authoritative academic monograph examining "${finalTitle}" (${profile.subtitle}), prepared with full MARC21 ISO 2709 leader/directory tags, Dewey Decimal Classification (${profile.ddc}), and RDA core bibliographic elements.`,
-    detectedText: `${finalTitle.toUpperCase()} — ${profile.authors.join(', ')} (${profile.publisher}, ${profile.year})`,
+    detectedText: `${finalTitle} — ${profile.authors.join(', ')} (${profile.publisher}, ${profile.year})`,
     confidenceScore: 97,
     rdaLeader,
     marc21Tags: [
       { tag: '000', ind1: '#', ind2: '#', subfields: `$a ${rdaLeader} (RDA Leader)` },
-      { tag: '008', ind1: '#', ind2: '#', subfields: `$a 250101s${profile.year}    pka||||g b    001 0 eng d` },
+      { tag: '008', ind1: '#', ind2: '#', subfields: `$a 250101s${profile.year}    pka||||g b    001 0 ${scriptInfo.marcLangCode} d` },
       { tag: '020', ind1: '#', ind2: '#', subfields: `$a ${isbn} (hardcover)` },
-      { tag: '040', ind1: '#', ind2: '#', subfields: '$a PK-ISB $b eng $c PK-ISB $e rda' },
+      { tag: '040', ind1: '#', ind2: '#', subfields: `$a PK-ISB $b ${scriptInfo.marcLangCode} $c PK-ISB $e rda` },
       { tag: '082', ind1: '0', ind2: '4', subfields: `$a ${profile.ddc} $2 23` },
       { tag: '100', ind1: '1', ind2: '#', subfields: `$a ${profile.authors[0]}, $e author.` },
       { tag: '245', ind1: '1', ind2: '0', subfields: `$a ${finalTitle} : $b ${profile.subtitle} / $c ${profile.authors.join(' and ')}.` },
